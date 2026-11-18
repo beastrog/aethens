@@ -40,13 +40,14 @@ packages = ["src/aethens"]
 line-length = 100
 target-version = "py311"
 src = ["src", "tests"]
+extend-exclude = ["bench/tasks"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "S", "SIM", "RUF"]
 ignore = ["S101"]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["S603", "S607", "S108"]
+"tests/**" = ["S603", "S607", "S108", "S105"]
 
 [tool.mypy]
 strict = true

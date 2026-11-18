@@ -1,6 +1,6 @@
 # Status
 
-Last updated: 2026-11-18 (Asia/Calcutta), after B3.
+Last updated: 2026-11-18 (Asia/Calcutta), after B4.
 
 ## Mode
 
@@ -27,10 +27,15 @@ anyway, so this does not change task isolation). `docker run --rm hello-world` w
   cleanup after an injected exception, host env not leaked (both modes), uid != 0, CapEff/CapBnd = 0,
   NoNewPrivs = 1, read-only rootfs, pids limit, original task untouched.
 
+- B4: Check interface; C001 gold sanity; C002 flakiness (PYTHONHASHSEED varied per run); minimal
+  `aethens audit` with JSON output; bench/ with 8 tasks (6 planted: 2 no-assertions, 2 broken-gold,
+  2 flaky; 2 controls) and manifest. Repro commands verified by running them in a subprocess.
+
 ## Next
-- B4: Check interface, C001 gold sanity, C002 flakiness, first bench fixtures.
+- B5: C003 labeled candidates, C004 mutation probes, bench to at least 12 tasks.
 
 ## Open risks
+- C002 is probabilistic in the run count (about 1 seed in 16 misses a 50/50 flaky test at 5 runs).
 - Hosted CI has never run; the workflow file is only checked by running its commands locally.
 
 ## Not verified

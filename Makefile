@@ -16,4 +16,4 @@ test:
 	$(RUN) pytest
 
 bench:
-	@echo "bench: no bench fixtures yet (added in B4, metrics in B6); nothing to compare."
+	@echo "bench: fixtures and manifest exist (bench/), the metrics runner and regression gate arrive in B6."

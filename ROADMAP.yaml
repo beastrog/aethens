@@ -43,6 +43,7 @@ phases:
         day: 3
         description: C001 gold sanity and C002 flakiness with planted-defect fixtures and clean controls
         acceptance: findings carry full evidence and repro command; deterministic under a seed
+        status: DONE_LOCAL (planted defects found, controls silent, repro verified, deterministic under a seed; hosted CI not run)
       - id: B5
         day: 4
         description: C003 labeled candidates (false accept and false reject, label_source aware) and C004 mutation probes (AST mutations, info severity, equivalent-mutant caveat); C005 exit-zero probe only if time remains

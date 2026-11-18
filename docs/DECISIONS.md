@@ -74,3 +74,22 @@ CI installs uv with `pip install uv==0.13.7` instead of a third-party setup acti
 - D-020 (B3) Docker tests carry the `docker` marker. Without Docker they are skipped with a
   "NOT VERIFIED (Docker): <reason>" message; with `AETHENS_REQUIRE_DOCKER=1` (set in CI) a missing daemon
   or image is a failure.
+- D-021 (B4) Check interface: abstract class with `id`, `title`, `tier`, `cost_class` and
+  `run(task, ctx) -> list[Finding]`; `CheckContext` carries the runner, seed, budget and whether the
+  run is unsafe-local (so repro commands include `--unsafe-local`).
+- D-022 (B4) Every run pins `PYTHONHASHSEED` to a value derived from (seed, task id, check id, run);
+  C002 varies it per run. Hash-order flakiness is therefore detected deterministically for a given seed,
+  and C002 detection is probabilistic in the number of runs: with 5 runs a 50/50 flaky test is missed
+  for about 1 seed in 16 (observed on flaky-setorder: seeds 0-7 caught 7 of 8, seed 4 missed). This is
+  stated in every C002 finding's limits.
+- D-023 (B4) C002 severity: error when the gold both passes and fails across runs; warning when the
+  only difference is timeouts (as in BUILD_PROMPTS B4). Runs: smoke 3, standard 5, deep 10.
+- D-024 (B4) Finding ids are `<check>-<task>-<sha256(check|task|subject|title)[:8]>`: stable across runs
+  so a repro run can be matched to the original finding.
+- D-025 (B4) Repro commands are `aethens audit <task path> --check <id> --seed <n> --budget <b>`, with
+  the path relative to the working directory when the task is inside it. To make them runnable by hand
+  (B4 acceptance) a minimal `aethens audit` (JSON output) is added now; markdown, --fail-on and exit
+  code 3 are B6 scope. `python -m aethens` works too.
+- D-026 (B4) The bench lives in `bench/tasks/` with `bench/manifest.yaml` (aethens-bench/v1) listing each
+  task as `control` or `defective`, and for defective tasks each planted defect's class and the check
+  expected to catch it. Bench tasks are excluded from ruff (they contain deliberate defects).

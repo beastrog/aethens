@@ -1,0 +1,35 @@
+# Aethens bench manifest (aethens-bench/v1).
+# Every task here is original work written for this project (Apache-2.0, see bench/LICENSES.md).
+# kind: control tasks must produce no error or warning findings.
+# kind: defective tasks list each planted defect, its class, and the check expected to catch it.
+# Defect classes: weak-tests, over-strict, flaky, no-assertions, broken-gold, order-dependence.
+schema: aethens-bench/v1
+tasks:
+  - path: tasks/noassert-exists
+    kind: defective
+    defects:
+      - {class: no-assertions, check: C001, note: "tests only check the function exists"}
+  - path: tasks/noassert-swallow
+    kind: defective
+    defects:
+      - {class: no-assertions, check: C001, note: "try/except swallows failed assertions"}
+  - path: tasks/brokengold-offbyone
+    kind: defective
+    defects:
+      - {class: broken-gold, check: C001, note: "gold stops one short"}
+  - path: tasks/brokengold-wrongfile
+    kind: defective
+    defects:
+      - {class: broken-gold, check: C001, note: "gold overlay writes the wrong file name"}
+  - path: tasks/flaky-setorder
+    kind: defective
+    defects:
+      - {class: flaky, check: C002, note: "test pins set iteration order"}
+  - path: tasks/flaky-hashshard
+    kind: defective
+    defects:
+      - {class: flaky, check: C002, note: "test depends on str hash values"}
+  - path: tasks/ctrl-clamp
+    kind: control
+  - path: tasks/ctrl-tags-sorted
+    kind: control
