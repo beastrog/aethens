@@ -38,6 +38,7 @@ phases:
         day: 2
         description: runner with Docker default and explicit unsafe-local mode; resource limits, timeouts, environment scrubbing, disposable copy, cleanup
         acceptance: tests for hung test, container build or start failure, memory blowup, network attempt blocked, output truncation; cleanup verified; no shell=True anywhere
+        status: DONE_LOCAL (all acceptance tests pass against a real Docker daemon locally; hosted CI not run)
       - id: B4
         day: 3
         description: C001 gold sanity and C002 flakiness with planted-defect fixtures and clean controls

@@ -50,3 +50,27 @@ CI installs uv with `pip install uv==0.13.7` instead of a third-party setup acti
 - D-011 (B2) The YAML loader rejects duplicate keys (a silently ignored duplicate could hide a field).
 - D-012 (B2) Bench and example tasks use stdlib `unittest` as their verifier, because the default image
   has no pytest and runs have no network.
+- D-013 (B3) Docker run flags (AGENTS.md rule 8, BUILD_PROMPTS B3): `--network none`, `--memory` =
+  `--memory-swap` (no swap), `--cpus`, `--pids-limit`, `--read-only`, `--tmpfs /tmp:rw,nosuid,nodev,size=`,
+  `--cap-drop ALL`, `--security-opt no-new-privileges`, non-root `--user`, `--pull never`, bind mount of a
+  disposable copy at /work. Default limits chosen by the agent (owner may change): 1024 MiB memory,
+  1.0 CPU, 256 pids, 256 MiB tmpfs, 64 KiB output tail per stream.
+- D-014 (B3) The container user is the host user's uid:gid (so the host can always delete the copy),
+  or 65534:65534 (nobody) when the host user is root; never root.
+- D-015 (B3) No `--rm`: the runner inspects the container state (OOMKilled, whether it started) and then
+  always removes it with `docker rm -f -v`, in a `finally` block, also after timeouts and exceptions.
+- D-016 (B3) `--pull never`: runs never pull images implicitly, so tests make no network calls and an
+  audit never downloads anything mid-run. A missing image raises `ContainerStartError` with a
+  `docker pull` hint. CI pulls `python:3.12-slim` in a separate step.
+- D-017 (B3) A container that never started (docker exit 125, missing image, bad option) raises
+  `ContainerStartError` (tool error, exit 2), not a verifier failure; exit codes 126/127 from inside a
+  started container are verifier results.
+- D-018 (B3) Output is read by threads that keep only the last N bytes in memory (no disk spill), so a
+  verifier printing gigabytes cannot exhaust host memory or disk.
+- D-019 (B3) Local mode applies rlimits through a tiny stdlib-only exec wrapper run with `python -I`,
+  not `preexec_fn` (unsafe with threads). Its environment is exactly PATH, a temp HOME,
+  PYTHONDONTWRITEBYTECODE, PYTHONUNBUFFERED and the run's own variables. The process group is killed
+  with SIGKILL after every run, not only on timeout, so background children never outlive a run.
+- D-020 (B3) Docker tests carry the `docker` marker. Without Docker they are skipped with a
+  "NOT VERIFIED (Docker): <reason>" message; with `AETHENS_REQUIRE_DOCKER=1` (set in CI) a missing daemon
+  or image is a failure.

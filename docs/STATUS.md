@@ -1,6 +1,6 @@
 # Status
 
-Last updated: 2026-11-18 (Asia/Calcutta), after B2.
+Last updated: 2026-11-18 (Asia/Calcutta), after B3.
 
 ## Mode
 
@@ -21,12 +21,23 @@ anyway, so this does not change task isolation). `docker run --rm hello-world` w
 - B2: aethens-task/v1 loader and validator (`aethens.adapters.load_task/load_tasks`), typed error per
   class, docs/task-format.md, examples/add-two and examples/word-format.
 
+- B3: runner (`aethens.runner`): DockerRunner (default) and LocalRunner (explicit opt-in). Verified
+  against Docker Engine 29.10.0 on this box: hung verifier killed and cleaned up, memory blowup
+  OOM-killed, network unreachable (only `lo`), output truncated, missing image -> ContainerStartError,
+  cleanup after an injected exception, host env not leaked (both modes), uid != 0, CapEff/CapBnd = 0,
+  NoNewPrivs = 1, read-only rootfs, pids limit, original task untouched.
+
 ## Next
-- B3: runner (Docker default, explicit unsafe-local mode).
+- B4: Check interface, C001 gold sanity, C002 flakiness, first bench fixtures.
 
 ## Open risks
 - Hosted CI has never run; the workflow file is only checked by running its commands locally.
 
 ## Not verified
+- Rootless Docker, Docker Desktop (macOS/Windows), Podman. Local mode's RLIMIT_AS is not enforced on macOS.
+- The build box's dockerd runs with `--iptables=false`; on hosts with iptables the bridge network exists
+  but runs still use `--network none`.
+- Running the test suite needs access to the Docker socket; on this box that is the `docker` group
+  (`sg docker -c "make check"`).
 - Loader behaviour on case-insensitive filesystems (macOS, Windows); tested on Linux only.
 - GitHub Actions behaviour (no remote).
