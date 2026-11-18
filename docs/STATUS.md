@@ -1,6 +1,6 @@
 # Status
 
-Last updated: 2026-11-18 (Asia/Calcutta), after B5.
+Last updated: 2026-11-18 (Asia/Calcutta), after B6.
 
 ## Mode
 
@@ -36,11 +36,19 @@ anyway, so this does not change task isolation). `docker run --rm hello-world` w
   warning on any control (ctrl-clamp has 2 C004 info survivors, which are equivalent mutants).
   C005 not built (reason in docs/IDEAS.md).
 
+- B6: report JSON Schema (docs/report-schema.json), Markdown renderer, full CLI (exit codes 0/1/2/3,
+  --fail-on, --format, --output), bench runner with precision/recall/false positives and baseline gate,
+  bench grown to 22 tasks (8 controls, 14 defective, six classes, at least 2 each).
+  Bench (locally generated, seed 0, standard): precision 1.0, recall 0.8571 (12/14), 0 false positives.
+  See bench/results.json and docs/sessions/B6.md.
+
 ## Next
-- B6: report JSON schema + Markdown, full CLI (fail-on, format, exit codes 0/1/2/3), bench runner with
-  precision/recall and baseline gate, bench to 20-24 tasks incl. order dependence.
+- B7: GitHub Action, README with bench numbers, SECURITY, CONTRIBUTING, templates, DISCLOSURE,
+  release.yml.
 
 ## Open risks
+- Exit code 3 semantics are an agent decision (D-032); the owner should confirm.
+- Bench numbers are from local runs; the hosted CI artifact does not exist yet.
 - C002 is probabilistic in the run count (about 1 seed in 16 misses a 50/50 flaky test at 5 runs).
 - Hosted CI has never run; the workflow file is only checked by running its commands locally.
 

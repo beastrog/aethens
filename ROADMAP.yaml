@@ -53,6 +53,7 @@ phases:
         day: 5
         description: report JSON aethens-report/v1 and Markdown renderer; CLI aethens audit PATH with fail_on and exit codes 0/1/2/3; bench runner computing precision, recall, false positives; bench/baseline.json regression gate
         acceptance: bench has 20-24 tasks across six defect classes with controls; CI fails on regression
+        status: DONE_LOCAL (22 bench tasks; bench deterministic; injected regression fails make bench locally; repro verified; hosted CI not run)
       - id: B7
         day: 6
         description: GitHub Action (composite, pull_request only, read-only); README with CI-generated bench numbers and honest limits; SECURITY.md; CONTRIBUTING; issue templates incl. "I ran it on X"; docs/DISCLOSURE.md; release.yml using Trusted Publishing

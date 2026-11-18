@@ -11,3 +11,8 @@ Ideas that came up during the build. AGENTS.md rule 14: write them here, do not 
 - Report C004 kill ratios per task in the Markdown summary (currently only in each survivor's evidence).
 - Equivalent-mutant filter: skip `<` -> `<=` mutants where both branches return the same bound (seen on
   ctrl-clamp). Needs care not to hide real weaknesses.
+- C002: treat the C001 gold run as an extra sample, or add runs adaptively when all runs agree, to cut
+  the 1-in-16 miss rate seen on order-generated (seed 0). Changes check semantics: owner decision.
+- Order-dependence check: rerun the verifier with test order reversed or shuffled (needs a
+  harness-specific hook, e.g. unittest's sortTestMethodsUsing or pytest-randomly), to catch
+  order-alphabetical-style defects.

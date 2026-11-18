@@ -34,3 +34,10 @@ jobs:
         run: docker pull python:3.12-slim
       - name: make check
         run: make check
+      - name: Upload the CI-generated bench report
+        if: always() && matrix.python-version == '3.12'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: bench-results
+          path: bench/results.json
+          if-no-files-found: error

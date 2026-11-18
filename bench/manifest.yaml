@@ -59,3 +59,27 @@ tasks:
   - path: tasks/ctrl-llm-labels
     kind: control
     note: "llm-unreviewed labels that are correct; must stay silent"
+  - path: tasks/order-setcases
+    kind: defective
+    defects:
+      - {class: order-dependence, check: C002, note: "which case gets id 1 depends on set iteration order"}
+  - path: tasks/order-generated
+    kind: defective
+    defects:
+      - {class: order-dependence, check: C002, note: "shared state across generated tests named in set order"}
+  - path: tasks/order-alphabetical
+    kind: defective
+    defects:
+      - {class: order-dependence, check: C002, note: "KNOWN MISS: depends on unittest's fixed alphabetical order; no v0.1 check reorders tests"}
+  - path: tasks/ctrl-money-format
+    kind: control
+    note: "exact format pinned because the statement specifies it"
+  - path: tasks/ctrl-float-tolerant
+    kind: control
+    note: "same task as strict-float, compared with a tolerance; the fsum candidate must pass"
+  - path: tasks/ctrl-exception-type
+    kind: control
+    note: "same task as strict-message, checks only the exception type"
+  - path: tasks/ctrl-isolated-state
+    kind: control
+    note: "stack tests with setUp isolation and order-independent set use"

@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/aethens/aethens/docs/report-schema.json",
+  "title": "Aethens report (aethens-report/v1)",
+  "description": "Output of `aethens audit --format json`. Mirrors aethens.models.Report.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "tool_version", "task_ids", "checks_run", "budget", "seed", "findings", "started_at", "duration_s"],
+  "properties": {
+    "schema": {"const": "aethens-report/v1"},
+    "tool_version": {"type": "string"},
+    "task_ids": {"type": "array", "items": {"type": "string"}},
+    "checks_run": {"type": "array", "items": {"type": "string", "pattern": "^C[0-9]{3}$"}},
+    "budget": {"enum": ["smoke", "standard", "deep"]},
+    "seed": {"type": "integer"},
+    "started_at": {"type": "string", "description": "ISO 8601 timestamp with UTC offset"},
+    "duration_s": {"type": "number", "minimum": 0},
+    "findings": {"type": "array", "items": {"$ref": "#/$defs/finding"}}
+  },
+  "$defs": {
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "check_id", "severity", "task_id", "title", "detail", "evidence", "repro", "seed", "confidence", "limits"],
+      "properties": {
+        "id": {"type": "string"},
+        "check_id": {"type": "string", "pattern": "^C[0-9]{3}$"},
+        "severity": {"enum": ["error", "warning", "info"]},
+        "task_id": {"type": "string"},
+        "title": {"type": "string"},
+        "detail": {"type": "string"},
+        "evidence": {"$ref": "#/$defs/evidence"},
+        "repro": {"type": "string", "description": "One-line command that reproduces the finding"},
+        "seed": {"type": "integer"},
+        "confidence": {"enum": ["confirmed", "needs-review"]},
+        "limits": {"type": "string"}
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["subject", "command", "observed", "exit_codes", "timed_out", "stdout_tail", "stderr_tail", "extra"],
+      "properties": {
+        "subject": {"type": "string", "description": "starter, gold, candidate:<name> or mutant:<key>"},
+        "command": {"type": "array", "items": {"type": "string"}},
+        "observed": {"type": "string"},
+        "exit_codes": {"type": "array", "items": {"type": ["integer", "null"]}},
+        "timed_out": {"type": "boolean"},
+        "stdout_tail": {"type": "string"},
+        "stderr_tail": {"type": "string"},
+        "extra": {"type": "object", "additionalProperties": {"type": "string"}}
+      }
+    }
+  }
+}

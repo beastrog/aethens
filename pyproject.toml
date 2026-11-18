@@ -40,7 +40,7 @@ packages = ["src/aethens"]
 line-length = 100
 target-version = "py311"
 src = ["src", "tests"]
-extend-exclude = ["bench/tasks"]
+extend-exclude = ["bench/tasks", "tests/fixtures"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "S", "SIM", "RUF"]
@@ -52,9 +52,16 @@ ignore = ["S101"]
 [tool.mypy]
 strict = true
 python_version = "3.11"
-files = ["src", "tests"]
+files = ["src", "tests", "bench/run_bench.py"]
+exclude = ["tests/fixtures/"]
+
+[[tool.mypy.overrides]]
+# jsonschema ships no type stubs; it is only used in tests.
+module = ["jsonschema", "jsonschema.*"]
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+norecursedirs = ["fixtures", ".*"]
 addopts = "-ra --strict-markers"
 markers = ["docker: needs a working Docker daemon and the python:3.12-slim image"]

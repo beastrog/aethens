@@ -107,3 +107,22 @@ CI installs uv with `pip install uv==0.13.7` instead of a third-party setup acti
 - D-030 (B5) C005 (exit-zero probe) was not built; see docs/IDEAS.md.
 - D-031 (B5) Bench fixture fix found while building: Python 3.12+ `sum()` of floats uses compensated
   summation, so the strict-float gold uses an explicit loop to produce the float its test pins.
+- D-032 (B6) Exit code 3 ("timeout") means a gold-solution run in C001 or C002 hit the task's
+  timeout, so the gold verdict could not be established. Precedence 2 > 3 > 1 > 0. The plan names the
+  code but does not define it; **owner to confirm**.
+- D-033 (B6) Report JSON Schema is draft 2020-12 at docs/report-schema.json, `additionalProperties:
+  false` throughout, and is tested against real reports. Markdown output is sized for a PR comment:
+  output tails are cut to the last 1500 characters there (the JSON keeps the runner's 64 KiB tail).
+- D-034 (B6) CLI additions beyond the B6 list: `--check ID` (repeatable; needed for one-line repro
+  commands) and `--output FILE`.
+- D-035 (B6) Bench metrics: a defect is found when its expected check reports at least its
+  `min_severity` (default warning; weak-leap uses info for C004). Precision counts only error/warning
+  findings; FP = error/warning on a control. Error/warning findings on defective tasks from checks
+  that were not expected are reported as `unexpected`, outside precision. The baseline gate fails on
+  lower precision, lower recall, or more false positives. Bench defaults: seed 0, budget standard,
+  4 parallel workers (tasks are independent, so results do not depend on scheduling).
+- D-036 (B6) bench/results.json is committed (no timings, so it is deterministic) so README numbers
+  trace to a file; CI regenerates it and uploads it as the `bench-results` artifact
+  (actions/upload-artifact v7.0.2 `cf430e030ddbb5b0abf93d22962f4752f3646cd9`).
+- D-037 (B6) The bench includes a planted defect no v0.1 check can catch (order-alphabetical) so
+  recall is not inflated by only planting what the tool can see.

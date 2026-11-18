@@ -16,4 +16,4 @@ test:
 	$(RUN) pytest
 
 bench:
-	@echo "bench: fixtures and manifest exist (bench/), the metrics runner and regression gate arrive in B6."
+	$(RUN) python bench/run_bench.py

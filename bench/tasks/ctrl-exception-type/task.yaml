@@ -1,0 +1,10 @@
+schema: aethens-task/v1
+id: ctrl-exception-type
+language: python
+image: python:3.12-slim
+statement: statement.md
+starter: starter
+tests: tests
+verifier: ["python", "-m", "unittest", "discover", "-s", "tests"]
+timeout_s: 20
+gold: gold

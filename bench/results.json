@@ -1,0 +1,285 @@
+{
+  "schema": "aethens-bench-results/v1",
+  "tool_version": "0.1.0.dev0",
+  "seed": 0,
+  "budget": "standard",
+  "tasks": 22,
+  "controls": 8,
+  "defective": 14,
+  "metrics": {
+    "planted": 14,
+    "found": 12,
+    "recall": 0.8571,
+    "true_findings": 11,
+    "false_positives": 0,
+    "precision": 1.0,
+    "unexpected_findings": 3,
+    "info_on_controls": 2,
+    "known_misses": [
+      {
+        "task": "order-generated",
+        "class": "order-dependence",
+        "check": "C002"
+      },
+      {
+        "task": "order-alphabetical",
+        "class": "order-dependence",
+        "check": "C002"
+      }
+    ],
+    "per_check": {
+      "C001": {
+        "planted": 4,
+        "found": 4,
+        "false_positives": 0
+      },
+      "C002": {
+        "planted": 5,
+        "found": 3,
+        "false_positives": 0
+      },
+      "C003": {
+        "planted": 4,
+        "found": 4,
+        "false_positives": 0
+      },
+      "C004": {
+        "planted": 1,
+        "found": 1,
+        "false_positives": 0
+      }
+    },
+    "per_class": {
+      "weak-tests": {
+        "planted": 3,
+        "found": 3
+      },
+      "over-strict": {
+        "planted": 2,
+        "found": 2
+      },
+      "flaky": {
+        "planted": 2,
+        "found": 2
+      },
+      "no-assertions": {
+        "planted": 2,
+        "found": 2
+      },
+      "broken-gold": {
+        "planted": 2,
+        "found": 2
+      },
+      "order-dependence": {
+        "planted": 3,
+        "found": 1
+      }
+    }
+  },
+  "findings": [
+    {
+      "task_id": "brokengold-offbyone",
+      "check_id": "C001",
+      "severity": "error",
+      "id": "C001-brokengold-offbyone-a98865c9"
+    },
+    {
+      "task_id": "brokengold-wrongfile",
+      "check_id": "C001",
+      "severity": "error",
+      "id": "C001-brokengold-wrongfile-3d089653"
+    },
+    {
+      "task_id": "ctrl-clamp",
+      "check_id": "C004",
+      "severity": "info",
+      "id": "C004-ctrl-clamp-42cb6c2a"
+    },
+    {
+      "task_id": "ctrl-clamp",
+      "check_id": "C004",
+      "severity": "info",
+      "id": "C004-ctrl-clamp-875ee207"
+    },
+    {
+      "task_id": "flaky-hashshard",
+      "check_id": "C001",
+      "severity": "error",
+      "id": "C001-flaky-hashshard-fd17ae15"
+    },
+    {
+      "task_id": "flaky-hashshard",
+      "check_id": "C002",
+      "severity": "error",
+      "id": "C002-flaky-hashshard-50a5d549"
+    },
+    {
+      "task_id": "flaky-setorder",
+      "check_id": "C001",
+      "severity": "error",
+      "id": "C001-flaky-setorder-6c93ed69"
+    },
+    {
+      "task_id": "flaky-setorder",
+      "check_id": "C002",
+      "severity": "error",
+      "id": "C002-flaky-setorder-c9621353"
+    },
+    {
+      "task_id": "noassert-exists",
+      "check_id": "C001",
+      "severity": "error",
+      "id": "C001-noassert-exists-9729bbc2"
+    },
+    {
+      "task_id": "noassert-exists",
+      "check_id": "C004",
+      "severity": "info",
+      "id": "C004-noassert-exists-3f61c0a9"
+    },
+    {
+      "task_id": "noassert-exists",
+      "check_id": "C004",
+      "severity": "info",
+      "id": "C004-noassert-exists-6b35bb0e"
+    },
+    {
+      "task_id": "noassert-exists",
+      "check_id": "C004",
+      "severity": "info",
+      "id": "C004-noassert-exists-bb8f768d"
+    },
+    {
+      "task_id": "noassert-swallow",
+      "check_id": "C001",
+      "severity": "error",
+      "id": "C001-noassert-swallow-a02cfc3c"
+    },
+    {
+      "task_id": "noassert-swallow",
+      "check_id": "C004",
+      "severity": "info",
+      "id": "C004-noassert-swallow-adbf8aeb"
+    },
+    {
+      "task_id": "noassert-swallow",
+      "check_id": "C004",
+      "severity": "info",
+      "id": "C004-noassert-swallow-b1366483"
+    },
+    {
+      "task_id": "order-setcases",
+      "check_id": "C001",
+      "severity": "error",
+      "id": "C001-order-setcases-5cc8074a"
+    },
+    {
+      "task_id": "order-setcases",
+      "check_id": "C002",
+      "severity": "error",
+      "id": "C002-order-setcases-c739a031"
+    },
+    {
+      "task_id": "strict-float",
+      "check_id": "C003",
+      "severity": "error",
+      "id": "C003-strict-float-1b0e5200"
+    },
+    {
+      "task_id": "strict-message",
+      "check_id": "C003",
+      "severity": "error",
+      "id": "C003-strict-message-b1952318"
+    },
+    {
+      "task_id": "weak-leap",
+      "check_id": "C004",
+      "severity": "info",
+      "id": "C004-weak-leap-0ced0883"
+    },
+    {
+      "task_id": "weak-leap",
+      "check_id": "C004",
+      "severity": "info",
+      "id": "C004-weak-leap-7120fdc1"
+    },
+    {
+      "task_id": "weak-leap",
+      "check_id": "C004",
+      "severity": "info",
+      "id": "C004-weak-leap-90d5abfb"
+    },
+    {
+      "task_id": "weak-leap",
+      "check_id": "C004",
+      "severity": "info",
+      "id": "C004-weak-leap-9925d263"
+    },
+    {
+      "task_id": "weak-leap",
+      "check_id": "C004",
+      "severity": "info",
+      "id": "C004-weak-leap-d7969aeb"
+    },
+    {
+      "task_id": "weak-llm",
+      "check_id": "C003",
+      "severity": "warning",
+      "id": "C003-weak-llm-82120caf"
+    },
+    {
+      "task_id": "weak-llm",
+      "check_id": "C004",
+      "severity": "info",
+      "id": "C004-weak-llm-016fda1f"
+    },
+    {
+      "task_id": "weak-llm",
+      "check_id": "C004",
+      "severity": "info",
+      "id": "C004-weak-llm-5aa93585"
+    },
+    {
+      "task_id": "weak-llm",
+      "check_id": "C004",
+      "severity": "info",
+      "id": "C004-weak-llm-cd3eb1be"
+    },
+    {
+      "task_id": "weak-sign",
+      "check_id": "C003",
+      "severity": "error",
+      "id": "C003-weak-sign-8f10cfcd"
+    },
+    {
+      "task_id": "weak-sign",
+      "check_id": "C004",
+      "severity": "info",
+      "id": "C004-weak-sign-131dc06e"
+    },
+    {
+      "task_id": "weak-sign",
+      "check_id": "C004",
+      "severity": "info",
+      "id": "C004-weak-sign-430fc485"
+    },
+    {
+      "task_id": "weak-sign",
+      "check_id": "C004",
+      "severity": "info",
+      "id": "C004-weak-sign-b991bac9"
+    },
+    {
+      "task_id": "weak-sign",
+      "check_id": "C004",
+      "severity": "info",
+      "id": "C004-weak-sign-bcaacde0"
+    },
+    {
+      "task_id": "weak-sign",
+      "check_id": "C004",
+      "severity": "info",
+      "id": "C004-weak-sign-d0d91fd3"
+    }
+  ]
+}
