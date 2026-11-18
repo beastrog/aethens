@@ -1,0 +1,26 @@
+{
+  "seed": 0,
+  "budget": "standard",
+  "per_check": {
+    "C001": {
+      "loud_findings": 0,
+      "precision": null,
+      "recall": null
+    },
+    "C002": {
+      "loud_findings": 0,
+      "precision": null,
+      "recall": null
+    },
+    "C004": {
+      "loud_findings": 0,
+      "precision": 0.5556,
+      "recall": null
+    },
+    "C005": {
+      "loud_findings": 0,
+      "precision": null,
+      "recall": null
+    }
+  }
+}

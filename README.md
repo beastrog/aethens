@@ -105,14 +105,30 @@ These numbers come from a local run on the build machine (Docker Engine 29.10.0,
 CI workflow regenerates `bench/results.json` and uploads it as the `bench-results` artifact; it has
 not run yet.
 
+## Accuracy on public data Aethens did not write
+
+The bench above is self-authored, so it can only show that Aethens finds what its authors planted.
+The external bench runs Aethens on public tasks and judges the results with an outside oracle.
+Method, ground truth and caveats: [bench/external/README.md](bench/external/README.md).
+
+<!-- external:start -->
+Generated from `bench/external/results.json` by `bench/external/render_external.py` (aethens 0.1.0.dev0, seed 0, budget standard).
+
+On 164 HumanEval tasks (MIT), judged by EvalPlus's HumanEval+ tests (Apache-2.0) as an outside oracle:
+
+- C004 precision 0.4615: 36 of 78 mutants that HumanEval's own tests accepted are rejected by HumanEval+.
+- C004 recall 0.8387 relative to exhaustive mutation (26 of 31 weak tasks found at budget standard).
+- Error/warning findings on checks without labels in this data (presumed clean): C001 0, C002 1, C005 0. Details: [docs/EXTERNAL_BENCH.md](docs/EXTERNAL_BENCH.md).
+<!-- external:end -->
+
 ## Known misses and limits
 
-- Order dependence that follows unittest's fixed alphabetical order (`bench/tasks/order-alphabetical`)
-  is not caught: no v0.1 check reorders tests.
-- C002 is probabilistic in the number of runs. At the bench seed, `bench/tasks/order-generated` is
-  missed because all five runs happened to execute the tests in the failing order.
-- Harnesses that judge only the exit code accept a solution that calls `os._exit(0)` on import. v0.1
-  has no check for this (see docs/IDEAS.md).
+- C005 reorders tests only for `python -m unittest` verifiers, and only tries the default order,
+  reversed, a few seeded shuffles and each test alone; other orders are not tried.
+- C002 is probabilistic in the number of runs: a test that flips 50/50 is missed with probability
+  2 × 0.5^5 = 1/16 at 5 runs.
+- Harnesses that judge only the exit code accept a solution that calls `os._exit(0)` on import. There
+  is no check for this yet (see docs/IDEAS.md).
 - Python tasks only; verifiers must be runnable as a command inside a Docker image with no network.
 - Tested on Linux with Docker Engine. Rootless Docker, Docker Desktop and Podman are untested.
 

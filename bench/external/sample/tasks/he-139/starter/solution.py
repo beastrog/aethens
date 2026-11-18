@@ -1,0 +1,16 @@
+# Converted by bench/external/convert.py from HumanEval (MIT). HumanEval: github.com/openai/human-eval, Copyright (c) OpenAI.
+# Task HumanEval/139. Do not edit by hand; re-run the converter.
+
+def special_factorial(n):
+    """The Brazilian factorial is defined as:
+    brazilian_factorial(n) = n! * (n-1)! * (n-2)! * ... * 1!
+    where n > 0
+
+    For example:
+    >>> special_factorial(4)
+    288
+
+    The function will receive an integer as input and should return the special
+    factorial of this integer.
+    """
+    raise NotImplementedError

@@ -17,3 +17,4 @@ test:
 
 bench:
 	$(RUN) python bench/run_bench.py
+	$(RUN) python bench/external/run_external.py --sample

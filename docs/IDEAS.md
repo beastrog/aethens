@@ -21,3 +21,6 @@ Ideas that came up during the build. AGENTS.md rule 14: write them here, do not 
   its source first). Not built in D1.
 - C005: treat a reordered run that crashes before reporting (e.g. a test calls `os._exit`) as a
   run-level finding; today such runs are skipped and the limits say so.
+- External bench: add EvalPlus MBPP+ (re-check MBPP CC-BY-4.0 and MBPP+ Apache-2.0 first) and any
+  public dataset with labelled flaky, order-dependent or over-specified tests, so C002/C005/C006 get
+  real recall numbers, not only false-positive counts.

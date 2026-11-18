@@ -79,7 +79,7 @@ phases:
       - id: D2
         description: accuracy measured on public labelled data Aethens did not write (external bench); per-check precision and recall in a generated file; small licence-compatible vendored subset runs offline in make check
         acceptance: every dataset licence checked and recorded in bench/LICENSES.md; skipped datasets recorded with the reason; generated results file; offline subset in make check
-        status: NOT_STARTED
+        status: DONE_LOCAL (HumanEval + HumanEval+ oracle, 164 tasks; per-check results generated into docs/EXTERNAL_BENCH.md; 6-task offline sample gated in make check; ImpossibleBench skipped, MBPP+ deferred, reasons in bench/LICENSES.md)
       - id: D3
         description: over-specification check without an LLM (C006); behaviour-preserving AST rewrites of the gold; a test that rejects a rewrite is flagged as over-specified
         acceptance: each rewrite documented with the conditions that make it semantics-preserving and skipped when unsure; planted fixtures and controls; unit tests per rewrite

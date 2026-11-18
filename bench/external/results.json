@@ -1,0 +1,2940 @@
+{
+  "schema": "aethens-external-bench/v1",
+  "tool_version": "0.1.0.dev0",
+  "subset": "full",
+  "seed": 0,
+  "budget": "standard",
+  "datasets": [
+    {
+      "name": "HumanEval",
+      "role": "tasks: prompt, original canonical solution, original base tests",
+      "licence": "MIT",
+      "source": "github.com/openai/human-eval @ b9453e8f"
+    },
+    {
+      "name": "HumanEval+ (EvalPlus)",
+      "role": "oracle only: extended tests with expected outputs from EvalPlus's reference",
+      "licence": "Apache-2.0",
+      "source": "huggingface.co/datasets/evalplus/humanevalplus @ d32357cf"
+    }
+  ],
+  "tasks": 164,
+  "checks": [
+    "C001",
+    "C002",
+    "C004",
+    "C005"
+  ],
+  "exhaustive": true,
+  "metrics": {
+    "tasks_without_oracle": [
+      "he-022",
+      "he-032",
+      "he-044",
+      "he-049",
+      "he-055",
+      "he-063",
+      "he-064",
+      "he-076",
+      "he-091",
+      "he-095",
+      "he-097",
+      "he-111",
+      "he-122",
+      "he-123",
+      "he-124",
+      "he-125",
+      "he-127",
+      "he-132",
+      "he-140",
+      "he-150"
+    ],
+    "per_check": {
+      "C001": {
+        "ground_truth": "presumed clean (no labels for this class in the dataset)",
+        "loud_findings": 0,
+        "tasks_with_loud_findings": 0,
+        "loud_finding_list": [],
+        "precision": null,
+        "recall": null
+      },
+      "C002": {
+        "ground_truth": "presumed clean (no labels for this class in the dataset)",
+        "loud_findings": 1,
+        "tasks_with_loud_findings": 1,
+        "loud_finding_list": [
+          {
+            "task": "he-063",
+            "id": "C002-he-063-b1a6265b",
+            "severity": "warning",
+            "title": "Gold solution run time varies: some runs time out"
+          }
+        ],
+        "precision": null,
+        "recall": null
+      },
+      "C004": {
+        "ground_truth": "HumanEval+ (EvalPlus) tests reject the surviving mutant",
+        "loud_findings": 0,
+        "tasks_with_loud_findings": 0,
+        "loud_finding_list": [],
+        "precision": 0.4615,
+        "recall": 0.8387,
+        "survivors": 90,
+        "survivors_judged_by_oracle": 78,
+        "confirmed": 36,
+        "unconfirmed": 42,
+        "tasks_with_confirmed_survivor": 26,
+        "recall_detail": {
+          "definition": "weak = some mutant (exhaustive, Aethens operators) passes the base tests and fails HumanEval+",
+          "tasks_exhaustively_mutated": 144,
+          "weak_tasks": 31,
+          "weak_tasks_found_at_budget": 26
+        }
+      },
+      "C005": {
+        "ground_truth": "presumed clean (no labels for this class in the dataset)",
+        "loud_findings": 0,
+        "tasks_with_loud_findings": 0,
+        "loud_finding_list": [],
+        "precision": null,
+        "recall": null
+      }
+    }
+  },
+  "per_task": [
+    {
+      "task": "he-000",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-000-f20e257a",
+          "title": "Mutant survived: '<' -> '<=' at solution.py:18"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:54:compare-boundary:0",
+          "line": 18,
+          "oracle": "confirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 8,
+        "base_pass_oracle_fail": 1
+      }
+    },
+    {
+      "task": "he-001",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 13,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-002",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 2,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-003",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 8,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-004",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 4,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-005",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 5,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-006",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-006-deb437ef",
+          "title": "Mutant survived: constant 0 -> 1 at solution.py:16"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:25:constant-plus-one:0",
+          "line": 16,
+          "oracle": "unconfirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 10,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-007",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 2,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-008",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 5,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-009",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 3,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-010",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-010-df5db707",
+          "title": "Mutant survived: constant 1 -> 2 at solution.py:28"
+        },
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-010-178ed156",
+          "title": "Mutant survived: '+=' -> '-=' at solution.py:28"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:41:constant-plus-one:0",
+          "line": 28,
+          "oracle": "confirmed"
+        },
+        {
+          "mutant": "solution.py:25:augassign-swap:0",
+          "line": 28,
+          "oracle": "confirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 12,
+        "base_pass_oracle_fail": 2
+      }
+    },
+    {
+      "task": "he-011",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 5,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-012",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 4,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-013",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 3,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-014",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 3,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-015",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 3,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-016",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 1,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-017",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 4,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-018",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-018-c3a2c322",
+          "title": "Mutant survived: '-' -> '+' at solution.py:16"
+        },
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-018-cfd5e46d",
+          "title": "Mutant survived: constant 1 -> 2 at solution.py:16"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:30:binop-swap:0",
+          "line": 16,
+          "oracle": "unconfirmed"
+        },
+        {
+          "mutant": "solution.py:32:constant-plus-one:0",
+          "line": 16,
+          "oracle": "unconfirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 10,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-019",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-019-88073b11",
+          "title": "Mutant survived: constant 9 -> 10 at solution.py:23"
+        },
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-019-91b9ba4f",
+          "title": "Mutant survived: constant 6 -> 7 at solution.py:20"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:36:constant-plus-one:0",
+          "line": 23,
+          "oracle": "unconfirmed"
+        },
+        {
+          "mutant": "solution.py:33:constant-plus-one:0",
+          "line": 20,
+          "oracle": "confirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 11,
+        "base_pass_oracle_fail": 2
+      }
+    },
+    {
+      "task": "he-020",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-020-43c50ae9",
+          "title": "Mutant survived: '<' -> '<=' at solution.py:25"
+        },
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-020-dba38f9a",
+          "title": "Mutant survived: '-' -> '+' at solution.py:21"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:82:compare-boundary:0",
+          "line": 25,
+          "oracle": "confirmed"
+        },
+        {
+          "mutant": "solution.py:88:binop-swap:0",
+          "line": 21,
+          "oracle": "confirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 10,
+        "base_pass_oracle_fail": 2
+      }
+    },
+    {
+      "task": "he-021",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 4,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-022",
+      "oracle_accepts_gold": false,
+      "oracle_gold_run": "exit code 1",
+      "findings": [],
+      "survivors": []
+    },
+    {
+      "task": "he-023",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 1,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-024",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 5,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-025",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-025-9554b670",
+          "title": "Mutant survived: constant 1 -> 2 at solution.py:20"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:66:constant-plus-one:0",
+          "line": 20,
+          "oracle": "unconfirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 18,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-026",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 4,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-027",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 1,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-028",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 1,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-029",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 1,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-030",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 4,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-031",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-031-5904457e",
+          "title": "Mutant survived: '<' -> '<=' at solution.py:22"
+        },
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-031-cd2b1cdb",
+          "title": "Mutant survived: constant 2 -> 3 at solution.py:22"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:9:compare-boundary:0",
+          "line": 22,
+          "oracle": "confirmed"
+        },
+        {
+          "mutant": "solution.py:17:constant-plus-one:0",
+          "line": 22,
+          "oracle": "confirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 14,
+        "base_pass_oracle_fail": 2
+      }
+    },
+    {
+      "task": "he-032",
+      "oracle_accepts_gold": false,
+      "oracle_gold_run": "exit code 1",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-032-4d7031c3",
+          "title": "Mutant survived: '>' -> '>=' at solution.py:30"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:25:compare-boundary:0",
+          "line": 30,
+          "oracle": "no-oracle"
+        }
+      ]
+    },
+    {
+      "task": "he-033",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 3,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-034",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 1,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-035",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-035-30e9edde",
+          "title": "Mutant survived: '>' -> '>=' at solution.py:14"
+        },
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-035-7c13942b",
+          "title": "Mutant survived: constant 0 -> 1 at solution.py:12"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:22:compare-boundary:0",
+          "line": 14,
+          "oracle": "unconfirmed"
+        },
+        {
+          "mutant": "solution.py:18:constant-plus-one:0",
+          "line": 12,
+          "oracle": "confirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 5,
+        "base_pass_oracle_fail": 1
+      }
+    },
+    {
+      "task": "he-036",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 14,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-037",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 8,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-038",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-038-0f8ae10a",
+          "title": "Mutant survived: constant 3 -> 4 at solution.py:12"
+        },
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-038-11de8437",
+          "title": "Mutant survived: constant 2 -> 3 at solution.py:10"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:59:constant-plus-one:0",
+          "line": 12,
+          "oracle": "confirmed"
+        },
+        {
+          "mutant": "solution.py:95:constant-plus-one:0",
+          "line": 10,
+          "oracle": "unconfirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 18,
+        "base_pass_oracle_fail": 1
+      }
+    },
+    {
+      "task": "he-039",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-039-5b83433e",
+          "title": "Mutant survived: return value replaced by None at solution.py:23"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:24:return-none:0",
+          "line": 23,
+          "oracle": "unconfirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 31,
+        "base_pass_oracle_fail": 1
+      }
+    },
+    {
+      "task": "he-040",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-040-ad5f2459",
+          "title": "Mutant survived: constant 1 -> 2 at solution.py:23"
+        },
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-040-0a8c6835",
+          "title": "Mutant survived: '+' -> '-' at solution.py:24"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:35:constant-plus-one:0",
+          "line": 23,
+          "oracle": "confirmed"
+        },
+        {
+          "mutant": "solution.py:40:binop-swap:0",
+          "line": 24,
+          "oracle": "confirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 11,
+        "base_pass_oracle_fail": 3
+      }
+    },
+    {
+      "task": "he-041",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 3,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-042",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 3,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-043",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-043-c7f3ffea",
+          "title": "Mutant survived: constant 1 -> 2 at solution.py:22"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:33:constant-plus-one:0",
+          "line": 22,
+          "oracle": "confirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 8,
+        "base_pass_oracle_fail": 1
+      }
+    },
+    {
+      "task": "he-044",
+      "oracle_accepts_gold": false,
+      "oracle_gold_run": "exit code 1",
+      "findings": [],
+      "survivors": []
+    },
+    {
+      "task": "he-045",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 3,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-046",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-046-f0422b3e",
+          "title": "Mutant survived: return value replaced by None at solution.py:22"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:13:return-none:0",
+          "line": 22,
+          "oracle": "confirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 22,
+        "base_pass_oracle_fail": 3
+      }
+    },
+    {
+      "task": "he-047",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 17,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-048",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 7,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-049",
+      "oracle_accepts_gold": false,
+      "oracle_gold_run": "exit code 1",
+      "findings": [],
+      "survivors": []
+    },
+    {
+      "task": "he-050",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 14,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-051",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 2,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-052",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-052-a55d881f",
+          "title": "Mutant survived: return value replaced by None at solution.py:14"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:18:return-none:0",
+          "line": 14,
+          "oracle": "confirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 5,
+        "base_pass_oracle_fail": 1
+      }
+    },
+    {
+      "task": "he-053",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 2,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-054",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 2,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-055",
+      "oracle_accepts_gold": false,
+      "oracle_gold_run": "timed out (killed)",
+      "findings": [],
+      "survivors": []
+    },
+    {
+      "task": "he-056",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-056-60f64ac9",
+          "title": "Mutant survived: return value replaced by None at solution.py:25"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:24:return-none:0",
+          "line": 25,
+          "oracle": "confirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 15,
+        "base_pass_oracle_fail": 1
+      }
+    },
+    {
+      "task": "he-057",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 6,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-058",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 3,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-059",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-059-a76b8274",
+          "title": "Mutant survived: constant 2 -> 3 at solution.py:15"
+        },
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-059-1569bb29",
+          "title": "Mutant survived: '+' -> '-' at solution.py:20"
+        },
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-059-afa95f5c",
+          "title": "Mutant survived: constant 1 -> 2 at solution.py:20"
+        },
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-059-a173440f",
+          "title": "Mutant survived: constant 2 -> 3 at solution.py:13"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:43:constant-plus-one:0",
+          "line": 15,
+          "oracle": "confirmed"
+        },
+        {
+          "mutant": "solution.py:32:binop-swap:0",
+          "line": 20,
+          "oracle": "unconfirmed"
+        },
+        {
+          "mutant": "solution.py:50:constant-plus-one:0",
+          "line": 20,
+          "oracle": "unconfirmed"
+        },
+        {
+          "mutant": "solution.py:39:constant-plus-one:0",
+          "line": 13,
+          "oracle": "confirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 24,
+        "base_pass_oracle_fail": 5
+      }
+    },
+    {
+      "task": "he-060",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 3,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-061",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-061-2373b957",
+          "title": "Mutant survived: return value replaced by None at solution.py:25"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:24:return-none:0",
+          "line": 25,
+          "oracle": "confirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 15,
+        "base_pass_oracle_fail": 1
+      }
+    },
+    {
+      "task": "he-062",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 3,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-063",
+      "oracle_accepts_gold": false,
+      "oracle_gold_run": "timed out (killed)",
+      "findings": [
+        {
+          "check_id": "C002",
+          "severity": "warning",
+          "id": "C002-he-063-b1a6265b",
+          "title": "Gold solution run time varies: some runs time out"
+        }
+      ],
+      "survivors": []
+    },
+    {
+      "task": "he-064",
+      "oracle_accepts_gold": false,
+      "oracle_gold_run": "exit code 1",
+      "findings": [],
+      "survivors": []
+    },
+    {
+      "task": "he-065",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 9,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-066",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 7,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-067",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 3,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-068",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-068-9f6ea280",
+          "title": "Mutant survived: constant 0 -> 1 at solution.py:38"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:19:constant-plus-one:0",
+          "line": 38,
+          "oracle": "confirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 12,
+        "base_pass_oracle_fail": 1
+      }
+    },
+    {
+      "task": "he-069",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-069-60593092",
+          "title": "Mutant survived: constant 1 -> 2 at solution.py:15"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:45:constant-plus-one:0",
+          "line": 15,
+          "oracle": "unconfirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 12,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-070",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 4,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-071",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-071-de86f17e",
+          "title": "Mutant survived: '<=' -> '<' at solution.py:15"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:24:compare-boundary:0",
+          "line": 15,
+          "oracle": "confirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 26,
+        "base_pass_oracle_fail": 2
+      }
+    },
+    {
+      "task": "he-072",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-072-e40677f9",
+          "title": "Mutant survived: '<' -> '<=' at solution.py:26"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:15:compare-boundary:0",
+          "line": 26,
+          "oracle": "unconfirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 18,
+        "base_pass_oracle_fail": 2
+      }
+    },
+    {
+      "task": "he-073",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 11,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-074",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 9,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-075",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-075-673d7dcf",
+          "title": "Mutant survived: constant 101 -> 102 at solution.py:22"
+        },
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-075-e50f5c3b",
+          "title": "Mutant survived: constant 2 -> 3 at solution.py:13"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:65:constant-plus-one:0",
+          "line": 22,
+          "oracle": "unconfirmed"
+        },
+        {
+          "mutant": "solution.py:34:constant-plus-one:0",
+          "line": 13,
+          "oracle": "confirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 22,
+        "base_pass_oracle_fail": 1
+      }
+    },
+    {
+      "task": "he-076",
+      "oracle_accepts_gold": false,
+      "oracle_gold_run": "exit code 1",
+      "findings": [],
+      "survivors": []
+    },
+    {
+      "task": "he-077",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 7,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-078",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 7,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-079",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 4,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-080",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 22,
+        "base_pass_oracle_fail": 1
+      }
+    },
+    {
+      "task": "he-081",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 36,
+        "base_pass_oracle_fail": 4
+      }
+    },
+    {
+      "task": "he-082",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 14,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-083",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 12,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-084",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 2,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-085",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 7,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-086",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 1,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-087",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 4,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-088",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-088-e6b8f4fa",
+          "title": "Mutant survived: '+' -> '-' at solution.py:19"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:28:binop-swap:0",
+          "line": 19,
+          "oracle": "unconfirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 11,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-089",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-089-4a50ccec",
+          "title": "Mutant survived: '+=' -> '-=' at solution.py:21"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:24:augassign-swap:0",
+          "line": 21,
+          "oracle": "confirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 11,
+        "base_pass_oracle_fail": 1
+      }
+    },
+    {
+      "task": "he-090",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 6,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-091",
+      "oracle_accepts_gold": false,
+      "oracle_gold_run": "exit code 1",
+      "findings": [],
+      "survivors": []
+    },
+    {
+      "task": "he-092",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 13,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-093",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 5,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-094",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-094-a871d6e8",
+          "title": "Mutant survived: '**' -> '*' at solution.py:18"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:86:binop-swap:0",
+          "line": 18,
+          "oracle": "confirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 22,
+        "base_pass_oracle_fail": 1
+      }
+    },
+    {
+      "task": "he-095",
+      "oracle_accepts_gold": false,
+      "oracle_gold_run": "exit code 1",
+      "findings": [],
+      "survivors": []
+    },
+    {
+      "task": "he-096",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 8,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-097",
+      "oracle_accepts_gold": false,
+      "oracle_gold_run": "exit code 1",
+      "findings": [],
+      "survivors": []
+    },
+    {
+      "task": "he-098",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 8,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-099",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-099-d337df10",
+          "title": "Mutant survived: '>' -> '>=' at solution.py:35"
+        },
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-099-9ee88e2c",
+          "title": "Mutant survived: '>' -> '>=' at solution.py:31"
+        },
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-099-fc64a137",
+          "title": "Mutant survived: constant 0 -> 1 at solution.py:35"
+        },
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-099-04c7f2d8",
+          "title": "Mutant survived: constant 0 -> 1 at solution.py:31"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:35:compare-boundary:0",
+          "line": 35,
+          "oracle": "unconfirmed"
+        },
+        {
+          "mutant": "solution.py:32:compare-boundary:0",
+          "line": 31,
+          "oracle": "unconfirmed"
+        },
+        {
+          "mutant": "solution.py:60:constant-plus-one:0",
+          "line": 35,
+          "oracle": "confirmed"
+        },
+        {
+          "mutant": "solution.py:53:constant-plus-one:0",
+          "line": 31,
+          "oracle": "confirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 20,
+        "base_pass_oracle_fail": 4
+      }
+    },
+    {
+      "task": "he-100",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 4,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-101",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 5,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-102",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 18,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-103",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 14,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-104",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 6,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-105",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-105-8d496dd8",
+          "title": "Mutant survived: constant 7 -> 8 at solution.py:33"
+        },
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-105-d55de20f",
+          "title": "Mutant survived: constant 6 -> 7 at solution.py:32"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:28:constant-plus-one:0",
+          "line": 33,
+          "oracle": "confirmed"
+        },
+        {
+          "mutant": "solution.py:27:constant-plus-one:0",
+          "line": 32,
+          "oracle": "confirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 10,
+        "base_pass_oracle_fail": 2
+      }
+    },
+    {
+      "task": "he-106",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 21,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-107",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 25,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-108",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-108-a0d6bc59",
+          "title": "Mutant survived: constant 1 -> 2 at solution.py:15"
+        },
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-108-d744fed1",
+          "title": "Mutant survived: constant 0 -> 1 at solution.py:16"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:17:constant-plus-one:0",
+          "line": 15,
+          "oracle": "unconfirmed"
+        },
+        {
+          "mutant": "solution.py:30:constant-plus-one:0",
+          "line": 16,
+          "oracle": "unconfirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 16,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-109",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 10,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-110",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 21,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-111",
+      "oracle_accepts_gold": false,
+      "oracle_gold_run": "exit code 1",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-111-83d9d688",
+          "title": "Mutant survived: '>' -> '>=' at solution.py:22"
+        },
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-111-7b5104fd",
+          "title": "Mutant survived: '>' -> '>=' at solution.py:24"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:43:compare-boundary:0",
+          "line": 22,
+          "oracle": "no-oracle"
+        },
+        {
+          "mutant": "solution.py:21:compare-boundary:0",
+          "line": 24,
+          "oracle": "no-oracle"
+        }
+      ]
+    },
+    {
+      "task": "he-112",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 4,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-113",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 13,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-114",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-114-305f892c",
+          "title": "Mutant survived: '<' -> '<=' at solution.py:16"
+        },
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-114-72acc716",
+          "title": "Mutant survived: constant 0 -> 1 at solution.py:16"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:33:compare-boundary:0",
+          "line": 16,
+          "oracle": "unconfirmed"
+        },
+        {
+          "mutant": "solution.py:51:constant-plus-one:0",
+          "line": 16,
+          "oracle": "unconfirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 12,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-115",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 2,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-116",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-116-1a24fc6c",
+          "title": "Mutant survived: constant 2 -> 3 at solution.py:15"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:29:constant-plus-one:0",
+          "line": 15,
+          "oracle": "unconfirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 2,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-117",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 9,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-118",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 21,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-119",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 25,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-120",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 5,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-121",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 10,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-122",
+      "oracle_accepts_gold": false,
+      "oracle_gold_run": "exit code 1",
+      "findings": [],
+      "survivors": []
+    },
+    {
+      "task": "he-123",
+      "oracle_accepts_gold": false,
+      "oracle_gold_run": "exit code 1",
+      "findings": [],
+      "survivors": []
+    },
+    {
+      "task": "he-124",
+      "oracle_accepts_gold": false,
+      "oracle_gold_run": "exit code 1",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-124-7a9792d2",
+          "title": "Mutant survived: '>' -> '>=' at solution.py:34"
+        },
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-124-21aff3d3",
+          "title": "Mutant survived: '==' -> '!=' at solution.py:34"
+        },
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-124-a709a003",
+          "title": "Mutant survived: constant 12 -> 13 at solution.py:30"
+        },
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-124-c85f076b",
+          "title": "Mutant survived: constant 12 -> 13 at solution.py:28"
+        },
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-124-2b605e53",
+          "title": "Mutant survived: '>' -> '>=' at solution.py:30"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:62:compare-boundary:0",
+          "line": 34,
+          "oracle": "no-oracle"
+        },
+        {
+          "mutant": "solution.py:100:compare-negate:0",
+          "line": 34,
+          "oracle": "no-oracle"
+        },
+        {
+          "mutant": "solution.py:143:constant-plus-one:0",
+          "line": 30,
+          "oracle": "no-oracle"
+        },
+        {
+          "mutant": "solution.py:86:constant-plus-one:0",
+          "line": 28,
+          "oracle": "no-oracle"
+        },
+        {
+          "mutant": "solution.py:54:compare-boundary:0",
+          "line": 30,
+          "oracle": "no-oracle"
+        }
+      ]
+    },
+    {
+      "task": "he-125",
+      "oracle_accepts_gold": false,
+      "oracle_gold_run": "exit code 1",
+      "findings": [],
+      "survivors": []
+    },
+    {
+      "task": "he-126",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-126-11155ed5",
+          "title": "Mutant survived: constant 1 -> 2 at solution.py:25"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:80:constant-plus-one:0",
+          "line": 25,
+          "oracle": "confirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 16,
+        "base_pass_oracle_fail": 1
+      }
+    },
+    {
+      "task": "he-127",
+      "oracle_accepts_gold": false,
+      "oracle_gold_run": "timed out (killed)",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-127-31c6d12a",
+          "title": "Mutant survived: return value replaced by None at solution.py:31"
+        },
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-127-a7f370a2",
+          "title": "Mutant survived: '>' -> '>=' at solution.py:37"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:65:return-none:0",
+          "line": 31,
+          "oracle": "no-oracle"
+        },
+        {
+          "mutant": "solution.py:49:compare-boundary:0",
+          "line": 37,
+          "oracle": "no-oracle"
+        }
+      ]
+    },
+    {
+      "task": "he-128",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-128-ca13f3a1",
+          "title": "Mutant survived: '<' -> '<=' at solution.py:17"
+        },
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-128-78d34ce6",
+          "title": "Mutant survived: constant 0 -> 1 at solution.py:17"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:59:compare-boundary:0",
+          "line": 17,
+          "oracle": "unconfirmed"
+        },
+        {
+          "mutant": "solution.py:64:constant-plus-one:0",
+          "line": 17,
+          "oracle": "unconfirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 12,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-129",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-129-5be38ce7",
+          "title": "Mutant survived: constant 1 -> 2 at solution.py:35"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:32:constant-plus-one:0",
+          "line": 35,
+          "oracle": "unconfirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 35,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-130",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 30,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-131",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-131-b7e492a5",
+          "title": "Mutant survived: constant 1 -> 2 at solution.py:18"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:48:constant-plus-one:0",
+          "line": 18,
+          "oracle": "unconfirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 16,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-132",
+      "oracle_accepts_gold": false,
+      "oracle_gold_run": "exit code 1",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-132-abde5c58",
+          "title": "Mutant survived: '<' -> '<=' at solution.py:29"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:71:compare-boundary:0",
+          "line": 29,
+          "oracle": "no-oracle"
+        }
+      ]
+    },
+    {
+      "task": "he-133",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 5,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-134",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 12,
+        "base_pass_oracle_fail": 1
+      }
+    },
+    {
+      "task": "he-135",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-135-01f3c440",
+          "title": "Mutant survived: constant 1 -> 2 at solution.py:15"
+        },
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-135-ffe45e1d",
+          "title": "Mutant survived: '<' -> '<=' at solution.py:17"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:13:constant-plus-one:0",
+          "line": 15,
+          "oracle": "confirmed"
+        },
+        {
+          "mutant": "solution.py:25:compare-boundary:0",
+          "line": 17,
+          "oracle": "unconfirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 13,
+        "base_pass_oracle_fail": 1
+      }
+    },
+    {
+      "task": "he-136",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 9,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-137",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-137-44732a34",
+          "title": "Mutant survived: '>' -> '>=' at solution.py:20"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:41:compare-boundary:0",
+          "line": 20,
+          "oracle": "unconfirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 8,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-138",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 9,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-139",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-139-9eee9e38",
+          "title": "Mutant survived: constant 1 -> 2 at solution.py:18"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:23:constant-plus-one:0",
+          "line": 18,
+          "oracle": "unconfirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 8,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-140",
+      "oracle_accepts_gold": false,
+      "oracle_gold_run": "exit code 1",
+      "findings": [],
+      "survivors": []
+    },
+    {
+      "task": "he-141",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 24,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-142",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-142-4b887dc9",
+          "title": "Mutant survived: '%' -> '//' at solution.py:21"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:58:binop-swap:0",
+          "line": 21,
+          "oracle": "unconfirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 20,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-143",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-143-d32f77d3",
+          "title": "Mutant survived: constant 1 -> 2 at solution.py:31"
+        },
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-143-24fa7b3a",
+          "title": "Mutant survived: constant 1 -> 2 at solution.py:28"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:65:constant-plus-one:0",
+          "line": 31,
+          "oracle": "unconfirmed"
+        },
+        {
+          "mutant": "solution.py:40:constant-plus-one:0",
+          "line": 28,
+          "oracle": "unconfirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 18,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-144",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 8,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-145",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-145-f879c3af",
+          "title": "Mutant survived: '*' -> '/' at solution.py:19"
+        },
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-145-9a9bb6d2",
+          "title": "Mutant survived: '<' -> '<=' at solution.py:17"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:23:binop-swap:0",
+          "line": 19,
+          "oracle": "unconfirmed"
+        },
+        {
+          "mutant": "solution.py:18:compare-boundary:0",
+          "line": 17,
+          "oracle": "unconfirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 13,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-146",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-146-3b19cf85",
+          "title": "Mutant survived: constant 10 -> 11 at solution.py:15"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:25:constant-plus-one:0",
+          "line": 15,
+          "oracle": "confirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 19,
+        "base_pass_oracle_fail": 1
+      }
+    },
+    {
+      "task": "he-147",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 20,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-148",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-148-32cddb80",
+          "title": "Mutant survived: '<' -> '<=' at solution.py:25"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:20:compare-boundary:0",
+          "line": 25,
+          "oracle": "unconfirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 15,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-149",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 6,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-150",
+      "oracle_accepts_gold": false,
+      "oracle_gold_run": "exit code 1",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-150-102081be",
+          "title": "Mutant survived: constant 2 -> 3 at solution.py:15"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:22:constant-plus-one:0",
+          "line": 15,
+          "oracle": "no-oracle"
+        }
+      ]
+    },
+    {
+      "task": "he-151",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-151-d40ee9e3",
+          "title": "Mutant survived: '>' -> '>=' at solution.py:16"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:23:compare-boundary:0",
+          "line": 16,
+          "oracle": "unconfirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 12,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-152",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 2,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-153",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-153-a520d40a",
+          "title": "Mutant survived: 'and' -> 'or' at solution.py:22"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:87:boolop-swap:0",
+          "line": 22,
+          "oracle": "unconfirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 15,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-154",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-154-af8c6608",
+          "title": "Mutant survived: constant 1 -> 2 at solution.py:17"
+        },
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-154-94481225",
+          "title": "Mutant survived: '-' -> '+' at solution.py:16"
+        },
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-154-075a9601",
+          "title": "Mutant survived: '+' -> '-' at solution.py:18"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:51:constant-plus-one:0",
+          "line": 17,
+          "oracle": "unconfirmed"
+        },
+        {
+          "mutant": "solution.py:37:binop-swap:0",
+          "line": 16,
+          "oracle": "unconfirmed"
+        },
+        {
+          "mutant": "solution.py:73:binop-swap:0",
+          "line": 18,
+          "oracle": "unconfirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 12,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-155",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 12,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-156",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 24,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-157",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-157-1dd9c81d",
+          "title": "Mutant survived: '*' -> '/' at solution.py:14"
+        },
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-157-663d398e",
+          "title": "Mutant survived: '*' -> '/' at solution.py:14"
+        },
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-157-82cbcc6e",
+          "title": "Mutant survived: '+' -> '-' at solution.py:14"
+        },
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-157-24c7d4f0",
+          "title": "Mutant survived: '*' -> '/' at solution.py:14"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:32:binop-swap:0",
+          "line": 14,
+          "oracle": "confirmed"
+        },
+        {
+          "mutant": "solution.py:34:binop-swap:0",
+          "line": 14,
+          "oracle": "confirmed"
+        },
+        {
+          "mutant": "solution.py:19:binop-swap:0",
+          "line": 14,
+          "oracle": "confirmed"
+        },
+        {
+          "mutant": "solution.py:17:binop-swap:0",
+          "line": 14,
+          "oracle": "confirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 17,
+        "base_pass_oracle_fail": 4
+      }
+    },
+    {
+      "task": "he-158",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 2,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-159",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-159-7942081f",
+          "title": "Mutant survived: '<=' -> '<' at solution.py:33"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:9:compare-boundary:0",
+          "line": 33,
+          "oracle": "unconfirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 9,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-160",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 5,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-161",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-161-94027f25",
+          "title": "Mutant survived: constant 1 -> 2 at solution.py:21"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:62:constant-plus-one:0",
+          "line": 21,
+          "oracle": "unconfirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 13,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-162",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [],
+      "survivors": [],
+      "exhaustive": {
+        "mutants": 2,
+        "base_pass_oracle_fail": 0
+      }
+    },
+    {
+      "task": "he-163",
+      "oracle_accepts_gold": true,
+      "oracle_gold_run": "exit code 0",
+      "findings": [
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-163-d9146351",
+          "title": "Mutant survived: constant 1 -> 2 at solution.py:17"
+        },
+        {
+          "check_id": "C004",
+          "severity": "info",
+          "id": "C004-he-163-b84d49d2",
+          "title": "Mutant survived: constant 8 -> 9 at solution.py:15"
+        }
+      ],
+      "survivors": [
+        {
+          "mutant": "solution.py:54:constant-plus-one:0",
+          "line": 17,
+          "oracle": "confirmed"
+        },
+        {
+          "mutant": "solution.py:21:constant-plus-one:0",
+          "line": 15,
+          "oracle": "unconfirmed"
+        }
+      ],
+      "exhaustive": {
+        "mutants": 9,
+        "base_pass_oracle_fail": 1
+      }
+    }
+  ]
+}

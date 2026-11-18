@@ -40,7 +40,13 @@ packages = ["src/aethens"]
 line-length = 100
 target-version = "py311"
 src = ["src", "tests"]
-extend-exclude = ["bench/tasks", "tests/fixtures"]
+extend-exclude = [
+  "bench/tasks",
+  "tests/fixtures",
+  "bench/external/sample",
+  "bench/external/full",
+  "bench/external/data",
+]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "S", "SIM", "RUF"]
@@ -52,7 +58,17 @@ ignore = ["S101"]
 [tool.mypy]
 strict = true
 python_version = "3.11"
-files = ["src", "tests", "bench/run_bench.py", "bench/render_readme.py"]
+files = [
+  "src",
+  "tests",
+  "bench/run_bench.py",
+  "bench/render_readme.py",
+  "bench/external/fetch.py",
+  "bench/external/convert.py",
+  "bench/external/run_external.py",
+  "bench/external/render_external.py",
+]
+mypy_path = ["bench/external"]
 exclude = ["tests/fixtures/"]
 
 [[tool.mypy.overrides]]

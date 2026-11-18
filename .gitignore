@@ -9,3 +9,5 @@ build/
 *.egg-info/
 .coverage
 audits/private/
+bench/external/data/
+bench/external/full/

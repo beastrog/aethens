@@ -55,6 +55,12 @@ anyway, so this does not change task isolation). `docker run --rm hello-world` w
   seeded shuffles, each test alone; same PYTHONHASHSEED; changes must reproduce). Bench 26 tasks
   (10 controls, 16 defective): precision 1.0, recall 1.0 (16/16), 0 false positives, seed 0,
   standard. Before D1: precision 1.0, recall 0.8571 (12/14) on 22 tasks.
+- D2 DONE_LOCAL: external bench on 164 HumanEval tasks (MIT) with EvalPlus HumanEval+
+  (Apache-2.0) as the outside oracle; full results in docs/EXTERNAL_BENCH.md (C004 confirmed-
+  survivor precision 0.4615 = 36/78, recall 0.8387 against oracle-detected weak tests; C001 and
+  C005 0 loud findings; C002 1 timing warning on he-063; 20 tasks have no usable oracle). The
+  6-task vendored sample runs offline in `make check` with a regression gate. The full run is
+  local only (needs a one-time pinned download; about 17 minutes with 4 workers).
 
 ## Next (owner actions; the agent stops after B7)
 - Fresh-session hardening review (Prompt 3 in docs/BUILD_PROMPTS.md). NOT done: B7's acceptance

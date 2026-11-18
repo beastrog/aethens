@@ -172,3 +172,30 @@ CI installs uv with `pip install uv==0.13.7` instead of a third-party setup acti
 - D-048 (D1) Bench: order-alphabetical and order-generated now expect C005 (they are
   order-dependence defects; order-generated was a seed-dependent C002 miss). Added order-crossmodule,
   order-classfixture and the controls ctrl-order-cache and ctrl-order-shared-readonly.
+- D-049 (D2) External bench data: HumanEval (MIT, commit b9453e8f) for tasks and HumanEval+
+  (EvalPlus, Apache-2.0, HF revision d32357cf) as an outside oracle. Downloads are pinned by URL and
+  sha256 (`bench/external/fetch.py`); only 6 converted tasks are vendored, each file with an
+  attribution header (AGENTS.md rule 11). ImpossibleBench skipped (data licence not stated, no
+  reference solutions, SWE split needs networked images); MBPP+ deferred. No new dependency (stdlib
+  `urllib`, `gzip`, `json` only).
+- D-050 (D2) Conversion: gold = prompt + ORIGINAL canonical solution; tests = ORIGINAL base check,
+  one unittest method per assert when the check body is only asserts (so C005 has tests to
+  reorder), else one method calling `check`. Tests see every name the solution defines, matching
+  HumanEval's one-namespace harness (needed by HumanEval/32, whose test calls `poly`). timeout_s 20
+  (gold runs take under 1 s; mutants that loop forever would otherwise cost 60 s each). Oracle runs
+  get at least 60 s: a first full run with timeout 15 s and 6 workers saw load-induced timeouts.
+- D-051 (D2) EvalPlus's numpy-based `is_floats`/`assertion` helpers are replaced with a stdlib
+  equivalent (exact match, else `|out - exp| <= atol + 1e-7 * |exp|` element-wise, NaN equal NaN,
+  atol 1e-6 for float outputs) because the sandbox image has no numpy and runs have no network.
+  Not verified against numpy in every corner case.
+- D-052 (D2) Ground truth. C004: a survivor is confirmed when the HumanEval+ tests reject the same
+  mutant; precision = confirmed / survivors judged by the oracle. Recall (`--exhaustive`) is relative
+  to exhaustive mutation with Aethens' own operators: weak task = some mutant passes the base tests
+  and fails HumanEval+. C001/C002/C005/C006/C007 have no labels in the data: error/warning findings
+  are counted and listed as findings on presumed-clean tasks; no precision is claimed from zero
+  findings. Tasks whose original canonical solution fails HumanEval+ (EvalPlus fixed or
+  re-specified them, or it times out) cannot use the oracle and are listed.
+- D-053 (D2) `make bench` also runs the 6-task offline sample (`run_external.py --sample`), gated by
+  bench/external/sample-baseline.json (more error/warning findings, or lower C004 precision or
+  recall, fails). The full run is manual (about 15-20 minutes with 4 workers locally) and its results
+  file is committed.
