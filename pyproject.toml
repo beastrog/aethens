@@ -52,7 +52,7 @@ ignore = ["S101"]
 [tool.mypy]
 strict = true
 python_version = "3.11"
-files = ["src", "tests", "bench/run_bench.py"]
+files = ["src", "tests", "bench/run_bench.py", "bench/render_readme.py"]
 exclude = ["tests/fixtures/"]
 
 [[tool.mypy.overrides]]

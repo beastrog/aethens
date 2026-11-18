@@ -1,0 +1,36 @@
+name: I ran Aethens on X
+description: Tell us how it went on your own tasks, including false positives and misses.
+labels: [feedback]
+body:
+  - type: input
+    id: what
+    attributes:
+      label: What did you run it on?
+      description: A public benchmark, your own task set, or a description if it is private.
+    validations:
+      required: true
+  - type: input
+    id: scale
+    attributes:
+      label: Roughly how many tasks, and which budget?
+  - type: textarea
+    id: useful
+    attributes:
+      label: Findings that were real
+  - type: textarea
+    id: wrong
+    attributes:
+      label: Findings that were wrong (false positives)
+  - type: textarea
+    id: missed
+    attributes:
+      label: Problems it missed that you know about
+  - type: textarea
+    id: friction
+    attributes:
+      label: What got in the way (setup, task format, speed)?
+  - type: markdown
+    attributes:
+      value: >
+        Please do not name defects in other people's benchmarks here before their maintainers have
+        been told privately; see docs/DISCLOSURE.md.

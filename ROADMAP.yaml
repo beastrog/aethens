@@ -21,7 +21,7 @@ phases:
 
   - id: 1
     name: Build week (agent-driven, owner reviews at the gate)
-    status: IN_PROGRESS
+    status: IN_PROGRESS (B1-B6 DONE_LOCAL, B7 PARTIAL; gate G1 needs the owner)
     timebox: about 7 full-time days
     milestones:
       - id: B1
@@ -58,6 +58,7 @@ phases:
         day: 6
         description: GitHub Action (composite, pull_request only, read-only); README with CI-generated bench numbers and honest limits; SECURITY.md; CONTRIBUTING; issue templates incl. "I ran it on X"; docs/DISCLOSURE.md; release.yml using Trusted Publishing
         acceptance: Action tested on a sample repo; README claims all trace to the bench report; fresh-session hardening review done and its findings fixed or logged
+        status: PARTIAL (all other criteria verified locally; Action tested by running its steps locally, not on GitHub; fresh-session hardening review NOT done, it is an owner step; hosted CI not run)
     gate:
       id: G1
       pass: >

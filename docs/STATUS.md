@@ -1,6 +1,6 @@
 # Status
 
-Last updated: 2026-11-18 (Asia/Calcutta), after B6.
+Last updated: 2026-11-18 (Asia/Calcutta), after B7 (build week complete, local-only).
 
 ## Mode
 
@@ -42,9 +42,21 @@ anyway, so this does not change task isolation). `docker run --rm hello-world` w
   Bench (locally generated, seed 0, standard): precision 1.0, recall 0.8571 (12/14), 0 false positives.
   See bench/results.json and docs/sessions/B6.md.
 
-## Next
-- B7: GitHub Action, README with bench numbers, SECURITY, CONTRIBUTING, templates, DISCLOSURE,
-  release.yml.
+- B7: composite Action (action.yml) + action-selftest workflow, README (bench block generated from
+  bench/results.json), SECURITY.md, CONTRIBUTING.md, CODE_OF_CONDUCT.md, issue templates (bug,
+  "I ran Aethens on X"), docs/DISCLOSURE.md, release.yml (Trusted Publishing). Verified locally:
+  sdist and wheel build, `twine check --strict` passes, the README quickstart works exactly as
+  written from a fresh clone and virtualenv, and the Action's shell steps (run with GitHub's
+  `bash --noprofile --norc -eo pipefail`) give exit 0 on a clean sample repo, 1 with the report in the
+  job summary on a defective one, and 2 on a bad path.
+
+## Next (owner actions; the agent stops after B7)
+- Fresh-session hardening review (Prompt 3 in docs/BUILD_PROMPTS.md). NOT done: B7's acceptance
+  criterion "fresh-session hardening review done" is therefore open, and B7 is marked PARTIAL.
+- Create the GitHub repo (private), push, let CI and action-selftest run on a PR, confirm the
+  bench-results artifact matches bench/results.json.
+- Confirm exit code 3 semantics (D-032) and the agent-chosen limits (D-008, D-013).
+- Terms check, README cold read, PyPI trusted publisher, release, flip public.
 
 ## Open risks
 - Exit code 3 semantics are an agent decision (D-032); the owner should confirm.
@@ -53,6 +65,8 @@ anyway, so this does not change task isolation). `docker run --rm hello-world` w
 - Hosted CI has never run; the workflow file is only checked by running its commands locally.
 
 ## Not verified
+- The Action and both workflows on GitHub-hosted runners; release.yml and Trusted Publishing end to end.
+- Security contact: SECURITY.md points to GitHub private vulnerability reporting, which the owner must enable.
 - Rootless Docker, Docker Desktop (macOS/Windows), Podman. Local mode's RLIMIT_AS is not enforced on macOS.
 - The build box's dockerd runs with `--iptables=false`; on hosts with iptables the bridge network exists
   but runs still use `--network none`.

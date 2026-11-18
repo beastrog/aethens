@@ -1,0 +1,31 @@
+name: Bug report
+description: Aethens crashed, gave a wrong exit code, or reported something it should not have.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: Include the command you ran and the output. Do not paste secrets.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: aethens --version
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: OS, Docker version, Python version
+  - type: textarea
+    id: repro
+    attributes:
+      label: Smallest task directory that reproduces it (if you can share one)

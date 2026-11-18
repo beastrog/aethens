@@ -126,3 +126,18 @@ CI installs uv with `pip install uv==0.13.7` instead of a third-party setup acti
   (actions/upload-artifact v7.0.2 `cf430e030ddbb5b0abf93d22962f4752f3646cd9`).
 - D-037 (B6) The bench includes a planted defect no v0.1 check can catch (order-alphabetical) so
   recall is not inflated by only planting what the tool can see.
+- D-038 (B7) The composite Action installs Aethens from its own checkout (`pip install
+  $GITHUB_ACTION_PATH`), pulls the images listed in its `images` input (runs use `--pull never`),
+  writes the Markdown report to the job summary and exposes `exit-code`. Inputs reach scripts only via
+  `env:` (no `${{ }}` inside `run:`), to prevent script injection. The Audit step starts with `set +e`
+  because GitHub runs bash with `-e` (found by simulating the step with GitHub's exact bash flags).
+- D-039 (B7) README bench numbers are inserted by `bench/render_readme.py` from bench/results.json,
+  and a test fails if the README block is stale (AGENTS.md rule 6).
+- D-040 (B7) release.yml: build job (contents: read) builds with build 1.6.1 and checks with
+  twine 7.0.0 --strict; publish job alone has `id-token: write` and uses
+  pypa/gh-action-pypi-publish v1.14.3 (`7245906fb61fa33a13554f9d5fb856fe61758086`) in a `pypi`
+  environment. actions/download-artifact v8.0.2 `9000827ccba6bdab643e8b6fd33ac0654aef8333`.
+  build and twine are pinned in the workflow only; locally they were run with `uvx`, so they are not
+  project dependencies.
+- D-041 (B7) The code of conduct is short original text that links to the Contributor Covenant rather
+  than copying it.

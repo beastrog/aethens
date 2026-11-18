@@ -11,3 +11,4 @@ All notable changes are recorded here. The format follows Keep a Changelog; vers
 - B4: checks C001 (gold sanity) and C002 (flakiness), minimal `aethens audit` (JSON), first bench fixtures with manifest.
 - B5: checks C003 (labeled candidates, label_source aware) and C004 (AST mutation probes, info only); bench grows to 15 tasks.
 - B6: aethens-report/v1 JSON Schema, Markdown reports, full `aethens audit` CLI with exit codes 0/1/2/3, bench runner with precision/recall and a baseline regression gate; bench grows to 22 tasks.
+- B7: composite GitHub Action, README with generated bench numbers and limits, SECURITY, CONTRIBUTING, CODE_OF_CONDUCT, issue templates, disclosure policy, release workflow with Trusted Publishing.
