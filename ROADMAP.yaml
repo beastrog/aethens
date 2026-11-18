@@ -4,8 +4,8 @@ note: >
   28 Oct 2026. Open source only (Apache-2.0). Build v0.1 in about a week of full-time agent-driven work
   (2-3 weeks at 12-15 h/week), then let evidence decide. Spelling Aethens vs Athens pending the owner.
   All numeric thresholds are the owner's hypotheses and may be changed BEFORE looking at data.
-current_phase: 0
-global_status: PLANNING
+current_phase: 1
+global_status: BUILDING (local-only mode, hosted CI not run)
 
 phases:
   - id: 0
@@ -21,13 +21,14 @@ phases:
 
   - id: 1
     name: Build week (agent-driven, owner reviews at the gate)
-    status: NOT_STARTED
+    status: IN_PROGRESS
     timebox: about 7 full-time days
     milestones:
       - id: B1
         day: 1
         description: repo skeleton, pyproject, Makefile with make check, CI, LICENSE, typed models (Task, Candidate, Finding, Report), errors, schema tests, STATUS.md, DECISIONS.md
         acceptance: make check green locally and in CI; models round-trip through JSON; mypy --strict clean
+        status: DONE (local make check green on py3.11/3.12/3.13; hosted CI not run)
       - id: B2
         day: 1
         description: aethens-task/v1 loader and validator (task.yaml, starter, tests, gold, labeled candidate overlay dirs with label_source)

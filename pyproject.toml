@@ -1,0 +1,58 @@
+[build-system]
+requires = ["hatchling>=1.33"]
+build-backend = "hatchling.build"
+
+[project]
+name = "aethens"
+version = "0.1.0.dev0"
+description = "Validate the verifiers of code tasks by running them: accept correct, reject wrong, same result every run."
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+requires-python = ">=3.11"
+authors = [{ name = "Aethens contributors" }]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Software Development :: Testing",
+  "Typing :: Typed",
+]
+dependencies = []
+
+[project.scripts]
+aethens = "aethens.cli:main"
+
+[dependency-groups]
+dev = [
+  "ruff==0.17.5",
+  "mypy==2.4.1",
+  "pytest==9.2.0",
+  "jsonschema==4.26.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/aethens"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "S", "SIM", "RUF"]
+ignore = ["S101"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S603", "S607", "S108"]
+
+[tool.mypy]
+strict = true
+python_version = "3.11"
+files = ["src", "tests"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+markers = ["docker: needs a working Docker daemon and the python:3.12-slim image"]
