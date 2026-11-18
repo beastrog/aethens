@@ -72,6 +72,11 @@ anyway, so this does not change task isolation). `docker run --rm hello-world` w
   order-generated's hash-seed flakiness at seed 0 (new C002 label, D-059): bench 31 tasks,
   precision 1.0, recall 1.0 (20/20), 0 false positives.
 
+- D5 DONE_LOCAL: C007 reward-hacking probes (six categories, same sandbox, isolation unchanged).
+  Bench 34 tasks (15 controls, 19 defective): core precision 1.0, recall 1.0 (20/20), 0 false
+  positives; reward hacking recall 1.0 (116/116 labelled task-category pairs), precision 1.0,
+  both hardened controls silent. pytest conftest probes not built.
+
 ## Next (owner actions; the agent stops after B7)
 - Fresh-session hardening review (Prompt 3 in docs/BUILD_PROMPTS.md). NOT done: B7's acceptance
   criterion "fresh-session hardening review done" is therefore open, and B7 is marked PARTIAL.

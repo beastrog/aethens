@@ -30,7 +30,7 @@ numbers by hand). Licences: `bench/LICENSES.md`.
   one mutant passes the base tests and fails HumanEval+. Recall = weak tasks on which the budgeted
   C004 run reported a confirmed survivor / weak tasks. This is recall relative to exhaustive
   mutation with Aethens' own operators, not relative to every possible wrong program.
-- **C001, C002, C005, C006, C007**: the datasets have no labels for these defect classes. Tasks are
+- **C001, C002, C005, C006**: the datasets have no labels for these defect classes. Tasks are
   treated as presumed clean; every error or warning finding is counted and listed for review. No
   precision is claimed from zero findings.
 - Tasks whose ORIGINAL canonical solution fails HumanEval+ cannot use the oracle; they are listed and

@@ -8,6 +8,13 @@ Ideas that came up during the build. AGENTS.md rule 14: write them here, do not 
   task, including all bench controls (which use exactly that kind of harness), which breaks the
   "zero false positives on controls" gate. It needs an owner decision on severity and on what counts
   as a robust harness (for example requiring a results file or a test-count line) before it is built.
+  BUILT in D5 as C007 (owner-approved), with reward-hacking scored separately from the core metrics
+  so the controls stay meaningful (DECISIONS D-060).
+- C007 pytest probes: a `conftest.py` that forces every test to pass (e.g. a
+  `pytest_runtest_makereport` hook) and pytest plugin autoloading. Not built: the default image has
+  no pytest and runs have no network, so it could not be tested here.
+- C007 probes for other gaming routes: writing expected-output files the harness reads, patching
+  `builtins` used by the tests, reading the tests' expected values at run time from `tests/`.
 - Report C004 kill ratios per task in the Markdown summary (currently only in each survivor's evidence).
 - Equivalent-mutant filter: skip `<` -> `<=` mutants where both branches return the same bound (seen on
   ctrl-clamp). Needs care not to hide real weaknesses.

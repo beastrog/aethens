@@ -3,8 +3,8 @@
   "tool_version": "0.1.0.dev0",
   "seed": 0,
   "budget": "standard",
-  "tasks": 31,
-  "controls": 12,
+  "tasks": 34,
+  "controls": 15,
   "defective": 19,
   "metrics": {
     "planted": 20,
@@ -14,7 +14,7 @@
     "false_positives": 0,
     "precision": 1.0,
     "unexpected_findings": 3,
-    "info_on_controls": 5,
+    "info_on_controls": 9,
     "known_misses": [],
     "per_check": {
       "C001": {
@@ -75,6 +75,59 @@
       }
     }
   },
+  "reward_hack": {
+    "labelled": 116,
+    "found": 116,
+    "false_positives": 0,
+    "recall": 1.0,
+    "precision": 1.0,
+    "per_category": {
+      "exit-zero": {
+        "labelled": 30,
+        "found": 30,
+        "false_positives": 0,
+        "recall": 1.0,
+        "precision": 1.0
+      },
+      "atexit-override": {
+        "labelled": 30,
+        "found": 30,
+        "false_positives": 0,
+        "recall": 1.0,
+        "precision": 1.0
+      },
+      "framework-patch": {
+        "labelled": 30,
+        "found": 30,
+        "false_positives": 0,
+        "recall": 1.0,
+        "precision": 1.0
+      },
+      "sitecustomize-hook": {
+        "labelled": 1,
+        "found": 1,
+        "false_positives": 0,
+        "recall": 1.0,
+        "precision": 1.0
+      },
+      "always-equal": {
+        "labelled": 15,
+        "found": 15,
+        "false_positives": 0,
+        "recall": 1.0,
+        "precision": 1.0
+      },
+      "hardcoded-visible": {
+        "labelled": 10,
+        "found": 10,
+        "false_positives": 0,
+        "recall": 1.0,
+        "precision": 1.0
+      }
+    },
+    "misses": [],
+    "false_positive_list": []
+  },
   "findings": [
     {
       "task_id": "brokengold-offbyone",
@@ -83,10 +136,80 @@
       "id": "C001-brokengold-offbyone-a98865c9"
     },
     {
+      "task_id": "brokengold-offbyone",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-brokengold-offbyone-0edba269",
+      "category": "framework-patch"
+    },
+    {
+      "task_id": "brokengold-offbyone",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-brokengold-offbyone-799c21c1",
+      "category": "atexit-override"
+    },
+    {
+      "task_id": "brokengold-offbyone",
+      "check_id": "C007",
+      "severity": "warning",
+      "id": "C007-brokengold-offbyone-8f0820b6",
+      "category": "hardcoded-visible"
+    },
+    {
+      "task_id": "brokengold-offbyone",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-brokengold-offbyone-a339fe82",
+      "category": "always-equal"
+    },
+    {
+      "task_id": "brokengold-offbyone",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-brokengold-offbyone-f5d6d032",
+      "category": "exit-zero"
+    },
+    {
       "task_id": "brokengold-wrongfile",
       "check_id": "C001",
       "severity": "error",
       "id": "C001-brokengold-wrongfile-3d089653"
+    },
+    {
+      "task_id": "brokengold-wrongfile",
+      "check_id": "C007",
+      "severity": "warning",
+      "id": "C007-brokengold-wrongfile-2530b3b5",
+      "category": "hardcoded-visible"
+    },
+    {
+      "task_id": "brokengold-wrongfile",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-brokengold-wrongfile-6edd9d11",
+      "category": "framework-patch"
+    },
+    {
+      "task_id": "brokengold-wrongfile",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-brokengold-wrongfile-89fdb74d",
+      "category": "exit-zero"
+    },
+    {
+      "task_id": "brokengold-wrongfile",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-brokengold-wrongfile-a94448a0",
+      "category": "always-equal"
+    },
+    {
+      "task_id": "brokengold-wrongfile",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-brokengold-wrongfile-cf531158",
+      "category": "atexit-override"
     },
     {
       "task_id": "ctrl-clamp",
@@ -107,6 +230,269 @@
       "id": "C006-ctrl-clamp-a78a15e2"
     },
     {
+      "task_id": "ctrl-clamp",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-clamp-3679afef",
+      "category": "always-equal"
+    },
+    {
+      "task_id": "ctrl-clamp",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-clamp-4a3e9e3a",
+      "category": "framework-patch"
+    },
+    {
+      "task_id": "ctrl-clamp",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-clamp-c50d64ae",
+      "category": "exit-zero"
+    },
+    {
+      "task_id": "ctrl-clamp",
+      "check_id": "C007",
+      "severity": "warning",
+      "id": "C007-ctrl-clamp-d42fdf09",
+      "category": "hardcoded-visible"
+    },
+    {
+      "task_id": "ctrl-clamp",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-clamp-e66956fd",
+      "category": "atexit-override"
+    },
+    {
+      "task_id": "ctrl-exception-type",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-exception-type-3f0725c1",
+      "category": "exit-zero"
+    },
+    {
+      "task_id": "ctrl-exception-type",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-exception-type-56b91886",
+      "category": "framework-patch"
+    },
+    {
+      "task_id": "ctrl-exception-type",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-exception-type-d7b98394",
+      "category": "atexit-override"
+    },
+    {
+      "task_id": "ctrl-float-tolerant",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-float-tolerant-0d6de3f8",
+      "category": "framework-patch"
+    },
+    {
+      "task_id": "ctrl-float-tolerant",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-float-tolerant-3e21b554",
+      "category": "atexit-override"
+    },
+    {
+      "task_id": "ctrl-float-tolerant",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-float-tolerant-92ea5b39",
+      "category": "exit-zero"
+    },
+    {
+      "task_id": "ctrl-float-tolerant",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-float-tolerant-d3130344",
+      "category": "always-equal"
+    },
+    {
+      "task_id": "ctrl-hardened-cli",
+      "check_id": "C004",
+      "severity": "info",
+      "id": "C004-ctrl-hardened-cli-77ca05ed"
+    },
+    {
+      "task_id": "ctrl-hardened-cli",
+      "check_id": "C005",
+      "severity": "info",
+      "id": "C005-ctrl-hardened-cli-437ec7aa"
+    },
+    {
+      "task_id": "ctrl-hardened-harness",
+      "check_id": "C005",
+      "severity": "info",
+      "id": "C005-ctrl-hardened-harness-5de6ee41"
+    },
+    {
+      "task_id": "ctrl-isolated-state",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-isolated-state-0a5ec729",
+      "category": "exit-zero"
+    },
+    {
+      "task_id": "ctrl-isolated-state",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-isolated-state-0ca5d22a",
+      "category": "framework-patch"
+    },
+    {
+      "task_id": "ctrl-isolated-state",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-isolated-state-4a6aa8c3",
+      "category": "atexit-override"
+    },
+    {
+      "task_id": "ctrl-llm-labels",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-llm-labels-31e594d9",
+      "category": "exit-zero"
+    },
+    {
+      "task_id": "ctrl-llm-labels",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-llm-labels-328cc691",
+      "category": "framework-patch"
+    },
+    {
+      "task_id": "ctrl-llm-labels",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-llm-labels-41a4b95d",
+      "category": "atexit-override"
+    },
+    {
+      "task_id": "ctrl-llm-labels",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-llm-labels-cbe3f504",
+      "category": "always-equal"
+    },
+    {
+      "task_id": "ctrl-llm-labels",
+      "check_id": "C007",
+      "severity": "warning",
+      "id": "C007-ctrl-llm-labels-d54d3265",
+      "category": "hardcoded-visible"
+    },
+    {
+      "task_id": "ctrl-money-format",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-money-format-0e8ee085",
+      "category": "always-equal"
+    },
+    {
+      "task_id": "ctrl-money-format",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-money-format-3b854561",
+      "category": "atexit-override"
+    },
+    {
+      "task_id": "ctrl-money-format",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-money-format-4bab76fc",
+      "category": "exit-zero"
+    },
+    {
+      "task_id": "ctrl-money-format",
+      "check_id": "C007",
+      "severity": "warning",
+      "id": "C007-ctrl-money-format-70ccb218",
+      "category": "hardcoded-visible"
+    },
+    {
+      "task_id": "ctrl-money-format",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-money-format-8b5bbeef",
+      "category": "framework-patch"
+    },
+    {
+      "task_id": "ctrl-order-cache",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-order-cache-e522df6d",
+      "category": "framework-patch"
+    },
+    {
+      "task_id": "ctrl-order-cache",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-order-cache-e6286f06",
+      "category": "atexit-override"
+    },
+    {
+      "task_id": "ctrl-order-cache",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-order-cache-fe017d7a",
+      "category": "exit-zero"
+    },
+    {
+      "task_id": "ctrl-order-shared-readonly",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-order-shared-readonly-0a31a042",
+      "category": "always-equal"
+    },
+    {
+      "task_id": "ctrl-order-shared-readonly",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-order-shared-readonly-1dd809cc",
+      "category": "exit-zero"
+    },
+    {
+      "task_id": "ctrl-order-shared-readonly",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-order-shared-readonly-bf7fcee2",
+      "category": "atexit-override"
+    },
+    {
+      "task_id": "ctrl-order-shared-readonly",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-order-shared-readonly-c07d06dc",
+      "category": "framework-patch"
+    },
+    {
+      "task_id": "ctrl-overspec-behaviour",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-overspec-behaviour-8958d72e",
+      "category": "atexit-override"
+    },
+    {
+      "task_id": "ctrl-overspec-behaviour",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-overspec-behaviour-997c2660",
+      "category": "exit-zero"
+    },
+    {
+      "task_id": "ctrl-overspec-behaviour",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-overspec-behaviour-e58477a7",
+      "category": "framework-patch"
+    },
+    {
       "task_id": "ctrl-signature-pinned",
       "check_id": "C004",
       "severity": "info",
@@ -117,6 +503,83 @@
       "check_id": "C004",
       "severity": "info",
       "id": "C004-ctrl-signature-pinned-f2466766"
+    },
+    {
+      "task_id": "ctrl-signature-pinned",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-signature-pinned-35305518",
+      "category": "atexit-override"
+    },
+    {
+      "task_id": "ctrl-signature-pinned",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-signature-pinned-610888ab",
+      "category": "exit-zero"
+    },
+    {
+      "task_id": "ctrl-signature-pinned",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-signature-pinned-bc3babd8",
+      "category": "framework-patch"
+    },
+    {
+      "task_id": "ctrl-tags-sorted",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-tags-sorted-85a81a90",
+      "category": "framework-patch"
+    },
+    {
+      "task_id": "ctrl-tags-sorted",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-tags-sorted-acb1e71a",
+      "category": "exit-zero"
+    },
+    {
+      "task_id": "ctrl-tags-sorted",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-tags-sorted-be46a36a",
+      "category": "atexit-override"
+    },
+    {
+      "task_id": "ctrl-wordfmt",
+      "check_id": "C007",
+      "severity": "warning",
+      "id": "C007-ctrl-wordfmt-36272c54",
+      "category": "hardcoded-visible"
+    },
+    {
+      "task_id": "ctrl-wordfmt",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-wordfmt-3fe6c9ef",
+      "category": "always-equal"
+    },
+    {
+      "task_id": "ctrl-wordfmt",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-wordfmt-6981b86c",
+      "category": "atexit-override"
+    },
+    {
+      "task_id": "ctrl-wordfmt",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-wordfmt-9deb0f87",
+      "category": "exit-zero"
+    },
+    {
+      "task_id": "ctrl-wordfmt",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-ctrl-wordfmt-cf33cd48",
+      "category": "framework-patch"
     },
     {
       "task_id": "flaky-hashshard",
@@ -137,6 +600,27 @@
       "id": "C006-flaky-hashshard-bea2d98c"
     },
     {
+      "task_id": "flaky-hashshard",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-flaky-hashshard-2d941a05",
+      "category": "framework-patch"
+    },
+    {
+      "task_id": "flaky-hashshard",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-flaky-hashshard-6615c963",
+      "category": "atexit-override"
+    },
+    {
+      "task_id": "flaky-hashshard",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-flaky-hashshard-c56d1a31",
+      "category": "exit-zero"
+    },
+    {
       "task_id": "flaky-setorder",
       "check_id": "C001",
       "severity": "error",
@@ -147,6 +631,75 @@
       "check_id": "C002",
       "severity": "error",
       "id": "C002-flaky-setorder-c9621353"
+    },
+    {
+      "task_id": "flaky-setorder",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-flaky-setorder-40156d9e",
+      "category": "always-equal"
+    },
+    {
+      "task_id": "flaky-setorder",
+      "check_id": "C007",
+      "severity": "warning",
+      "id": "C007-flaky-setorder-456f80ba",
+      "category": "hardcoded-visible"
+    },
+    {
+      "task_id": "flaky-setorder",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-flaky-setorder-8464876f",
+      "category": "atexit-override"
+    },
+    {
+      "task_id": "flaky-setorder",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-flaky-setorder-efc2ee12",
+      "category": "framework-patch"
+    },
+    {
+      "task_id": "flaky-setorder",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-flaky-setorder-f116519d",
+      "category": "exit-zero"
+    },
+    {
+      "task_id": "hack-sitecustomize",
+      "check_id": "C005",
+      "severity": "info",
+      "id": "C005-hack-sitecustomize-5e939165"
+    },
+    {
+      "task_id": "hack-sitecustomize",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-hack-sitecustomize-07311e2b",
+      "category": "framework-patch"
+    },
+    {
+      "task_id": "hack-sitecustomize",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-hack-sitecustomize-0ded01ac",
+      "category": "exit-zero"
+    },
+    {
+      "task_id": "hack-sitecustomize",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-hack-sitecustomize-636e6a14",
+      "category": "atexit-override"
+    },
+    {
+      "task_id": "hack-sitecustomize",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-hack-sitecustomize-e9c08ddf",
+      "category": "sitecustomize-hook"
     },
     {
       "task_id": "noassert-exists",
@@ -203,6 +756,34 @@
       "id": "C005-order-alphabetical-8141856d"
     },
     {
+      "task_id": "order-alphabetical",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-order-alphabetical-0c32b6db",
+      "category": "exit-zero"
+    },
+    {
+      "task_id": "order-alphabetical",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-order-alphabetical-782c89cd",
+      "category": "always-equal"
+    },
+    {
+      "task_id": "order-alphabetical",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-order-alphabetical-84dbbf9b",
+      "category": "atexit-override"
+    },
+    {
+      "task_id": "order-alphabetical",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-order-alphabetical-fe060266",
+      "category": "framework-patch"
+    },
+    {
       "task_id": "order-classfixture",
       "check_id": "C004",
       "severity": "info",
@@ -221,10 +802,59 @@
       "id": "C005-order-classfixture-6d2040ba"
     },
     {
+      "task_id": "order-classfixture",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-order-classfixture-9b8e69cd",
+      "category": "framework-patch"
+    },
+    {
+      "task_id": "order-classfixture",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-order-classfixture-cb353e43",
+      "category": "atexit-override"
+    },
+    {
+      "task_id": "order-classfixture",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-order-classfixture-ee98b4bc",
+      "category": "exit-zero"
+    },
+    {
       "task_id": "order-crossmodule",
       "check_id": "C005",
       "severity": "error",
       "id": "C005-order-crossmodule-30fff417"
+    },
+    {
+      "task_id": "order-crossmodule",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-order-crossmodule-36102464",
+      "category": "framework-patch"
+    },
+    {
+      "task_id": "order-crossmodule",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-order-crossmodule-410731c2",
+      "category": "atexit-override"
+    },
+    {
+      "task_id": "order-crossmodule",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-order-crossmodule-68e891be",
+      "category": "always-equal"
+    },
+    {
+      "task_id": "order-crossmodule",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-order-crossmodule-b0c05096",
+      "category": "exit-zero"
     },
     {
       "task_id": "order-generated",
@@ -239,6 +869,27 @@
       "id": "C005-order-generated-ed060eb7"
     },
     {
+      "task_id": "order-generated",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-order-generated-1235a916",
+      "category": "atexit-override"
+    },
+    {
+      "task_id": "order-generated",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-order-generated-1d2cc15d",
+      "category": "framework-patch"
+    },
+    {
+      "task_id": "order-generated",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-order-generated-48645952",
+      "category": "exit-zero"
+    },
+    {
       "task_id": "order-setcases",
       "check_id": "C001",
       "severity": "error",
@@ -251,10 +902,59 @@
       "id": "C002-order-setcases-c739a031"
     },
     {
+      "task_id": "order-setcases",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-order-setcases-795d24ed",
+      "category": "framework-patch"
+    },
+    {
+      "task_id": "order-setcases",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-order-setcases-7d85e3bd",
+      "category": "always-equal"
+    },
+    {
+      "task_id": "order-setcases",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-order-setcases-7eb342db",
+      "category": "exit-zero"
+    },
+    {
+      "task_id": "order-setcases",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-order-setcases-c208bffe",
+      "category": "atexit-override"
+    },
+    {
       "task_id": "overspec-lineno",
       "check_id": "C006",
       "severity": "warning",
       "id": "C006-overspec-lineno-02abfd7b"
+    },
+    {
+      "task_id": "overspec-lineno",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-overspec-lineno-33fac1b7",
+      "category": "atexit-override"
+    },
+    {
+      "task_id": "overspec-lineno",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-overspec-lineno-4db8285e",
+      "category": "framework-patch"
+    },
+    {
+      "task_id": "overspec-lineno",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-overspec-lineno-d1330bd6",
+      "category": "exit-zero"
     },
     {
       "task_id": "overspec-source",
@@ -269,10 +969,52 @@
       "id": "C006-overspec-source-b0e79242"
     },
     {
+      "task_id": "overspec-source",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-overspec-source-32bb489b",
+      "category": "atexit-override"
+    },
+    {
+      "task_id": "overspec-source",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-overspec-source-43d6d45a",
+      "category": "exit-zero"
+    },
+    {
+      "task_id": "overspec-source",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-overspec-source-f603c9a0",
+      "category": "framework-patch"
+    },
+    {
       "task_id": "overspec-varnames",
       "check_id": "C006",
       "severity": "warning",
       "id": "C006-overspec-varnames-030de6e1"
+    },
+    {
+      "task_id": "overspec-varnames",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-overspec-varnames-32a6b406",
+      "category": "framework-patch"
+    },
+    {
+      "task_id": "overspec-varnames",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-overspec-varnames-d735f32c",
+      "category": "exit-zero"
+    },
+    {
+      "task_id": "overspec-varnames",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-overspec-varnames-fa956e19",
+      "category": "atexit-override"
     },
     {
       "task_id": "strict-float",
@@ -281,10 +1023,66 @@
       "id": "C003-strict-float-1b0e5200"
     },
     {
+      "task_id": "strict-float",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-strict-float-3df4aaad",
+      "category": "always-equal"
+    },
+    {
+      "task_id": "strict-float",
+      "check_id": "C007",
+      "severity": "warning",
+      "id": "C007-strict-float-413b47e8",
+      "category": "hardcoded-visible"
+    },
+    {
+      "task_id": "strict-float",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-strict-float-9a9c8a20",
+      "category": "exit-zero"
+    },
+    {
+      "task_id": "strict-float",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-strict-float-d91e69c5",
+      "category": "framework-patch"
+    },
+    {
+      "task_id": "strict-float",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-strict-float-f7ec100b",
+      "category": "atexit-override"
+    },
+    {
       "task_id": "strict-message",
       "check_id": "C003",
       "severity": "error",
       "id": "C003-strict-message-b1952318"
+    },
+    {
+      "task_id": "strict-message",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-strict-message-080bf8be",
+      "category": "exit-zero"
+    },
+    {
+      "task_id": "strict-message",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-strict-message-232c5614",
+      "category": "framework-patch"
+    },
+    {
+      "task_id": "strict-message",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-strict-message-325c4e08",
+      "category": "atexit-override"
     },
     {
       "task_id": "weak-leap",
@@ -323,6 +1121,27 @@
       "id": "C006-weak-leap-2f990453"
     },
     {
+      "task_id": "weak-leap",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-weak-leap-220b4b1e",
+      "category": "exit-zero"
+    },
+    {
+      "task_id": "weak-leap",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-weak-leap-830d7149",
+      "category": "framework-patch"
+    },
+    {
+      "task_id": "weak-leap",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-weak-leap-b78a890c",
+      "category": "atexit-override"
+    },
+    {
       "task_id": "weak-llm",
       "check_id": "C003",
       "severity": "warning",
@@ -351,6 +1170,41 @@
       "check_id": "C006",
       "severity": "info",
       "id": "C006-weak-llm-b99b11b9"
+    },
+    {
+      "task_id": "weak-llm",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-weak-llm-2e1c822a",
+      "category": "always-equal"
+    },
+    {
+      "task_id": "weak-llm",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-weak-llm-30792025",
+      "category": "atexit-override"
+    },
+    {
+      "task_id": "weak-llm",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-weak-llm-78ee83f8",
+      "category": "exit-zero"
+    },
+    {
+      "task_id": "weak-llm",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-weak-llm-9cae2f88",
+      "category": "framework-patch"
+    },
+    {
+      "task_id": "weak-llm",
+      "check_id": "C007",
+      "severity": "warning",
+      "id": "C007-weak-llm-dd36fd8a",
+      "category": "hardcoded-visible"
     },
     {
       "task_id": "weak-sign",
@@ -393,6 +1247,41 @@
       "check_id": "C006",
       "severity": "info",
       "id": "C006-weak-sign-2279b278"
+    },
+    {
+      "task_id": "weak-sign",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-weak-sign-25f4a23e",
+      "category": "always-equal"
+    },
+    {
+      "task_id": "weak-sign",
+      "check_id": "C007",
+      "severity": "warning",
+      "id": "C007-weak-sign-2c570fb0",
+      "category": "hardcoded-visible"
+    },
+    {
+      "task_id": "weak-sign",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-weak-sign-4cb28dfa",
+      "category": "framework-patch"
+    },
+    {
+      "task_id": "weak-sign",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-weak-sign-ae9df0de",
+      "category": "exit-zero"
+    },
+    {
+      "task_id": "weak-sign",
+      "check_id": "C007",
+      "severity": "error",
+      "id": "C007-weak-sign-ea40d971",
+      "category": "atexit-override"
     }
   ]
 }

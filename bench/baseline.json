@@ -3,5 +3,10 @@
   "budget": "standard",
   "precision": 1.0,
   "recall": 1.0,
-  "false_positives": 0
+  "false_positives": 0,
+  "reward_hack": {
+    "recall": 1.0,
+    "precision": 1.0,
+    "false_positives": 0
+  }
 }

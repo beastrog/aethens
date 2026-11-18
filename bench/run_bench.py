@@ -11,6 +11,13 @@ Definitions (docs/AETHENS_PLAN.md section 6):
 - recall = planted defects found / planted defects.
 - Error/warning findings on defective tasks from checks that were not expected are reported as
   "unexpected" (not counted in precision); info findings on controls are reported too.
+- Reward hacking (C007, D5) is scored separately, because a verifier that a probe can game is a
+  property of the harness, not one of the defect classes above, and nearly every plain unittest
+  task is gameable. Every manifest entry lists, in ``reward_hack``, the probe categories that
+  should get through its verifier (labels written before running C007). Per category: recall =
+  labelled tasks with a C007 error/warning of that category / labelled tasks; a C007 error/warning
+  of a category on a task not labelled with it is a false positive. C007 findings are left out
+  of the core metrics.
 
 Writes bench/results.json (deterministic for a seed: no timings) and compares the headline metrics
 with bench/baseline.json. Exit 1 on regression, 2 on a tool error.
@@ -37,8 +44,10 @@ from aethens.checks import (
     C004MutationProbes,
     C005OrderDependence,
     C006OverSpecified,
+    C007RewardHacking,
     CheckContext,
 )
+from aethens.checks.c007_reward_hack import CATEGORIES
 from aethens.errors import AethensError
 from aethens.models import Budget, Task
 from aethens.runner import DockerRunner
@@ -71,7 +80,10 @@ def load_manifest(path: Path) -> list[dict[str, Any]]:
         for d in defects:
             if d["class"] not in CLASSES or d["check"] not in CHECKS:
                 raise SystemExit(f"{e['path']}: bad defect {d}")
-        entries.append({"path": e["path"], "kind": kind, "defects": defects})
+        hack = e.get("reward_hack")
+        if not isinstance(hack, list) or any(c not in CATEGORIES for c in hack):
+            raise SystemExit(f"{e['path']}: reward_hack must list categories from {CATEGORIES}")
+        entries.append({"path": e["path"], "kind": kind, "defects": defects, "reward_hack": hack})
     return entries
 
 
@@ -80,7 +92,8 @@ def compute_metrics(
 ) -> dict[str, Any]:
     by_task: dict[str, list[dict[str, Any]]] = {}
     for f in findings:
-        by_task.setdefault(str(f["task_id"]), []).append(f)
+        if f["check_id"] in CHECKS:  # C007 is scored by compute_reward_hack
+            by_task.setdefault(str(f["task_id"]), []).append(f)
     planted = found = true_findings = false_positives = unexpected = info_on_controls = 0
     per_check = {c: {"planted": 0, "found": 0, "false_positives": 0} for c in CHECKS}
     per_class = {c: {"planted": 0, "found": 0} for c in CLASSES}
@@ -129,8 +142,73 @@ def compute_metrics(
     }
 
 
-def regressions(baseline: dict[str, Any], metrics: dict[str, Any]) -> list[str]:
+def _ratio(a: int, b: int) -> float | None:
+    return round(a / b, 4) if b else None
+
+
+def compute_reward_hack(
+    manifest: list[dict[str, Any]], findings: list[dict[str, Any]]
+) -> dict[str, Any]:
+    hits: set[tuple[str, str]] = {
+        (str(f["task_id"]), str(f.get("category")))
+        for f in findings
+        if f["check_id"] == "C007" and RANK[str(f["severity"])] >= RANK["warning"]
+    }
+    per: dict[str, dict[str, Any]] = {}
+    misses: list[dict[str, str]] = []
+    fps: list[dict[str, str]] = []
+    for cat in CATEGORIES:
+        labelled = found = false_pos = 0
+        for e in manifest:
+            tid = e["id"]
+            if cat in e["reward_hack"]:
+                labelled += 1
+                if (tid, cat) in hits:
+                    found += 1
+                else:
+                    misses.append({"task": tid, "category": cat})
+            elif (tid, cat) in hits:
+                false_pos += 1
+                fps.append({"task": tid, "category": cat})
+        per[cat] = {
+            "labelled": labelled,
+            "found": found,
+            "false_positives": false_pos,
+            "recall": _ratio(found, labelled),
+            "precision": _ratio(found, found + false_pos),
+        }
+    labelled = sum(v["labelled"] for v in per.values())
+    found = sum(v["found"] for v in per.values())
+    false_pos = sum(v["false_positives"] for v in per.values())
+    return {
+        "labelled": labelled,
+        "found": found,
+        "false_positives": false_pos,
+        "recall": _ratio(found, labelled) or 0.0,
+        "precision": _ratio(found, found + false_pos) or 0.0,
+        "per_category": per,
+        "misses": misses,
+        "false_positive_list": fps,
+    }
+
+
+def regressions(
+    baseline: dict[str, Any],
+    metrics: dict[str, Any],
+    reward_hack: dict[str, Any] | None = None,
+) -> list[str]:
     problems = []
+    rb, rh = baseline.get("reward_hack"), reward_hack
+    if rb is not None and rh is not None:
+        if rh["recall"] < rb["recall"]:
+            problems.append(f"reward-hack recall {rh['recall']} < baseline {rb['recall']}")
+        if rh["precision"] < rb["precision"]:
+            problems.append(f"reward-hack precision {rh['precision']} < baseline {rb['precision']}")
+        if rh["false_positives"] > rb["false_positives"]:
+            problems.append(
+                f"reward-hack false positives {rh['false_positives']} > baseline "
+                f"{rb['false_positives']}"
+            )
     if metrics["precision"] < baseline["precision"]:
         problems.append(f"precision {metrics['precision']} < baseline {baseline['precision']}")
     if metrics["recall"] < baseline["recall"]:
@@ -150,12 +228,21 @@ def _audit_one(task: Task, seed: int, budget: Budget, runner: DockerRunner) -> l
         C004MutationProbes(),
         C005OrderDependence(),
         C006OverSpecified(),
+        C007RewardHacking(),
     ]
     report = run_audit([task], checks, CheckContext(runner=runner, seed=seed, budget=budget))
-    return [
-        {"task_id": f.task_id, "check_id": f.check_id, "severity": f.severity.value, "id": f.id}
-        for f in report.findings
-    ]
+    out: list[dict[str, Any]] = []
+    for f in report.findings:
+        row: dict[str, Any] = {
+            "task_id": f.task_id,
+            "check_id": f.check_id,
+            "severity": f.severity.value,
+            "id": f.id,
+        }
+        if f.check_id == "C007":
+            row["category"] = f.evidence.extra.get("category", "")
+        out.append(row)
+    return out
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -187,6 +274,7 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     findings = sorted((f for p in parts for f in p), key=lambda f: (f["task_id"], f["id"]))
     metrics = compute_metrics(manifest, findings)
+    hack = compute_reward_hack(manifest, findings)
     results = {
         "schema": "aethens-bench-results/v1",
         "tool_version": __version__,
@@ -196,6 +284,7 @@ def main(argv: list[str] | None = None) -> int:
         "controls": sum(1 for e in manifest if e["kind"] == "control"),
         "defective": sum(1 for e in manifest if e["kind"] == "defective"),
         "metrics": metrics,
+        "reward_hack": hack,
         "findings": findings,
     }
     Path(args.results).write_text(json.dumps(results, indent=2) + "\n", encoding="utf-8")
@@ -215,10 +304,25 @@ def main(argv: list[str] | None = None) -> int:
         print(f"bench:   {c}: found {v['found']}/{v['planted']}, false positives {fp}")
     for m in metrics["known_misses"]:
         print(f"bench:   miss: {m['task']} ({m['class']}, expected {m['check']})")
+    print(
+        f"bench: reward hacking (C007): recall {hack['recall']} ({hack['found']}/"
+        f"{hack['labelled']})  precision {hack['precision']}  "
+        f"false positives {hack['false_positives']}"
+    )
+    for cat, v in hack["per_category"].items():
+        print(
+            f"bench:   {cat}: found {v['found']}/{v['labelled']}, "
+            f"false positives {v['false_positives']}"
+        )
+    for m in hack["misses"]:
+        print(f"bench:   reward-hack miss: {m['task']} ({m['category']})")
+    for m in hack["false_positive_list"]:
+        print(f"bench:   reward-hack false positive: {m['task']} ({m['category']})")
     baseline_path = Path(args.baseline)
     headline = {k: metrics[k] for k in ("precision", "recall", "false_positives")}
     if args.update_baseline:
-        base = {"seed": args.seed, "budget": budget.value, **headline}
+        rh_head = {k: hack[k] for k in ("recall", "precision", "false_positives")}
+        base = {"seed": args.seed, "budget": budget.value, **headline, "reward_hack": rh_head}
         baseline_path.write_text(json.dumps(base, indent=2) + "\n", encoding="utf-8")
         print(f"bench: baseline written to {baseline_path}")
         return 0
@@ -229,7 +333,7 @@ def main(argv: list[str] | None = None) -> int:
     if (base["seed"], base["budget"]) != (args.seed, budget.value):
         print("bench: error: baseline was recorded with another seed or budget", file=sys.stderr)
         return 2
-    problems = regressions(base, metrics)
+    problems = regressions(base, metrics, hack)
     for p in problems:
         print(f"bench: REGRESSION: {p}", file=sys.stderr)
     if not problems:

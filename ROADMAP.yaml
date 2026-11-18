@@ -91,7 +91,7 @@ phases:
       - id: D5
         description: reward-hacking probe pack (C007); adversarial candidates that game weak verifiers, run in the same Docker sandbox
         acceptance: recall per exploit category on the bench; controls with hardened verifiers stay silent; isolation settings unchanged
-        status: NOT_STARTED
+        status: DONE_LOCAL (6 probe categories; reward-hack recall 116/116 on labelled bench tasks, 0 false positives, both hardened controls silent; isolation settings unchanged; pytest conftest probe not built)
 
   - id: 2
     name: Launch (owner actions)

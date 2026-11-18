@@ -7,6 +7,7 @@ from aethens.checks.c003_labeled_candidates import C003LabeledCandidates
 from aethens.checks.c004_mutation import C004MutationProbes
 from aethens.checks.c005_order import C005OrderDependence
 from aethens.checks.c006_overspec import C006OverSpecified
+from aethens.checks.c007_reward_hack import C007RewardHacking
 
 __all__ = [
     "C001GoldSanity",
@@ -15,6 +16,7 @@ __all__ = [
     "C004MutationProbes",
     "C005OrderDependence",
     "C006OverSpecified",
+    "C007RewardHacking",
     "Check",
     "CheckContext",
     "hash_seed",

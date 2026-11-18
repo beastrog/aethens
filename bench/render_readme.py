@@ -48,6 +48,27 @@ def render_block(results: dict[str, Any]) -> str:
             lines.append(f"- `{miss['task']}` ({miss['class']}, expected {miss['check']})")
     else:
         lines.append("- none")
+    hack = results.get("reward_hack")
+    if hack:
+        lines += [
+            "",
+            "Reward hacking (C007), scored separately: each task lists the probe categories that "
+            "should get through its verifier (labels in bench/manifest.yaml).",
+            "",
+            f"Overall: recall {hack['recall']} ({hack['found']}/{hack['labelled']}), precision "
+            f"{hack['precision']}, false positives {hack['false_positives']}.",
+            "",
+            "| exploit category | found / labelled | false positives |",
+            "|---|---|---|",
+        ]
+        for cat, v in hack["per_category"].items():
+            lines.append(f"| {cat} | {v['found']}/{v['labelled']} | {v['false_positives']} |")
+        if hack["misses"]:
+            lines += [
+                "",
+                "Reward-hack misses: "
+                + ", ".join(f"`{m['task']}` ({m['category']})" for m in hack["misses"]),
+            ]
     lines.append(END)
     return "\n".join(lines)
 

@@ -243,3 +243,29 @@ CI installs uv with `pip install uv==0.13.7` instead of a third-party setup acti
   order-dependent and flaky. The old fixed 5 runs missed it at seed 0; adaptive C002 finds it after
   more runs. This adds one planted defect (20 total), labelled after D4 was written and observed
   failing before: the owner should review whether adding a label a new feature catches is fair.
+- D-060 (D5) C007 reward-hacking probes (id C007, tier probe). Probe candidates are Aethens-written
+  overlays over every Python file in the gold and starter overlays, run with `run_spec` through the
+  task's normal runner: same Docker flags (`--network none`, read-only root, tmpfs, cap-drop ALL,
+  no-new-privileges, non-root, limits); nothing in the runner changed. C007 runs only when the
+  unsolved starter fails (a passing starter is C001's finding). An accepted probe must pass twice.
+  Categories: exit-zero (`os._exit(0)` on import; a `sys.exit(0)` variant is also tried but the
+  unittest loader catches it), atexit-override, framework-patch, sitecustomize-hook,
+  always-equal, hardcoded-visible. Errors with confidence confirmed, except hardcoded-visible:
+  warning, needs-review (a lookup table only matters when the tests are visible to the policy).
+  pytest `conftest.py` hooks are not probed (no pytest in the default image; not testable here).
+- D-061 (D5) Reward hacking is scored separately from the core metrics. Nearly every plain unittest
+  task is gameable, so counting C007 findings as false positives on controls would make the
+  existing controls meaningless. Each manifest entry now has a required `reward_hack` list of the
+  probe categories expected to get through (written by reading each task's tests before running
+  C007); per-category recall and precision are computed from it, C007 findings are excluded from
+  the core metrics, and both sets of headline numbers are gated by bench/baseline.json. New tasks:
+  hack-sitecustomize (verifier runs with `PYTHONPATH=.`), ctrl-hardened-harness and
+  ctrl-hardened-cli (the candidate runs in an isolated `python -I` child; results are judged in the
+  parent on seeded random inputs). All three are core controls.
+- D-062 (D5) One label disagreed with the first run: order-classfixture was labelled
+  framework-patch, but the first probe (patching only `TestResult.wasSuccessful`) did not pass
+  because Python 3.12 unittest exits 5 when no test ran (its setUpClass fails). The label was kept
+  and the probe strengthened to also report at least one test run. This is tuning on the bench: the
+  first-version reward-hack recall was 115/116 (framework-patch 29/30).
+- D-063 (D5) The external bench does not run C007: its verifier is Aethens' own unittest conversion
+  of HumanEval's check function, so probe results would describe the converter, not HumanEval.

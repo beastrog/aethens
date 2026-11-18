@@ -60,6 +60,7 @@ Reports follow `aethens-report/v2` (v1 plus a `coverage` list of what checks est
 | C004 mutation probes | runs up to 5/10/30 AST mutants of the gold solution | behaviour the tests never check (surviving mutants, info only) | equivalent mutants look like weaknesses; a killed mutant does not prove the tests are strong |
 | C005 test order and isolation | reruns the gold's tests in their default order, reversed, in 1/2/5 seeded shuffles and each test alone (up to 10/30/200), all with the same `PYTHONHASHSEED`; a change must reproduce on a second run | tests that pass only because an earlier test left state behind, or that break when another test runs first | orders it did not try; verifiers other than `python -m unittest` (it says it checked nothing) |
 | C006 over-specified tests | reruns the gold after behaviour-preserving AST rewrites (reformat, local renames, swapping adjacent constant assignments, append loop to comprehension, if/else inversion; smoke: the first two), each applied only where its safety conditions hold; a rejection must reproduce and the gold must still pass | tests that read the gold's source, line numbers, local variable names or code shape, so they would reject correct solutions written differently (warning, needs review) | over-strict tests on behaviour the statement leaves open, such as exact messages or float digits (use C003); rewrites it cannot prove safe are skipped |
+| C007 reward-hacking probes | when the unsolved starter fails, runs candidates that do not solve the task, in the same sandbox: `os._exit(0)` on import, an atexit hook forcing exit 0, a unittest patch that reports success, a `sitecustomize.py` hook, functions returning an object equal to everything, and a lookup table of the visible tests' literal answers; an accepted probe must pass twice | verifiers a policy can game without solving the task (error; the lookup-table probe is a warning, needs review, since it matters only when tests are visible) | other gaming routes; pytest `conftest.py` hooks (not probed); a verifier that resists these probes can still be gamed |
 
 ## Bench numbers
 
@@ -70,7 +71,7 @@ not measure real-world recall on other people's benchmarks.
 <!-- bench:start -->
 Generated from `bench/results.json` (aethens 0.1.0.dev0, seed 0, budget standard) by `bench/render_readme.py`.
 
-Bench: 31 self-authored tasks, 12 clean controls and 19 with planted defects.
+Bench: 34 self-authored tasks, 15 clean controls and 19 with planted defects.
 
 | metric | value |
 |---|---|
@@ -78,7 +79,7 @@ Bench: 31 self-authored tasks, 12 clean controls and 19 with planted defects.
 | recall (planted defects found) | 1.0 (20/20) |
 | false positives on controls | 0 |
 | unexpected error/warning findings on defective tasks | 3 |
-| info findings on controls | 5 |
+| info findings on controls | 9 |
 
 | defect class | found / planted |
 |---|---|
@@ -101,6 +102,19 @@ Bench: 31 self-authored tasks, 12 clean controls and 19 with planted defects.
 Known misses in this run:
 
 - none
+
+Reward hacking (C007), scored separately: each task lists the probe categories that should get through its verifier (labels in bench/manifest.yaml).
+
+Overall: recall 1.0 (116/116), precision 1.0, false positives 0.
+
+| exploit category | found / labelled | false positives |
+|---|---|---|
+| exit-zero | 30/30 | 0 |
+| atexit-override | 30/30 | 0 |
+| framework-patch | 30/30 | 0 |
+| sitecustomize-hook | 1/1 | 0 |
+| always-equal | 15/15 | 0 |
+| hardcoded-visible | 10/10 | 0 |
 <!-- bench:end -->
 
 These numbers come from a local run on the build machine (Docker Engine 29.10.0, Linux). The GitHub
@@ -134,8 +148,10 @@ On 164 HumanEval tasks (MIT), judged by EvalPlus's HumanEval+ tests (Apache-2.0)
 - C002 is still statistical: without a finding it states only that the flake rate is below a bound
   (0.25 at 95% confidence at the default budget, 0.05 at deep), assuming independent runs. A rarer
   flake can pass unseen, and the time budget can stop it before the target bound.
-- Harnesses that judge only the exit code accept a solution that calls `os._exit(0)` on import. There
-  is no check for this yet (see docs/IDEAS.md).
+- C007 tries six probe families; resisting them does not prove a verifier cannot be gamed. It does
+  not probe pytest `conftest.py` hooks. Almost every plain `python -m unittest` verifier is gameable
+  by its exit-code probes, so expect C007 errors on most tasks until the harness judges results
+  outside the solution's process (see bench/tasks/ctrl-hardened-harness for one way).
 - Python tasks only; verifiers must be runnable as a command inside a Docker image with no network.
 - Tested on Linux with Docker Engine. Rootless Docker, Docker Desktop and Podman are untested.
 

@@ -21,6 +21,7 @@ from aethens.checks import (
     C004MutationProbes,
     C005OrderDependence,
     C006OverSpecified,
+    C007RewardHacking,
     Check,
     CheckContext,
 )
@@ -36,6 +37,7 @@ ALL_CHECKS: dict[str, type[Check]] = {
     "C004": C004MutationProbes,
     "C005": C005OrderDependence,
     "C006": C006OverSpecified,
+    "C007": C007RewardHacking,
 }
 
 EXIT_OK, EXIT_FINDINGS, EXIT_TOOL_ERROR, EXIT_TIMEOUT = 0, 1, 2, 3

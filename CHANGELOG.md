@@ -5,6 +5,7 @@ All notable changes are recorded here. The format follows Keep a Changelog; vers
 ## [Unreleased]
 
 ### Added
+- D5: check C007 (reward-hacking probes): runs six families of non-solutions (early exit, atexit override, unittest patch, sitecustomize hook, always-equal objects, hardcoded visible answers) through the same sandbox and reports those the verifier accepts. Bench grows to 34 tasks with per-task exploit labels and per-category recall, scored separately from the core metrics; two hardened-harness controls stay silent.
 - D4: C002 is adaptive: it keeps rerunning while the gold agrees until it can state "flake rate below p at 95% confidence" (p = 0.5/0.25/0.05 by budget, time-capped), and reports a 95% Clopper-Pearson interval when it finds flakiness. Report schema bumped to `aethens-report/v2`, which adds a `coverage` list; v1 reports still load.
 - D3: check C006 (over-specified tests): reruns the gold after behaviour-preserving AST rewrites and warns (needs review) when the tests reject one. Bench grows to 31 tasks (3 planted over-specification defects, 2 controls).
 - D2: external bench on public data Aethens did not write: HumanEval tasks (MIT) judged with EvalPlus HumanEval+ (Apache-2.0) as an outside oracle; per-check results generated into docs/EXTERNAL_BENCH.md and the README; a 6-task vendored sample runs offline in `make check` with a regression gate.

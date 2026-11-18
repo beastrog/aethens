@@ -14,9 +14,11 @@ Ground truth (see bench/external/README.md):
   one mutant passes the base tests but fails the oracle; recall = weak tasks on which the budgeted
   C004 run reported a confirmed survivor / weak tasks (recall relative to exhaustive mutation with
   Aethens' own operators, not to every possible wrong program).
-- C001, C002, C005, C006, C007: HumanEval's tasks carry no labels for these defect classes. They
+- C001, C002, C005, C006: HumanEval's tasks carry no labels for these defect classes. They
   are treated as presumed clean: every error/warning finding is counted and listed for review, and
   no precision is claimed from zero findings.
+- C007 (reward-hacking probes) is not run here: the verifier is Aethens' own unittest conversion
+  of HumanEval's check function, so whether a probe gets through says nothing about HumanEval.
 - Tasks whose ORIGINAL HumanEval canonical solution fails the HumanEval+ oracle cannot use the
   oracle; they are listed and excluded from C004 precision and recall.
 
@@ -52,7 +54,9 @@ from aethens.runner import DockerRunner, Runner, RunSpec
 HERE = Path(__file__).resolve().parent
 LOUD = ("error", "warning")
 ORACLE_TIMEOUT_S = 60.0
-EXCLUDED_CHECKS = ("C003",)  # needs labelled candidates; HumanEval has none
+# C003 needs labelled candidates (HumanEval has none). C007 is not run: the unittest harness here
+# is Aethens' own conversion, not HumanEval's, so probe results would measure the converter.
+EXCLUDED_CHECKS = ("C003", "C007")
 DATASETS = [
     {
         "name": "HumanEval",

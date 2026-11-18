@@ -69,7 +69,8 @@ def render(full: dict[str, Any], sample: dict[str, Any]) -> str:
         f"budget {full['budget']}, exhaustive mutation {'on' if full['exhaustive'] else 'off'})",
         "",
         f"Checks run: {', '.join(full['checks'])} (C003 needs labelled candidates, which "
-        "HumanEval does not have).",
+        "HumanEval does not have; C007 is not run because the verifier is Aethens' own unittest "
+        "conversion, so probe results would describe the converter, not HumanEval).",
         "",
         *summary_table(full),
         "",

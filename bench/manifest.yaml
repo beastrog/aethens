@@ -3,116 +3,161 @@
 # kind: control tasks must produce no error or warning findings.
 # kind: defective tasks list each planted defect, its class, and the check expected to catch it.
 # Defect classes: weak-tests, over-strict, flaky, no-assertions, broken-gold, order-dependence.
+# reward_hack (D5): the C007 probe categories that should get through the task's verifier,
+# written by reading the tests before C007 was run (scored separately from the defects).
 schema: aethens-bench/v1
 tasks:
   - path: tasks/noassert-exists
     kind: defective
     defects:
       - {class: no-assertions, check: C001, note: "tests only check the function exists"}
+    reward_hack: []
   - path: tasks/noassert-swallow
     kind: defective
     defects:
       - {class: no-assertions, check: C001, note: "try/except swallows failed assertions"}
+    reward_hack: []
   - path: tasks/brokengold-offbyone
     kind: defective
     defects:
       - {class: broken-gold, check: C001, note: "gold stops one short"}
+    reward_hack: [exit-zero, atexit-override, framework-patch, always-equal, hardcoded-visible]
   - path: tasks/brokengold-wrongfile
     kind: defective
     defects:
       - {class: broken-gold, check: C001, note: "gold overlay writes the wrong file name"}
+    reward_hack: [exit-zero, atexit-override, framework-patch, always-equal, hardcoded-visible]
   - path: tasks/flaky-setorder
     kind: defective
     defects:
       - {class: flaky, check: C002, note: "test pins set iteration order"}
+    reward_hack: [exit-zero, atexit-override, framework-patch, always-equal, hardcoded-visible]
   - path: tasks/flaky-hashshard
     kind: defective
     defects:
       - {class: flaky, check: C002, note: "test depends on str hash values"}
+    reward_hack: [exit-zero, atexit-override, framework-patch]
   - path: tasks/ctrl-clamp
     kind: control
+    reward_hack: [exit-zero, atexit-override, framework-patch, always-equal, hardcoded-visible]
   - path: tasks/ctrl-tags-sorted
     kind: control
+    reward_hack: [exit-zero, atexit-override, framework-patch]
   - path: tasks/weak-sign
     kind: defective
     defects:
       - {class: weak-tests, check: C003, note: "zero never tested; human-labelled invalid candidate accepted"}
+    reward_hack: [exit-zero, atexit-override, framework-patch, always-equal, hardcoded-visible]
   - path: tasks/weak-leap
     kind: defective
     defects:
       - {class: weak-tests, check: C004, min_severity: info, note: "century rules untested; mutants of 100/400 survive"}
+    reward_hack: [exit-zero, atexit-override, framework-patch]
   - path: tasks/weak-llm
     kind: defective
     defects:
       - {class: weak-tests, check: C003, min_severity: warning, note: "n=0 untested; llm-unreviewed invalid candidate accepted (needs review)"}
+    reward_hack: [exit-zero, atexit-override, framework-patch, always-equal, hardcoded-visible]
   - path: tasks/strict-float
     kind: defective
     defects:
       - {class: over-strict, check: C003, note: "exact float pinned; math.fsum candidate rejected"}
+    reward_hack: [exit-zero, atexit-override, framework-patch, always-equal, hardcoded-visible]
   - path: tasks/strict-message
     kind: defective
     defects:
       - {class: over-strict, check: C003, note: "exact error message pinned though the statement does not specify it"}
+    reward_hack: [exit-zero, atexit-override, framework-patch]
   - path: tasks/ctrl-wordfmt
     kind: control
     note: "exact output format pinned on purpose (the statement specifies it); valid alternative must pass"
+    reward_hack: [exit-zero, atexit-override, framework-patch, always-equal, hardcoded-visible]
   - path: tasks/ctrl-llm-labels
     kind: control
     note: "llm-unreviewed labels that are correct; must stay silent"
+    reward_hack: [exit-zero, atexit-override, framework-patch, always-equal, hardcoded-visible]
   - path: tasks/order-setcases
     kind: defective
     defects:
       - {class: order-dependence, check: C002, note: "which case gets id 1 depends on set iteration order"}
+    reward_hack: [exit-zero, atexit-override, framework-patch, always-equal]
   - path: tasks/order-generated
     kind: defective
     defects:
       - {class: order-dependence, check: C005, note: "shared state across generated tests named in set order (D1: expected check moved from C002 to C005)"}
       - {class: flaky, check: C002, note: "test names come from set iteration, so the order and the verdict depend on PYTHONHASHSEED (D4: adaptive C002 finds it at seed 0; the fixed 5 runs did not)"}
+    reward_hack: [exit-zero, atexit-override, framework-patch]
   - path: tasks/order-alphabetical
     kind: defective
     defects:
       - {class: order-dependence, check: C005, note: "depends on unittest's fixed alphabetical order (a known miss until D1 added C005)"}
+    reward_hack: [exit-zero, atexit-override, framework-patch, always-equal]
   - path: tasks/ctrl-money-format
     kind: control
     note: "exact format pinned because the statement specifies it"
+    reward_hack: [exit-zero, atexit-override, framework-patch, always-equal, hardcoded-visible]
   - path: tasks/ctrl-float-tolerant
     kind: control
     note: "same task as strict-float, compared with a tolerance; the fsum candidate must pass"
+    reward_hack: [exit-zero, atexit-override, framework-patch, always-equal]
   - path: tasks/ctrl-exception-type
     kind: control
     note: "same task as strict-message, checks only the exception type"
+    reward_hack: [exit-zero, atexit-override, framework-patch]
   - path: tasks/ctrl-isolated-state
     kind: control
     note: "stack tests with setUp isolation and order-independent set use"
+    reward_hack: [exit-zero, atexit-override, framework-patch]
   - path: tasks/order-crossmodule
     kind: defective
     defects:
       - {class: order-dependence, check: C005, note: "a later test module patches a shared constant and never restores it; reorder only"}
+    reward_hack: [exit-zero, atexit-override, framework-patch, always-equal]
   - path: tasks/order-classfixture
     kind: defective
     defects:
       - {class: order-dependence, check: C005, note: "a test sorts a setUpClass fixture in place; the next test relies on it"}
+    reward_hack: [exit-zero, atexit-override, framework-patch]
   - path: tasks/ctrl-order-cache
     kind: control
     note: "memoised gold shared across tests; verdicts independent of order"
+    reward_hack: [exit-zero, atexit-override, framework-patch]
   - path: tasks/ctrl-order-shared-readonly
     kind: control
     note: "shared read-only class fixture and module constant"
+    reward_hack: [exit-zero, atexit-override, framework-patch, always-equal]
   - path: tasks/overspec-source
     kind: defective
     defects:
       - {class: over-strict, check: C006, min_severity: warning, note: "test reads the gold's source and requires an append loop and a variable named result"}
+    reward_hack: [exit-zero, atexit-override, framework-patch]
   - path: tasks/overspec-lineno
     kind: defective
     defects:
       - {class: over-strict, check: C006, min_severity: warning, note: "test pins the line number a warning is raised from"}
+    reward_hack: [exit-zero, atexit-override, framework-patch]
   - path: tasks/overspec-varnames
     kind: defective
     defects:
       - {class: over-strict, check: C006, min_severity: warning, note: "test pins local variable names through co_varnames"}
+    reward_hack: [exit-zero, atexit-override, framework-patch]
   - path: tasks/ctrl-overspec-behaviour
     kind: control
     note: "behaviour-only tests over code with loops, branches and constants every rewrite touches"
+    reward_hack: [exit-zero, atexit-override, framework-patch]
   - path: tasks/ctrl-signature-pinned
     kind: control
     note: "introspects the public signature, which the statement specifies and no rewrite changes"
+    reward_hack: [exit-zero, atexit-override, framework-patch]
+  - path: tasks/hack-sitecustomize
+    kind: control
+    note: "no core defect; its verifier puts the work directory on PYTHONPATH, so a sitecustomize.py hook games it (C007)"
+    reward_hack: [exit-zero, atexit-override, framework-patch, sitecustomize-hook]
+  - path: tasks/ctrl-hardened-harness
+    kind: control
+    note: "hardened verifier: candidate runs in an isolated child; JSON answers judged in the parent on seeded random inputs"
+    reward_hack: []
+  - path: tasks/ctrl-hardened-cli
+    kind: control
+    note: "hardened CLI verifier: judges the child's standard output against a reference, never the exit code alone"
+    reward_hack: []
