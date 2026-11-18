@@ -33,3 +33,29 @@ tasks:
     kind: control
   - path: tasks/ctrl-tags-sorted
     kind: control
+  - path: tasks/weak-sign
+    kind: defective
+    defects:
+      - {class: weak-tests, check: C003, note: "zero never tested; human-labelled invalid candidate accepted"}
+  - path: tasks/weak-leap
+    kind: defective
+    defects:
+      - {class: weak-tests, check: C004, min_severity: info, note: "century rules untested; mutants of 100/400 survive"}
+  - path: tasks/weak-llm
+    kind: defective
+    defects:
+      - {class: weak-tests, check: C003, min_severity: warning, note: "n=0 untested; llm-unreviewed invalid candidate accepted (needs review)"}
+  - path: tasks/strict-float
+    kind: defective
+    defects:
+      - {class: over-strict, check: C003, note: "exact float pinned; math.fsum candidate rejected"}
+  - path: tasks/strict-message
+    kind: defective
+    defects:
+      - {class: over-strict, check: C003, note: "exact error message pinned though the statement does not specify it"}
+  - path: tasks/ctrl-wordfmt
+    kind: control
+    note: "exact output format pinned on purpose (the statement specifies it); valid alternative must pass"
+  - path: tasks/ctrl-llm-labels
+    kind: control
+    note: "llm-unreviewed labels that are correct; must stay silent"

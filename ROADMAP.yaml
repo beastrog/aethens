@@ -48,6 +48,7 @@ phases:
         day: 4
         description: C003 labeled candidates (false accept and false reject, label_source aware) and C004 mutation probes (AST mutations, info severity, equivalent-mutant caveat); C005 exit-zero probe only if time remains
         acceptance: each check has fixture, control and unit test; bench has at least 12 tasks
+        status: DONE_LOCAL (fixture, control and unit test per check; 15 bench tasks; no control error/warning; C005 not built, see IDEAS; hosted CI not run)
       - id: B6
         day: 5
         description: report JSON aethens-report/v1 and Markdown renderer; CLI aethens audit PATH with fail_on and exit codes 0/1/2/3; bench runner computing precision, recall, false positives; bench/baseline.json regression gate

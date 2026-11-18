@@ -13,12 +13,24 @@ import sys
 from aethens import __version__
 from aethens.adapters import load_tasks
 from aethens.audit import run_audit
-from aethens.checks import C001GoldSanity, C002Flakiness, Check, CheckContext
+from aethens.checks import (
+    C001GoldSanity,
+    C002Flakiness,
+    C003LabeledCandidates,
+    C004MutationProbes,
+    Check,
+    CheckContext,
+)
 from aethens.errors import AethensError
 from aethens.models import Budget, Severity
 from aethens.runner import DockerRunner, LocalRunner, Runner
 
-ALL_CHECKS: dict[str, type[Check]] = {"C001": C001GoldSanity, "C002": C002Flakiness}
+ALL_CHECKS: dict[str, type[Check]] = {
+    "C001": C001GoldSanity,
+    "C002": C002Flakiness,
+    "C003": C003LabeledCandidates,
+    "C004": C004MutationProbes,
+}
 
 EXIT_OK, EXIT_FINDINGS, EXIT_TOOL_ERROR = 0, 1, 2
 

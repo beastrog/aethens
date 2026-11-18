@@ -1,6 +1,6 @@
 # Status
 
-Last updated: 2026-11-18 (Asia/Calcutta), after B4.
+Last updated: 2026-11-18 (Asia/Calcutta), after B5.
 
 ## Mode
 
@@ -31,8 +31,14 @@ anyway, so this does not change task isolation). `docker run --rm hello-world` w
   `aethens audit` with JSON output; bench/ with 8 tasks (6 planted: 2 no-assertions, 2 broken-gold,
   2 flaky; 2 controls) and manifest. Repro commands verified by running them in a subprocess.
 
+- B5: C003 labeled candidates (label_source aware), C004 AST mutation probes (info only), bench grown
+  to 15 tasks (11 defective, 4 controls). A full audit of the bench at seed 0 produced no error or
+  warning on any control (ctrl-clamp has 2 C004 info survivors, which are equivalent mutants).
+  C005 not built (reason in docs/IDEAS.md).
+
 ## Next
-- B5: C003 labeled candidates, C004 mutation probes, bench to at least 12 tasks.
+- B6: report JSON schema + Markdown, full CLI (fail-on, format, exit codes 0/1/2/3), bench runner with
+  precision/recall and baseline gate, bench to 20-24 tasks incl. order dependence.
 
 ## Open risks
 - C002 is probabilistic in the run count (about 1 seed in 16 misses a 50/50 flaky test at 5 runs).

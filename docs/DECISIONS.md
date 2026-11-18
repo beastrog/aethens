@@ -93,3 +93,17 @@ CI installs uv with `pip install uv==0.13.7` instead of a third-party setup acti
 - D-026 (B4) The bench lives in `bench/tasks/` with `bench/manifest.yaml` (aethens-bench/v1) listing each
   task as `control` or `defective`, and for defective tasks each planted defect's class and the check
   expected to catch it. Bench tasks are excluded from ruff (they contain deliberate defects).
+- D-027 (B5) C003 severity and confidence follow BUILD_PROMPTS B5: error + confirmed for `human` and
+  `oracle` labels, warning + needs-review for `llm-unreviewed`. A valid candidate that times out counts
+  as rejected (the evidence shows `timed_out`).
+- D-028 (B5) C004 operators: compare-boundary (< <=, > >=), compare-negate, binop-swap (+ -, * /, // *,
+  % //, ** *), augassign-swap, constant-plus-one (ints, not bools), negate-condition (if, while, ternary),
+  return-none, boolop-swap (and/or). Code under `if __name__ == "__main__":` is never mutated. Mutants are
+  written with `ast.unparse` (comments are dropped in the mutant copy only). Caps: smoke 5, standard 10,
+  deep 30 mutants per task, chosen by a `random.Random` seeded from (seed, task id).
+- D-029 (B5) Survivors are info + needs-review with the text "may be semantically equivalent; review".
+  A task whose gold has nothing to mutate gets one info finding saying C004 checked nothing, so a silent
+  C004 never looks like a clean bill of health (AGENTS.md rule 4).
+- D-030 (B5) C005 (exit-zero probe) was not built; see docs/IDEAS.md.
+- D-031 (B5) Bench fixture fix found while building: Python 3.12+ `sum()` of floats uses compensated
+  summation, so the strict-float gold uses an explicit loop to produce the float its test pins.
