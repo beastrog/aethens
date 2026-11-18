@@ -21,6 +21,11 @@
       "loud_findings": 0,
       "precision": null,
       "recall": null
+    },
+    "C006": {
+      "loud_findings": 0,
+      "precision": null,
+      "recall": null
     }
   }
 }

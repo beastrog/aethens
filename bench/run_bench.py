@@ -36,6 +36,7 @@ from aethens.checks import (
     C003LabeledCandidates,
     C004MutationProbes,
     C005OrderDependence,
+    C006OverSpecified,
     CheckContext,
 )
 from aethens.errors import AethensError
@@ -51,7 +52,7 @@ CLASSES = (
     "broken-gold",
     "order-dependence",
 )
-CHECKS = ("C001", "C002", "C003", "C004", "C005")
+CHECKS = ("C001", "C002", "C003", "C004", "C005", "C006")
 RANK = {"info": 1, "warning": 2, "error": 3}
 
 
@@ -148,6 +149,7 @@ def _audit_one(task: Task, seed: int, budget: Budget, runner: DockerRunner) -> l
         C003LabeledCandidates(),
         C004MutationProbes(),
         C005OrderDependence(),
+        C006OverSpecified(),
     ]
     report = run_audit([task], checks, CheckContext(runner=runner, seed=seed, budget=budget))
     return [

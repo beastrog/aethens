@@ -59,6 +59,7 @@ Reports follow `aethens-report/v1`: [docs/report-schema.json](docs/report-schema
 | C003 labeled candidates | runs each candidate in `candidates/valid` and `candidates/invalid` | false rejects (over-strict tests) and false accepts (weak tests), but only as good as the labels; `llm-unreviewed` labels give warnings marked needs-review | anything for which you have no labeled candidate |
 | C004 mutation probes | runs up to 5/10/30 AST mutants of the gold solution | behaviour the tests never check (surviving mutants, info only) | equivalent mutants look like weaknesses; a killed mutant does not prove the tests are strong |
 | C005 test order and isolation | reruns the gold's tests in their default order, reversed, in 1/2/5 seeded shuffles and each test alone (up to 10/30/200), all with the same `PYTHONHASHSEED`; a change must reproduce on a second run | tests that pass only because an earlier test left state behind, or that break when another test runs first | orders it did not try; verifiers other than `python -m unittest` (it says it checked nothing) |
+| C006 over-specified tests | reruns the gold after behaviour-preserving AST rewrites (reformat, local renames, swapping adjacent constant assignments, append loop to comprehension, if/else inversion; smoke: the first two), each applied only where its safety conditions hold; a rejection must reproduce and the gold must still pass | tests that read the gold's source, line numbers, local variable names or code shape, so they would reject correct solutions written differently (warning, needs review) | over-strict tests on behaviour the statement leaves open, such as exact messages or float digits (use C003); rewrites it cannot prove safe are skipped |
 
 ## Bench numbers
 
@@ -69,20 +70,20 @@ not measure real-world recall on other people's benchmarks.
 <!-- bench:start -->
 Generated from `bench/results.json` (aethens 0.1.0.dev0, seed 0, budget standard) by `bench/render_readme.py`.
 
-Bench: 26 self-authored tasks, 10 clean controls and 16 with planted defects.
+Bench: 31 self-authored tasks, 12 clean controls and 19 with planted defects.
 
 | metric | value |
 |---|---|
 | precision (error/warning findings) | 1.0 |
-| recall (planted defects found) | 1.0 (16/16) |
+| recall (planted defects found) | 1.0 (19/19) |
 | false positives on controls | 0 |
 | unexpected error/warning findings on defective tasks | 3 |
-| info findings on controls | 2 |
+| info findings on controls | 5 |
 
 | defect class | found / planted |
 |---|---|
 | weak-tests | 3/3 |
-| over-strict | 2/2 |
+| over-strict | 5/5 |
 | flaky | 2/2 |
 | no-assertions | 2/2 |
 | broken-gold | 2/2 |
@@ -95,6 +96,7 @@ Bench: 26 self-authored tasks, 10 clean controls and 16 with planted defects.
 | C003 | 4/4 | 0 |
 | C004 | 1/1 | 0 |
 | C005 | 4/4 | 0 |
+| C006 | 3/3 | 0 |
 
 Known misses in this run:
 
@@ -125,6 +127,10 @@ On 164 HumanEval tasks (MIT), judged by EvalPlus's HumanEval+ tests (Apache-2.0)
 
 - C005 reorders tests only for `python -m unittest` verifiers, and only tries the default order,
   reversed, a few seeded shuffles and each test alone; other orders are not tried.
+- C006 only catches tests coupled to implementation details (source text, line numbers, local
+  names, code shape). Its five rewrites are argued and tested to preserve behaviour, not
+  machine-proved, and it skips every site it cannot show is safe. Its findings need review: a
+  statement may legitimately require an implementation detail.
 - C002 is probabilistic in the number of runs: a test that flips 50/50 is missed with probability
   2 × 0.5^5 = 1/16 at 5 runs.
 - Harnesses that judge only the exit code accept a solution that calls `os._exit(0)` on import. There

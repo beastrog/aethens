@@ -199,3 +199,19 @@ CI installs uv with `pip install uv==0.13.7` instead of a third-party setup acti
   bench/external/sample-baseline.json (more error/warning findings, or lower C004 precision or
   recall, fails). The full run is manual (about 15-20 minutes with 4 workers locally) and its results
   file is committed.
+- D-054 (D3) C006 over-specified tests (id C006, tier probe, no LLM). Rewrites live in
+  `aethens/checks/rewrites.py`; each states its preconditions and skips any site it cannot prove
+  (introspective functions using locals/vars/eval/exec/inspect/sys/super, names seen by nested
+  scopes, global/nonlocal, parameters, try/with/match around append loops, loop variables used
+  after the loop, walrus/yield/await in the element, the `__main__` guard). A rewrite whose output
+  is textually identical to the input is not run. Families: smoke = reformat + rename-locals;
+  standard and deep = all five. Each family is applied to every provable site at once (one run per
+  family, not per site), which keeps the cost at about 5-7 runs per task but cannot say which site
+  a test rejected; the diff is in the finding.
+- D-055 (D3) C006 findings are warnings with confidence needs-review: some tasks legitimately
+  require an implementation detail (e.g. "use a list comprehension"); the statement decides. A
+  rejection counts only if the rewritten gold fails twice and the original gold passes again with
+  the same PYTHONHASHSEED (otherwise it is flakiness, C002's job). A task with no rewrite site gets
+  one info finding saying C006 checked nothing. Bench: defect class over-strict gains check C006;
+  planted overspec-source, overspec-lineno, overspec-varnames; controls ctrl-overspec-behaviour and
+  ctrl-signature-pinned (introspects the public signature, which no rewrite changes).

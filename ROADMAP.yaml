@@ -83,7 +83,7 @@ phases:
       - id: D3
         description: over-specification check without an LLM (C006); behaviour-preserving AST rewrites of the gold; a test that rejects a rewrite is flagged as over-specified
         acceptance: each rewrite documented with the conditions that make it semantics-preserving and skipped when unsure; planted fixtures and controls; unit tests per rewrite
-        status: NOT_STARTED
+        status: DONE_LOCAL (5 rewrite families with documented preconditions; 3/3 planted over-specification fixtures caught, both new controls silent; bench 31 tasks, recall 19/19, 0 false positives)
       - id: D4
         description: C002 reruns adaptively until it can state "flake rate below p at 95% confidence" or detects flakiness, within a budget
         acceptance: statistics and new semantics documented in docs/DECISIONS.md; report schema version bumped if the schema changes

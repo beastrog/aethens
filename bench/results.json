@@ -3,18 +3,18 @@
   "tool_version": "0.1.0.dev0",
   "seed": 0,
   "budget": "standard",
-  "tasks": 26,
-  "controls": 10,
-  "defective": 16,
+  "tasks": 31,
+  "controls": 12,
+  "defective": 19,
   "metrics": {
-    "planted": 16,
-    "found": 16,
+    "planted": 19,
+    "found": 19,
     "recall": 1.0,
-    "true_findings": 15,
+    "true_findings": 19,
     "false_positives": 0,
     "precision": 1.0,
     "unexpected_findings": 3,
-    "info_on_controls": 2,
+    "info_on_controls": 5,
     "known_misses": [],
     "per_check": {
       "C001": {
@@ -41,6 +41,11 @@
         "planted": 4,
         "found": 4,
         "false_positives": 0
+      },
+      "C006": {
+        "planted": 3,
+        "found": 3,
+        "false_positives": 0
       }
     },
     "per_class": {
@@ -49,8 +54,8 @@
         "found": 3
       },
       "over-strict": {
-        "planted": 2,
-        "found": 2
+        "planted": 5,
+        "found": 5
       },
       "flaky": {
         "planted": 2,
@@ -96,6 +101,24 @@
       "id": "C004-ctrl-clamp-875ee207"
     },
     {
+      "task_id": "ctrl-clamp",
+      "check_id": "C006",
+      "severity": "info",
+      "id": "C006-ctrl-clamp-a78a15e2"
+    },
+    {
+      "task_id": "ctrl-signature-pinned",
+      "check_id": "C004",
+      "severity": "info",
+      "id": "C004-ctrl-signature-pinned-911e64f3"
+    },
+    {
+      "task_id": "ctrl-signature-pinned",
+      "check_id": "C004",
+      "severity": "info",
+      "id": "C004-ctrl-signature-pinned-f2466766"
+    },
+    {
       "task_id": "flaky-hashshard",
       "check_id": "C001",
       "severity": "error",
@@ -106,6 +129,12 @@
       "check_id": "C002",
       "severity": "error",
       "id": "C002-flaky-hashshard-50a5d549"
+    },
+    {
+      "task_id": "flaky-hashshard",
+      "check_id": "C006",
+      "severity": "info",
+      "id": "C006-flaky-hashshard-bea2d98c"
     },
     {
       "task_id": "flaky-setorder",
@@ -162,6 +191,12 @@
       "id": "C004-noassert-swallow-b1366483"
     },
     {
+      "task_id": "noassert-swallow",
+      "check_id": "C006",
+      "severity": "info",
+      "id": "C006-noassert-swallow-ceae7d9e"
+    },
+    {
       "task_id": "order-alphabetical",
       "check_id": "C005",
       "severity": "error",
@@ -210,6 +245,30 @@
       "id": "C002-order-setcases-c739a031"
     },
     {
+      "task_id": "overspec-lineno",
+      "check_id": "C006",
+      "severity": "warning",
+      "id": "C006-overspec-lineno-02abfd7b"
+    },
+    {
+      "task_id": "overspec-source",
+      "check_id": "C006",
+      "severity": "warning",
+      "id": "C006-overspec-source-4b4057d8"
+    },
+    {
+      "task_id": "overspec-source",
+      "check_id": "C006",
+      "severity": "warning",
+      "id": "C006-overspec-source-b0e79242"
+    },
+    {
+      "task_id": "overspec-varnames",
+      "check_id": "C006",
+      "severity": "warning",
+      "id": "C006-overspec-varnames-030de6e1"
+    },
+    {
       "task_id": "strict-float",
       "check_id": "C003",
       "severity": "error",
@@ -252,6 +311,12 @@
       "id": "C004-weak-leap-d7969aeb"
     },
     {
+      "task_id": "weak-leap",
+      "check_id": "C006",
+      "severity": "info",
+      "id": "C006-weak-leap-2f990453"
+    },
+    {
       "task_id": "weak-llm",
       "check_id": "C003",
       "severity": "warning",
@@ -274,6 +339,12 @@
       "check_id": "C004",
       "severity": "info",
       "id": "C004-weak-llm-cd3eb1be"
+    },
+    {
+      "task_id": "weak-llm",
+      "check_id": "C006",
+      "severity": "info",
+      "id": "C006-weak-llm-b99b11b9"
     },
     {
       "task_id": "weak-sign",
@@ -310,6 +381,12 @@
       "check_id": "C004",
       "severity": "info",
       "id": "C004-weak-sign-d0d91fd3"
+    },
+    {
+      "task_id": "weak-sign",
+      "check_id": "C006",
+      "severity": "info",
+      "id": "C006-weak-sign-2279b278"
     }
   ]
 }

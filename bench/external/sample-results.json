@@ -23,7 +23,8 @@
     "C001",
     "C002",
     "C004",
-    "C005"
+    "C005",
+    "C006"
   ],
   "exhaustive": false,
   "metrics": {
@@ -61,6 +62,14 @@
         "tasks_with_confirmed_survivor": 3
       },
       "C005": {
+        "ground_truth": "presumed clean (no labels for this class in the dataset)",
+        "loud_findings": 0,
+        "tasks_with_loud_findings": 0,
+        "loud_finding_list": [],
+        "precision": null,
+        "recall": null
+      },
+      "C006": {
         "ground_truth": "presumed clean (no labels for this class in the dataset)",
         "loud_findings": 0,
         "tasks_with_loud_findings": 0,

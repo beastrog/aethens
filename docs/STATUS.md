@@ -62,6 +62,10 @@ anyway, so this does not change task isolation). `docker run --rm hello-world` w
   6-task vendored sample runs offline in `make check` with a regression gate. The full run is
   local only (needs a one-time pinned download; about 17 minutes with 4 workers).
 
+- D3 DONE_LOCAL: C006 over-specified tests (behaviour-preserving AST rewrites of the gold; a
+  rejection must reproduce). Bench 31 tasks (12 controls, 19 defective): precision 1.0, recall 1.0
+  (19/19), 0 false positives.
+
 ## Next (owner actions; the agent stops after B7)
 - Fresh-session hardening review (Prompt 3 in docs/BUILD_PROMPTS.md). NOT done: B7's acceptance
   criterion "fresh-session hardening review done" is therefore open, and B7 is marked PARTIAL.

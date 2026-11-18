@@ -57,3 +57,4 @@ Tasks whose original HumanEval canonical solution fails the HumanEval+ oracle (o
 | C002 | presumed clean (no labels for this class in the dataset) | 0 error/warning findings on 0 of 6 tasks; precision and recall not measurable (no labels) |
 | C004 | HumanEval+ (EvalPlus) tests reject the surviving mutant | precision 0.5556 (5 of 9 surviving mutants rejected by HumanEval+); recall n/a |
 | C005 | presumed clean (no labels for this class in the dataset) | 0 error/warning findings on 0 of 6 tasks; precision and recall not measurable (no labels) |
+| C006 | presumed clean (no labels for this class in the dataset) | 0 error/warning findings on 0 of 6 tasks; precision and recall not measurable (no labels) |

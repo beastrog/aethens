@@ -6,6 +6,7 @@ from aethens.checks.c002_flakiness import C002Flakiness
 from aethens.checks.c003_labeled_candidates import C003LabeledCandidates
 from aethens.checks.c004_mutation import C004MutationProbes
 from aethens.checks.c005_order import C005OrderDependence
+from aethens.checks.c006_overspec import C006OverSpecified
 
 __all__ = [
     "C001GoldSanity",
@@ -13,6 +14,7 @@ __all__ = [
     "C003LabeledCandidates",
     "C004MutationProbes",
     "C005OrderDependence",
+    "C006OverSpecified",
     "Check",
     "CheckContext",
     "hash_seed",

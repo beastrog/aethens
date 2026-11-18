@@ -5,6 +5,7 @@ All notable changes are recorded here. The format follows Keep a Changelog; vers
 ## [Unreleased]
 
 ### Added
+- D3: check C006 (over-specified tests): reruns the gold after behaviour-preserving AST rewrites and warns (needs review) when the tests reject one. Bench grows to 31 tasks (3 planted over-specification defects, 2 controls).
 - D2: external bench on public data Aethens did not write: HumanEval tasks (MIT) judged with EvalPlus HumanEval+ (Apache-2.0) as an outside oracle; per-check results generated into docs/EXTERNAL_BENCH.md and the README; a 6-task vendored sample runs offline in `make check` with a regression gate.
 - D1: check C005 (test order and isolation): reruns the tests reversed, in seeded shuffles and one at a time, and reports every test whose verdict changes and reproduces. Bench grows to 26 tasks; order-alphabetical and order-generated are now caught (expected check moved to C005).
 - B1: project skeleton, typed models (Task, Candidate, Finding, Report), typed errors, `make check`, CI workflow.

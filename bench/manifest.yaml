@@ -97,3 +97,21 @@ tasks:
   - path: tasks/ctrl-order-shared-readonly
     kind: control
     note: "shared read-only class fixture and module constant"
+  - path: tasks/overspec-source
+    kind: defective
+    defects:
+      - {class: over-strict, check: C006, min_severity: warning, note: "test reads the gold's source and requires an append loop and a variable named result"}
+  - path: tasks/overspec-lineno
+    kind: defective
+    defects:
+      - {class: over-strict, check: C006, min_severity: warning, note: "test pins the line number a warning is raised from"}
+  - path: tasks/overspec-varnames
+    kind: defective
+    defects:
+      - {class: over-strict, check: C006, min_severity: warning, note: "test pins local variable names through co_varnames"}
+  - path: tasks/ctrl-overspec-behaviour
+    kind: control
+    note: "behaviour-only tests over code with loops, branches and constants every rewrite touches"
+  - path: tasks/ctrl-signature-pinned
+    kind: control
+    note: "introspects the public signature, which the statement specifies and no rewrite changes"
