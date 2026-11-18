@@ -6,3 +6,4 @@ All notable changes are recorded here. The format follows Keep a Changelog; vers
 
 ### Added
 - B1: project skeleton, typed models (Task, Candidate, Finding, Report), typed errors, `make check`, CI workflow.
+- B2: aethens-task/v1 loader and validator with typed errors; two example tasks; docs/task-format.md.

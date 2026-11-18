@@ -1,6 +1,6 @@
 # Status
 
-Last updated: 2026-11-18 (Asia/Calcutta), after B1.
+Last updated: 2026-11-18 (Asia/Calcutta), after B2.
 
 ## Mode
 
@@ -18,11 +18,15 @@ anyway, so this does not change task isolation). `docker run --rm hello-world` w
   Apache-2.0 LICENSE, README stub, CHANGELOG, .gitignore (includes `audits/private/`), CI workflow,
   typed models with JSON round-trip, typed errors.
 
+- B2: aethens-task/v1 loader and validator (`aethens.adapters.load_task/load_tasks`), typed error per
+  class, docs/task-format.md, examples/add-two and examples/word-format.
+
 ## Next
-- B2: aethens-task/v1 loader and validator.
+- B3: runner (Docker default, explicit unsafe-local mode).
 
 ## Open risks
 - Hosted CI has never run; the workflow file is only checked by running its commands locally.
 
 ## Not verified
+- Loader behaviour on case-insensitive filesystems (macOS, Windows); tested on Linux only.
 - GitHub Actions behaviour (no remote).

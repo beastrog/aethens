@@ -11,6 +11,8 @@ Every dependency and design decision, with the reason. Newest at the bottom of e
 | mypy | 2.4.1 | MIT | dev | `mypy --strict` is required by AGENTS.md. |
 | pytest | 9.2.0 | MIT | dev | Test runner. |
 | jsonschema | 4.26.0 | MIT | dev | Validates reports against the published JSON Schema in tests (B6). |
+| PyYAML | >=6.0.3,<7 | MIT | runtime | Parse task.yaml and label sidecars (B2). Only `SafeLoader` (subclass) is used. |
+| types-PyYAML | 6.0.12.20261113 | Apache-2.0 | dev | Type stubs for mypy --strict. |
 
 Versions were read from the PyPI JSON API on 2026-11-18, not from memory.
 
@@ -35,3 +37,16 @@ CI installs uv with `pip install uv==0.13.7` instead of a third-party setup acti
   tested from the start.
 - D-006 (B1) The Makefile calls tools through `RUN ?= uv run`; CI selects the interpreter with
   `UV_PYTHON`.
+- D-007 (B2) Candidate labels live in a sidecar `<name>.label.yaml` next to each candidate directory,
+  not inside it, so the overlay contains only solution files.
+- D-008 (B2) Limits chosen by the agent (owner may change): max file size 5 MiB, `timeout_s` 1..3600,
+  default 60 s, default image `python:3.12-slim`.
+- D-009 (B2) The loader scans the whole task tree before parsing anything and rejects escaping or
+  dangling symlinks and special files (FIFO, device, socket). Internal symlinks are allowed; the runner
+  will copy them dereferenced (B3), so containers never see a symlink.
+- D-010 (B2) `image` must match `^[a-z0-9][A-Za-z0-9._/:@-]{0,254}$` and ids
+  `^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$`: neither can start with `-`, so neither can be parsed as a docker
+  CLI option (argument injection).
+- D-011 (B2) The YAML loader rejects duplicate keys (a silently ignored duplicate could hide a field).
+- D-012 (B2) Bench and example tasks use stdlib `unittest` as their verifier, because the default image
+  has no pytest and runs have no network.

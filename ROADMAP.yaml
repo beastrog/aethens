@@ -28,11 +28,12 @@ phases:
         day: 1
         description: repo skeleton, pyproject, Makefile with make check, CI, LICENSE, typed models (Task, Candidate, Finding, Report), errors, schema tests, STATUS.md, DECISIONS.md
         acceptance: make check green locally and in CI; models round-trip through JSON; mypy --strict clean
-        status: DONE (local make check green on py3.11/3.12/3.13; hosted CI not run)
+        status: DONE_LOCAL (make check green locally on py3.11/3.12/3.13; hosted CI not run, so the "in CI" criterion is unverified)
       - id: B2
         day: 1
         description: aethens-task/v1 loader and validator (task.yaml, starter, tests, gold, labeled candidate overlay dirs with label_source)
         acceptance: typed errors for missing files, bad schema, path traversal, symlinks escaping the task dir; example task loads
+        status: DONE_LOCAL (all acceptance tests pass locally; hosted CI not run)
       - id: B3
         day: 2
         description: runner with Docker default and explicit unsafe-local mode; resource limits, timeouts, environment scrubbing, disposable copy, cleanup
