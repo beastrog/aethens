@@ -105,7 +105,7 @@ def test_finding_round_trip() -> None:
 def test_report_round_trip_and_schema_constant() -> None:
     r = _report()
     data = json.loads(json.dumps(r.to_dict()))
-    assert data["schema"] == REPORT_SCHEMA == "aethens-report/v1"
+    assert data["schema"] == REPORT_SCHEMA == "aethens-report/v2"
     assert Report.from_dict(data) == r
 
 

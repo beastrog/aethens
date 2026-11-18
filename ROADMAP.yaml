@@ -87,7 +87,7 @@ phases:
       - id: D4
         description: C002 reruns adaptively until it can state "flake rate below p at 95% confidence" or detects flakiness, within a budget
         acceptance: statistics and new semantics documented in docs/DECISIONS.md; report schema version bumped if the schema changes
-        status: NOT_STARTED
+        status: DONE_LOCAL (exact binomial bound; 6/11/59 max runs for p 0.5/0.25/0.05; coverage statements in aethens-report/v2; statistics in DECISIONS D-056 to D-058)
       - id: D5
         description: reward-hacking probe pack (C007); adversarial candidates that game weak verifiers, run in the same Docker sandbox
         acceptance: recall per exploit category on the bench; controls with hardened verifiers stay silent; isolation settings unchanged

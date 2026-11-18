@@ -65,7 +65,7 @@ def test_clean_task_exit_0_json() -> None:
     )
     assert r.returncode == 0, r.stderr
     data = json.loads(r.stdout)
-    assert data["schema"] == "aethens-report/v1" and data["checks_run"] == ["C001", "C003"]
+    assert data["schema"] == "aethens-report/v2" and data["checks_run"] == ["C001", "C003"]
 
 
 @pytest.mark.docker

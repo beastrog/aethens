@@ -15,9 +15,12 @@ def run_audit(tasks: Sequence[Task], checks: Sequence[Check], ctx: CheckContext)
     started = datetime.now(UTC).replace(microsecond=0).isoformat()
     t0 = time.monotonic()
     findings = []
+    coverage = []
     for task in tasks:
         for check in checks:
-            findings.extend(check.run(task, ctx))
+            found, covered = check.run_with_coverage(task, ctx)
+            findings.extend(found)
+            coverage.extend(covered)
     return Report(
         tool_version=__version__,
         task_ids=tuple(t.id for t in tasks),
@@ -25,6 +28,7 @@ def run_audit(tasks: Sequence[Task], checks: Sequence[Check], ctx: CheckContext)
         budget=ctx.budget,
         seed=ctx.seed,
         findings=tuple(findings),
+        coverage=tuple(coverage),
         started_at=started,
         duration_s=round(time.monotonic() - t0, 3),
     )

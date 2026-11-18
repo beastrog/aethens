@@ -14,7 +14,9 @@ from typing import Any, TypeVar
 
 from aethens.errors import SchemaError
 
-REPORT_SCHEMA = "aethens-report/v1"
+REPORT_SCHEMA = "aethens-report/v2"
+# Older report versions Report.from_dict still reads (v1 had no coverage list).
+READABLE_REPORT_SCHEMAS = ("aethens-report/v1", REPORT_SCHEMA)
 TASK_SCHEMA = "aethens-task/v1"
 
 JSONDict = dict[str, Any]
@@ -269,8 +271,39 @@ class Finding:
 
 
 @dataclass(frozen=True)
+class Coverage:
+    """What a check established when it found nothing, e.g. C002's flake-rate bound (v2)."""
+
+    check_id: str
+    task_id: str
+    statement: str
+    stats: dict[str, str] = field(default_factory=dict)
+
+    def to_dict(self) -> JSONDict:
+        return {
+            "check_id": self.check_id,
+            "task_id": self.task_id,
+            "statement": self.statement,
+            "stats": dict(self.stats),
+        }
+
+    @classmethod
+    def from_dict(cls, data: JSONDict) -> Coverage:
+        w = "coverage"
+        stats = _req(data, "stats", dict, w)
+        if not all(isinstance(k, str) and isinstance(v, str) for k, v in stats.items()):
+            raise SchemaError(f"{w}: stats must map strings to strings")
+        return cls(
+            check_id=_req(data, "check_id", str, w),
+            task_id=_req(data, "task_id", str, w),
+            statement=_req(data, "statement", str, w),
+            stats=dict(stats),
+        )
+
+
+@dataclass(frozen=True)
 class Report:
-    """The result of one audit. Serialised as aethens-report/v1."""
+    """The result of one audit. Serialised as aethens-report/v2 (v1 plus ``coverage``)."""
 
     tool_version: str
     task_ids: tuple[str, ...]
@@ -280,6 +313,7 @@ class Report:
     findings: tuple[Finding, ...]
     started_at: str
     duration_s: float
+    coverage: tuple[Coverage, ...] = ()
     schema: str = REPORT_SCHEMA
 
     def to_dict(self) -> JSONDict:
@@ -291,6 +325,7 @@ class Report:
             "budget": self.budget.value,
             "seed": self.seed,
             "findings": [f.to_dict() for f in self.findings],
+            "coverage": [c.to_dict() for c in self.coverage],
             "started_at": self.started_at,
             "duration_s": self.duration_s,
         }
@@ -299,8 +334,11 @@ class Report:
     def from_dict(cls, data: JSONDict) -> Report:
         w = "report"
         schema = _req(data, "schema", str, w)
-        if schema != REPORT_SCHEMA:
+        if schema not in READABLE_REPORT_SCHEMAS:
             raise SchemaError(f"{w}: unsupported schema {schema!r}, expected {REPORT_SCHEMA!r}")
+        coverage: tuple[Coverage, ...] = ()
+        if schema == REPORT_SCHEMA:
+            coverage = tuple(Coverage.from_dict(c) for c in _req(data, "coverage", list, w))
         return cls(
             schema=schema,
             tool_version=_req(data, "tool_version", str, w),
@@ -311,4 +349,5 @@ class Report:
             findings=tuple(Finding.from_dict(f) for f in _req(data, "findings", list, w)),
             started_at=_req(data, "started_at", str, w),
             duration_s=float(_req(data, "duration_s", (int, float), w)),
+            coverage=coverage,
         )

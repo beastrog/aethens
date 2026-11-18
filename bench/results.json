@@ -7,10 +7,10 @@
   "controls": 12,
   "defective": 19,
   "metrics": {
-    "planted": 19,
-    "found": 19,
+    "planted": 20,
+    "found": 20,
     "recall": 1.0,
-    "true_findings": 19,
+    "true_findings": 20,
     "false_positives": 0,
     "precision": 1.0,
     "unexpected_findings": 3,
@@ -23,8 +23,8 @@
         "false_positives": 0
       },
       "C002": {
-        "planted": 3,
-        "found": 3,
+        "planted": 4,
+        "found": 4,
         "false_positives": 0
       },
       "C003": {
@@ -58,8 +58,8 @@
         "found": 5
       },
       "flaky": {
-        "planted": 2,
-        "found": 2
+        "planted": 3,
+        "found": 3
       },
       "no-assertions": {
         "planted": 2,
@@ -225,6 +225,12 @@
       "check_id": "C005",
       "severity": "error",
       "id": "C005-order-crossmodule-30fff417"
+    },
+    {
+      "task_id": "order-generated",
+      "check_id": "C002",
+      "severity": "error",
+      "id": "C002-order-generated-b16f9622"
     },
     {
       "task_id": "order-generated",

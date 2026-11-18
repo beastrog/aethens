@@ -215,3 +215,31 @@ CI installs uv with `pip install uv==0.13.7` instead of a third-party setup acti
   one info finding saying C006 checked nothing. Bench: defect class over-strict gains check C006;
   planted overspec-source, overspec-lineno, overspec-varnames; controls ctrl-overspec-behaviour and
   ctrl-signature-pinned (introspects the public signature, which no rewrite changes).
+- D-056 (D4) C002 statistics. Flake rate q = per-run probability of the less likely verdict
+  (0 <= q <= 0.5), runs assumed independent. After n runs that all agree, C002 states "flake rate
+  below b at 95% confidence", where b solves (1-q)^n + q^n = 0.05 on [0, 0.5]: the exact binomial
+  test inversion behind Clopper-Pearson. The q^n term is there because C002 does not know in advance
+  which verdict is the normal one; for n >= 30 b equals the textbook one-sided Clopper-Pearson bound
+  1 - 0.05^(1/n) (rule of three, about 3/n) to 6 digits, and at small n it is slightly more
+  conservative (6 runs, not 5, to rule out a 50/50 flip). When C002 finds flakiness, it reports k
+  (the count of the less common verdict) out of n and the two-sided 95% Clopper-Pearson interval
+  for k/n. Implemented in `aethens/stats.py` with the standard library (bisection on the exact
+  binomial CDF); no scipy.
+- D-057 (D4) New C002 semantics. Minimum runs 3/5/10 (smoke/standard/deep, the old fixed counts);
+  if they disagree that is the finding (unchanged). If they agree, C002 keeps going one run at a
+  time until a run disagrees (finding), the target bound holds (p = 0.5/0.25/0.05, reached after
+  6/11/59 agreeing runs), or summed run time reaches 120/300/1800 s. Without a finding it records a
+  coverage statement with the bound it actually reached and why it stopped. Cost: a stable task now
+  costs 11 gold runs at standard instead of 5. Three existing unit tests pinned the old fixed run
+  counts (5 at standard; 3/5/10 per budget; 5 distinct hash seeds); they were updated to the new
+  exact counts (11; 6/11/59; 11), not loosened.
+- D-058 (D4) Report schema bumped to aethens-report/v2: a top-level `coverage` list (check_id,
+  task_id, statement, string stats), produced through `Check.run_with_coverage` (default: run(),
+  no coverage). Only C002 produces coverage so far. `Report.from_dict` still reads v1 (coverage
+  empty). The Markdown report shows coverage in its own section. Three tests that pinned the
+  string "aethens-report/v1" now pin "aethens-report/v2".
+- D-059 (D4) order-generated gains a second expected defect (flaky, C002). Its generated test names
+  come from set iteration, so the run order and the verdict depend on PYTHONHASHSEED: it is both
+  order-dependent and flaky. The old fixed 5 runs missed it at seed 0; adaptive C002 finds it after
+  more runs. This adds one planted defect (20 total), labelled after D4 was written and observed
+  failing before: the owner should review whether adding a label a new feature catches is fair.

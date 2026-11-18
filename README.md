@@ -48,14 +48,14 @@ Useful options: `--budget smoke|standard|deep`, `--fail-on error|warning`, `--fo
 scrubbed environment and timeouts. Only use it on code you trust.
 
 Tasks use the `aethens-task/v1` directory format: [docs/task-format.md](docs/task-format.md).
-Reports follow `aethens-report/v1`: [docs/report-schema.json](docs/report-schema.json).
+Reports follow `aethens-report/v2` (v1 plus a `coverage` list of what checks established where they found nothing): [docs/report-schema.json](docs/report-schema.json).
 
 ## Checks
 
 | check | what it does | can catch | cannot catch |
 |---|---|---|---|
 | C001 gold sanity | runs the starting state (must fail) and the gold solution (must pass), once each | tests with no real assertions; a broken gold solution or wrong file layout | defects that only show on some runs (see C002) |
-| C002 flakiness | runs the gold solution 3/5/10 times (smoke/standard/deep), varying only `PYTHONHASHSEED` | verdicts that depend on set or dict ordering or `hash()` | flakiness from time, unseeded randomness or scheduling, except by chance; a test that flips 50/50 is missed with probability 2 × 0.5^5 = 1/16 at 5 runs |
+| C002 flakiness | runs the gold solution at least 3/5/10 times (smoke/standard/deep), varying only `PYTHONHASHSEED`; while every run agrees it keeps going (up to 6/11/59 runs, or 120/300/1800 s of run time) until it can state "flake rate below 0.5/0.25/0.05 at 95% confidence" (exact binomial bound, recorded in the report's coverage list) | verdicts that depend on set or dict ordering or `hash()`; flips rarer than the old fixed run count could see | flakiness from time, unseeded randomness or scheduling, except by chance; a flake rate below the stated bound |
 | C003 labeled candidates | runs each candidate in `candidates/valid` and `candidates/invalid` | false rejects (over-strict tests) and false accepts (weak tests), but only as good as the labels; `llm-unreviewed` labels give warnings marked needs-review | anything for which you have no labeled candidate |
 | C004 mutation probes | runs up to 5/10/30 AST mutants of the gold solution | behaviour the tests never check (surviving mutants, info only) | equivalent mutants look like weaknesses; a killed mutant does not prove the tests are strong |
 | C005 test order and isolation | reruns the gold's tests in their default order, reversed, in 1/2/5 seeded shuffles and each test alone (up to 10/30/200), all with the same `PYTHONHASHSEED`; a change must reproduce on a second run | tests that pass only because an earlier test left state behind, or that break when another test runs first | orders it did not try; verifiers other than `python -m unittest` (it says it checked nothing) |
@@ -75,7 +75,7 @@ Bench: 31 self-authored tasks, 12 clean controls and 19 with planted defects.
 | metric | value |
 |---|---|
 | precision (error/warning findings) | 1.0 |
-| recall (planted defects found) | 1.0 (19/19) |
+| recall (planted defects found) | 1.0 (20/20) |
 | false positives on controls | 0 |
 | unexpected error/warning findings on defective tasks | 3 |
 | info findings on controls | 5 |
@@ -84,7 +84,7 @@ Bench: 31 self-authored tasks, 12 clean controls and 19 with planted defects.
 |---|---|
 | weak-tests | 3/3 |
 | over-strict | 5/5 |
-| flaky | 2/2 |
+| flaky | 3/3 |
 | no-assertions | 2/2 |
 | broken-gold | 2/2 |
 | order-dependence | 5/5 |
@@ -92,7 +92,7 @@ Bench: 31 self-authored tasks, 12 clean controls and 19 with planted defects.
 | check | found / planted | false positives |
 |---|---|---|
 | C001 | 4/4 | 0 |
-| C002 | 3/3 | 0 |
+| C002 | 4/4 | 0 |
 | C003 | 4/4 | 0 |
 | C004 | 1/1 | 0 |
 | C005 | 4/4 | 0 |
@@ -131,8 +131,9 @@ On 164 HumanEval tasks (MIT), judged by EvalPlus's HumanEval+ tests (Apache-2.0)
   names, code shape). Its five rewrites are argued and tested to preserve behaviour, not
   machine-proved, and it skips every site it cannot show is safe. Its findings need review: a
   statement may legitimately require an implementation detail.
-- C002 is probabilistic in the number of runs: a test that flips 50/50 is missed with probability
-  2 × 0.5^5 = 1/16 at 5 runs.
+- C002 is still statistical: without a finding it states only that the flake rate is below a bound
+  (0.25 at 95% confidence at the default budget, 0.05 at deep), assuming independent runs. A rarer
+  flake can pass unseen, and the time budget can stop it before the target bound.
 - Harnesses that judge only the exit code accept a solution that calls `os._exit(0)` on import. There
   is no check for this yet (see docs/IDEAS.md).
 - Python tasks only; verifiers must be runnable as a command inside a Docker image with no network.

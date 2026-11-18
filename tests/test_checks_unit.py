@@ -82,11 +82,12 @@ def test_c001_layers_and_env() -> None:
 def test_c002_stable_is_silent() -> None:
     runner = FakeRunner(lambda s, i: result(0))
     assert C002Flakiness().run(TASK, ctx(runner)) == []
-    assert len(runner.specs) == 5  # standard budget
+    assert len(runner.specs) == 11  # standard budget: enough agreeing runs for p < 0.25 (D4)
 
 
 def test_c002_runs_per_budget() -> None:
-    for budget, n in ((Budget.SMOKE, 3), (Budget.STANDARD, 5), (Budget.DEEP, 10)):
+    # D4: adaptive; with every run agreeing C002 runs until the budget's target bound holds
+    for budget, n in ((Budget.SMOKE, 6), (Budget.STANDARD, 11), (Budget.DEEP, 59)):
         runner = FakeRunner(lambda s, i: result(0))
         C002Flakiness().run(TASK, ctx(runner, budget=budget))
         assert len(runner.specs) == n
@@ -118,7 +119,7 @@ def test_c002_hash_seeds_vary_and_are_deterministic() -> None:
     C002Flakiness().run(TASK, ctx(r2, seed=11))
     seeds1 = [s.env["PYTHONHASHSEED"] for s in r1.specs]
     seeds2 = [s.env["PYTHONHASHSEED"] for s in r2.specs]
-    assert seeds1 == seeds2 and len(set(seeds1)) == 5
+    assert seeds1 == seeds2 and len(set(seeds1)) == 11
     r3 = FakeRunner(lambda s, i: result(0))
     C002Flakiness().run(TASK, ctx(r3, seed=12))
     assert [s.env["PYTHONHASHSEED"] for s in r3.specs] != seeds1

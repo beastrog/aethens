@@ -9,7 +9,11 @@ from aethens.runner import RunResult, RunSpec
 
 
 def result(
-    code: int | None = 0, timed_out: bool = False, out: str = "", err: str = ""
+    code: int | None = 0,
+    timed_out: bool = False,
+    out: str = "",
+    err: str = "",
+    duration_s: float = 0.01,
 ) -> RunResult:
     return RunResult(
         exit_code=None if timed_out else code,
@@ -17,7 +21,7 @@ def result(
         oom_killed=False,
         stdout_tail=out,
         stderr_tail=err,
-        duration_s=0.01,
+        duration_s=duration_s,
         truncated=False,
         mode="fake",
         argv=("fake",),

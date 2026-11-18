@@ -1,13 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/aethens/aethens/docs/report-schema.json",
-  "title": "Aethens report (aethens-report/v1)",
-  "description": "Output of `aethens audit --format json`. Mirrors aethens.models.Report.",
+  "title": "Aethens report (aethens-report/v2)",
+  "description": "Output of `aethens audit --format json`. Mirrors aethens.models.Report. v2 adds `coverage` (what checks established where they found nothing); v1 reports had no coverage.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema", "tool_version", "task_ids", "checks_run", "budget", "seed", "findings", "started_at", "duration_s"],
+  "required": ["schema", "tool_version", "task_ids", "checks_run", "budget", "seed", "findings", "coverage", "started_at", "duration_s"],
   "properties": {
-    "schema": {"const": "aethens-report/v1"},
+    "schema": {"const": "aethens-report/v2"},
     "tool_version": {"type": "string"},
     "task_ids": {"type": "array", "items": {"type": "string"}},
     "checks_run": {"type": "array", "items": {"type": "string", "pattern": "^C[0-9]{3}$"}},
@@ -15,9 +15,22 @@
     "seed": {"type": "integer"},
     "started_at": {"type": "string", "description": "ISO 8601 timestamp with UTC offset"},
     "duration_s": {"type": "number", "minimum": 0},
-    "findings": {"type": "array", "items": {"$ref": "#/$defs/finding"}}
+    "findings": {"type": "array", "items": {"$ref": "#/$defs/finding"}},
+    "coverage": {"type": "array", "items": {"$ref": "#/$defs/coverage"}}
   },
   "$defs": {
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["check_id", "task_id", "statement", "stats"],
+      "description": "A statement a check can make although it found nothing, e.g. C002: flake rate below p at 95% confidence",
+      "properties": {
+        "check_id": {"type": "string", "pattern": "^C[0-9]{3}$"},
+        "task_id": {"type": "string"},
+        "statement": {"type": "string"},
+        "stats": {"type": "object", "additionalProperties": {"type": "string"}}
+      }
+    },
     "finding": {
       "type": "object",
       "additionalProperties": false,
@@ -41,7 +54,7 @@
       "additionalProperties": false,
       "required": ["subject", "command", "observed", "exit_codes", "timed_out", "stdout_tail", "stderr_tail", "extra"],
       "properties": {
-        "subject": {"type": "string", "description": "starter, gold, candidate:<name> or mutant:<key>"},
+        "subject": {"type": "string", "description": "starter, gold, candidate:<name>, mutant:<key>, test:<id> (C005), rewrite:<family> (C006) or probe:<category> (C007)"},
         "command": {"type": "array", "items": {"type": "string"}},
         "observed": {"type": "string"},
         "exit_codes": {"type": "array", "items": {"type": ["integer", "null"]}},

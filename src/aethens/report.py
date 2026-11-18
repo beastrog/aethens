@@ -1,4 +1,4 @@
-"""Render a Report as JSON (aethens-report/v1) or Markdown (sized for a PR comment)."""
+"""Render a Report as JSON (aethens-report/v2) or Markdown (sized for a PR comment)."""
 
 from __future__ import annotations
 
@@ -75,7 +75,7 @@ def render_markdown(report: Report) -> str:
             "and seed; it is not a guarantee about the verifier.",
             "",
         ]
-        return "\n".join(out)
+        return "\n".join(out + _coverage_md(report))
     out += ["| severity | check | task | title |", "|---|---|---|---|"]
     order = sorted(report.findings, key=lambda f: (-f.severity.rank, f.task_id, f.check_id, f.id))
     for f in order:
@@ -88,4 +88,15 @@ def render_markdown(report: Report) -> str:
         "solution; review before acting. Findings rely on what was run; see each finding's limits.",
         "",
     ]
-    return "\n".join(out)
+    return "\n".join(out + _coverage_md(report))
+
+
+def _coverage_md(report: Report) -> list[str]:
+    if not report.coverage:
+        return []
+    out = ["### Coverage (what was established where nothing was found)", ""]
+    out += ["| check | task | statement |", "|---|---|---|"]
+    for c in sorted(report.coverage, key=lambda c: (c.task_id, c.check_id)):
+        out.append(f"| {c.check_id} | {_esc(c.task_id)} | {_esc(c.statement)} |")
+    out.append("")
+    return out

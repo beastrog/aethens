@@ -9,7 +9,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
 
-from aethens.models import Budget, Confidence, Evidence, Finding, Severity, Task
+from aethens.models import Budget, Confidence, Coverage, Evidence, Finding, Severity, Task
 from aethens.runner import Runner, RunResult, RunSpec
 
 FLAKY_RUNS = {Budget.SMOKE: 3, Budget.STANDARD: 5, Budget.DEEP: 10}
@@ -31,6 +31,12 @@ class Check(ABC):
 
     @abstractmethod
     def run(self, task: Task, ctx: CheckContext) -> list[Finding]: ...
+
+    def run_with_coverage(
+        self, task: Task, ctx: CheckContext
+    ) -> tuple[list[Finding], list[Coverage]]:
+        """Findings plus what the check established when it found nothing (default: nothing)."""
+        return self.run(task, ctx), []
 
 
 def hash_seed(seed: int, task_id: str, check_id: str, salt: int | str) -> int:

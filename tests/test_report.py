@@ -1,4 +1,4 @@
-"""aethens-report/v1 JSON Schema and Markdown rendering (B6)."""
+"""aethens-report/v2 JSON Schema and Markdown rendering (B6)."""
 
 from __future__ import annotations
 
@@ -41,7 +41,7 @@ def _report(seed: int = 0) -> Report:
 
 def test_schema_is_valid_json_schema() -> None:
     jsonschema.Draft202012Validator.check_schema(SCHEMA)
-    assert SCHEMA["properties"]["schema"]["const"] == "aethens-report/v1"
+    assert SCHEMA["properties"]["schema"]["const"] == "aethens-report/v2"
 
 
 def test_report_validates_against_schema() -> None:

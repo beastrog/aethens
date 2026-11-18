@@ -67,6 +67,7 @@ tasks:
     kind: defective
     defects:
       - {class: order-dependence, check: C005, note: "shared state across generated tests named in set order (D1: expected check moved from C002 to C005)"}
+      - {class: flaky, check: C002, note: "test names come from set iteration, so the order and the verdict depend on PYTHONHASHSEED (D4: adaptive C002 finds it at seed 0; the fixed 5 runs did not)"}
   - path: tasks/order-alphabetical
     kind: defective
     defects:

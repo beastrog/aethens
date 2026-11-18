@@ -66,6 +66,12 @@ anyway, so this does not change task isolation). `docker run --rm hello-world` w
   rejection must reproduce). Bench 31 tasks (12 controls, 19 defective): precision 1.0, recall 1.0
   (19/19), 0 false positives.
 
+- D4 DONE_LOCAL: adaptive C002 (at least 3/5/10 runs, up to 6/11/59 until "flake rate below
+  0.5/0.25/0.05 at 95% confidence", time-capped at 120/300/1800 s); bound statements in the new
+  report `coverage` list; report schema aethens-report/v2 (reads v1). It now also finds
+  order-generated's hash-seed flakiness at seed 0 (new C002 label, D-059): bench 31 tasks,
+  precision 1.0, recall 1.0 (20/20), 0 false positives.
+
 ## Next (owner actions; the agent stops after B7)
 - Fresh-session hardening review (Prompt 3 in docs/BUILD_PROMPTS.md). NOT done: B7's acceptance
   criterion "fresh-session hardening review done" is therefore open, and B7 is marked PARTIAL.
@@ -77,7 +83,8 @@ anyway, so this does not change task isolation). `docker run --rm hello-world` w
 ## Open risks
 - Exit code 3 semantics are an agent decision (D-032); the owner should confirm.
 - Bench numbers are from local runs; the hosted CI artifact does not exist yet.
-- C002 is probabilistic in the run count (about 1 seed in 16 misses a 50/50 flaky test at 5 runs).
+- C002 is statistical: a clean result means "flake rate below 0.25 at 95% confidence" at the default
+  budget (0.05 at deep), assuming independent runs; rarer flakes can be missed.
 - Hosted CI has never run; the workflow file is only checked by running its commands locally.
 
 ## Not verified
