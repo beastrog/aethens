@@ -3,30 +3,19 @@
   "tool_version": "0.1.0.dev0",
   "seed": 0,
   "budget": "standard",
-  "tasks": 22,
-  "controls": 8,
-  "defective": 14,
+  "tasks": 26,
+  "controls": 10,
+  "defective": 16,
   "metrics": {
-    "planted": 14,
-    "found": 12,
-    "recall": 0.8571,
-    "true_findings": 11,
+    "planted": 16,
+    "found": 16,
+    "recall": 1.0,
+    "true_findings": 15,
     "false_positives": 0,
     "precision": 1.0,
     "unexpected_findings": 3,
     "info_on_controls": 2,
-    "known_misses": [
-      {
-        "task": "order-generated",
-        "class": "order-dependence",
-        "check": "C002"
-      },
-      {
-        "task": "order-alphabetical",
-        "class": "order-dependence",
-        "check": "C002"
-      }
-    ],
+    "known_misses": [],
     "per_check": {
       "C001": {
         "planted": 4,
@@ -34,7 +23,7 @@
         "false_positives": 0
       },
       "C002": {
-        "planted": 5,
+        "planted": 3,
         "found": 3,
         "false_positives": 0
       },
@@ -46,6 +35,11 @@
       "C004": {
         "planted": 1,
         "found": 1,
+        "false_positives": 0
+      },
+      "C005": {
+        "planted": 4,
+        "found": 4,
         "false_positives": 0
       }
     },
@@ -71,8 +65,8 @@
         "found": 2
       },
       "order-dependence": {
-        "planted": 3,
-        "found": 1
+        "planted": 5,
+        "found": 5
       }
     }
   },
@@ -166,6 +160,42 @@
       "check_id": "C004",
       "severity": "info",
       "id": "C004-noassert-swallow-b1366483"
+    },
+    {
+      "task_id": "order-alphabetical",
+      "check_id": "C005",
+      "severity": "error",
+      "id": "C005-order-alphabetical-8141856d"
+    },
+    {
+      "task_id": "order-classfixture",
+      "check_id": "C004",
+      "severity": "info",
+      "id": "C004-order-classfixture-91267462"
+    },
+    {
+      "task_id": "order-classfixture",
+      "check_id": "C004",
+      "severity": "info",
+      "id": "C004-order-classfixture-bad3cb07"
+    },
+    {
+      "task_id": "order-classfixture",
+      "check_id": "C005",
+      "severity": "error",
+      "id": "C005-order-classfixture-6d2040ba"
+    },
+    {
+      "task_id": "order-crossmodule",
+      "check_id": "C005",
+      "severity": "error",
+      "id": "C005-order-crossmodule-30fff417"
+    },
+    {
+      "task_id": "order-generated",
+      "check_id": "C005",
+      "severity": "error",
+      "id": "C005-order-generated-ed060eb7"
     },
     {
       "task_id": "order-setcases",

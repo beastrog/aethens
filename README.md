@@ -58,6 +58,7 @@ Reports follow `aethens-report/v1`: [docs/report-schema.json](docs/report-schema
 | C002 flakiness | runs the gold solution 3/5/10 times (smoke/standard/deep), varying only `PYTHONHASHSEED` | verdicts that depend on set or dict ordering or `hash()` | flakiness from time, unseeded randomness or scheduling, except by chance; a test that flips 50/50 is missed with probability 2 × 0.5^5 = 1/16 at 5 runs |
 | C003 labeled candidates | runs each candidate in `candidates/valid` and `candidates/invalid` | false rejects (over-strict tests) and false accepts (weak tests), but only as good as the labels; `llm-unreviewed` labels give warnings marked needs-review | anything for which you have no labeled candidate |
 | C004 mutation probes | runs up to 5/10/30 AST mutants of the gold solution | behaviour the tests never check (surviving mutants, info only) | equivalent mutants look like weaknesses; a killed mutant does not prove the tests are strong |
+| C005 test order and isolation | reruns the gold's tests in their default order, reversed, in 1/2/5 seeded shuffles and each test alone (up to 10/30/200), all with the same `PYTHONHASHSEED`; a change must reproduce on a second run | tests that pass only because an earlier test left state behind, or that break when another test runs first | orders it did not try; verifiers other than `python -m unittest` (it says it checked nothing) |
 
 ## Bench numbers
 
@@ -68,12 +69,12 @@ not measure real-world recall on other people's benchmarks.
 <!-- bench:start -->
 Generated from `bench/results.json` (aethens 0.1.0.dev0, seed 0, budget standard) by `bench/render_readme.py`.
 
-Bench: 22 self-authored tasks, 8 clean controls and 14 with planted defects.
+Bench: 26 self-authored tasks, 10 clean controls and 16 with planted defects.
 
 | metric | value |
 |---|---|
 | precision (error/warning findings) | 1.0 |
-| recall (planted defects found) | 0.8571 (12/14) |
+| recall (planted defects found) | 1.0 (16/16) |
 | false positives on controls | 0 |
 | unexpected error/warning findings on defective tasks | 3 |
 | info findings on controls | 2 |
@@ -85,19 +86,19 @@ Bench: 22 self-authored tasks, 8 clean controls and 14 with planted defects.
 | flaky | 2/2 |
 | no-assertions | 2/2 |
 | broken-gold | 2/2 |
-| order-dependence | 1/3 |
+| order-dependence | 5/5 |
 
 | check | found / planted | false positives |
 |---|---|---|
 | C001 | 4/4 | 0 |
-| C002 | 3/5 | 0 |
+| C002 | 3/3 | 0 |
 | C003 | 4/4 | 0 |
 | C004 | 1/1 | 0 |
+| C005 | 4/4 | 0 |
 
 Known misses in this run:
 
-- `order-generated` (order-dependence, expected C002)
-- `order-alphabetical` (order-dependence, expected C002)
+- none
 <!-- bench:end -->
 
 These numbers come from a local run on the build machine (Docker Engine 29.10.0, Linux). The GitHub

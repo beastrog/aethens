@@ -141,3 +141,34 @@ CI installs uv with `pip install uv==0.13.7` instead of a third-party setup acti
   project dependencies.
 - D-041 (B7) The code of conduct is short original text that links to the Contributor Covenant rather
   than copying it.
+
+## Differentiators (owner-approved 18 Nov 2026)
+
+- D-042 (D1) Check ids: C005 is the test-order and isolation check. The id was floated for an
+  exit-zero probe in B5 (docs/IDEAS.md); that probe is now part of the reward-hacking pack (D5).
+- D-043 (D1) C005 runs the tests through a stdlib-only driver copied into the sandbox at
+  `/work/.aethens/order_driver.py` and run with the verifier's own interpreter. The driver reuses
+  `unittest.TestProgram` for argument parsing and discovery (only `runTests` is replaced), so it runs
+  exactly the tests `python -m unittest ARGS` would. It sets `sys.path[0]` to the working directory
+  to match `-m`. The driver never runs in the Aethens process (AGENTS.md rule 8); the runner, its
+  isolation flags and limits are unchanged.
+- D-044 (D1) Orders: default (baseline), reversed, seeded shuffles (smoke 1, standard 2, deep 5) and
+  each test alone in a fresh container (cap smoke 10, standard 30, deep 200; a seeded sample above
+  the cap). Shuffles permute modules, then classes within a module, then tests within a class
+  (pytest-randomly's scheme), so class and module fixtures are not split, which would itself change
+  behaviour through repeated setUpClass/tearDownClass.
+- D-045 (D1) All C005 runs of a task share one PYTHONHASHSEED (derived from seed, task id, "C005"),
+  so order is the only variable. Verdicts are compared as passing (pass, skip, expected failure) vs
+  failing (fail, error, unexpected success); tests that did not run (failfast) are not compared.
+- D-046 (D1) A verdict change becomes an error + confirmed finding only when it reproduces: the
+  baseline and each changed order are run a second time. Changes that do not reproduce are info +
+  needs-review ("did not reproduce", see C002). One finding per test, listing every order that
+  changed its verdict. Evidence.command is the exact driver command of the first changed order;
+  `extra.driver_command`, `extra.default_order` and `extra.changed_in` complete the picture.
+- D-047 (D1) Only `python[3[.N]] -m unittest ...` verifiers are supported. Anything else, or a
+  baseline run that produces no driver result line, gives one info finding saying C005 checked
+  nothing (the C004 pattern), never silence. pytest support is in docs/IDEAS.md (the default image
+  has no pytest and runs have no network, so it could not be tested here).
+- D-048 (D1) Bench: order-alphabetical and order-generated now expect C005 (they are
+  order-dependence defects; order-generated was a seed-dependent C002 miss). Added order-crossmodule,
+  order-classfixture and the controls ctrl-order-cache and ctrl-order-shared-readonly.

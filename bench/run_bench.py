@@ -35,6 +35,7 @@ from aethens.checks import (
     C002Flakiness,
     C003LabeledCandidates,
     C004MutationProbes,
+    C005OrderDependence,
     CheckContext,
 )
 from aethens.errors import AethensError
@@ -50,7 +51,7 @@ CLASSES = (
     "broken-gold",
     "order-dependence",
 )
-CHECKS = ("C001", "C002", "C003", "C004")
+CHECKS = ("C001", "C002", "C003", "C004", "C005")
 RANK = {"info": 1, "warning": 2, "error": 3}
 
 
@@ -141,7 +142,13 @@ def regressions(baseline: dict[str, Any], metrics: dict[str, Any]) -> list[str]:
 
 
 def _audit_one(task: Task, seed: int, budget: Budget, runner: DockerRunner) -> list[dict[str, Any]]:
-    checks = [C001GoldSanity(), C002Flakiness(), C003LabeledCandidates(), C004MutationProbes()]
+    checks = [
+        C001GoldSanity(),
+        C002Flakiness(),
+        C003LabeledCandidates(),
+        C004MutationProbes(),
+        C005OrderDependence(),
+    ]
     report = run_audit([task], checks, CheckContext(runner=runner, seed=seed, budget=budget))
     return [
         {"task_id": f.task_id, "check_id": f.check_id, "severity": f.severity.value, "id": f.id}

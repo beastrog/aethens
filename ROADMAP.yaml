@@ -65,6 +65,34 @@ phases:
         zero false positives on bench controls; every planted defect class caught or listed as a known miss;
         hardening review findings fixed or logged; owner has read the README cold and could explain every claim
 
+  - id: 1D
+    name: Differentiators (approved by the owner on 18 Nov 2026, in this order; see docs/COMPETITIVE.md)
+    status: IN_PROGRESS
+    note: >
+      The owner explicitly approved these five items, including the changes to check semantics they
+      need. Local-only mode as for phase 1: local branch, make check green, git merge --squash.
+    milestones:
+      - id: D1
+        description: test-order and isolation check (C005); rerun the tests reversed, shuffled with a seed, and one at a time; report every test whose verdict changes, with evidence and a repro command
+        acceptance: catches bench tasks order-alphabetical and order-generated; new planted order fixtures and clean controls; no new false positives
+        status: DONE_LOCAL (all 4 order-dependence fixtures caught, both new controls silent, bench recall 16/16 with 0 false positives; hosted CI not run)
+      - id: D2
+        description: accuracy measured on public labelled data Aethens did not write (external bench); per-check precision and recall in a generated file; small licence-compatible vendored subset runs offline in make check
+        acceptance: every dataset licence checked and recorded in bench/LICENSES.md; skipped datasets recorded with the reason; generated results file; offline subset in make check
+        status: NOT_STARTED
+      - id: D3
+        description: over-specification check without an LLM (C006); behaviour-preserving AST rewrites of the gold; a test that rejects a rewrite is flagged as over-specified
+        acceptance: each rewrite documented with the conditions that make it semantics-preserving and skipped when unsure; planted fixtures and controls; unit tests per rewrite
+        status: NOT_STARTED
+      - id: D4
+        description: C002 reruns adaptively until it can state "flake rate below p at 95% confidence" or detects flakiness, within a budget
+        acceptance: statistics and new semantics documented in docs/DECISIONS.md; report schema version bumped if the schema changes
+        status: NOT_STARTED
+      - id: D5
+        description: reward-hacking probe pack (C007); adversarial candidates that game weak verifiers, run in the same Docker sandbox
+        acceptance: recall per exploit category on the bench; controls with hardened verifiers stay silent; isolation settings unchanged
+        status: NOT_STARTED
+
   - id: 2
     name: Launch (owner actions)
     status: NOT_STARTED

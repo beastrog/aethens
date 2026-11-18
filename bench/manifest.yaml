@@ -66,11 +66,11 @@ tasks:
   - path: tasks/order-generated
     kind: defective
     defects:
-      - {class: order-dependence, check: C002, note: "shared state across generated tests named in set order"}
+      - {class: order-dependence, check: C005, note: "shared state across generated tests named in set order (D1: expected check moved from C002 to C005)"}
   - path: tasks/order-alphabetical
     kind: defective
     defects:
-      - {class: order-dependence, check: C002, note: "KNOWN MISS: depends on unittest's fixed alphabetical order; no v0.1 check reorders tests"}
+      - {class: order-dependence, check: C005, note: "depends on unittest's fixed alphabetical order (a known miss until D1 added C005)"}
   - path: tasks/ctrl-money-format
     kind: control
     note: "exact format pinned because the statement specifies it"
@@ -83,3 +83,17 @@ tasks:
   - path: tasks/ctrl-isolated-state
     kind: control
     note: "stack tests with setUp isolation and order-independent set use"
+  - path: tasks/order-crossmodule
+    kind: defective
+    defects:
+      - {class: order-dependence, check: C005, note: "a later test module patches a shared constant and never restores it; reorder only"}
+  - path: tasks/order-classfixture
+    kind: defective
+    defects:
+      - {class: order-dependence, check: C005, note: "a test sorts a setUpClass fixture in place; the next test relies on it"}
+  - path: tasks/ctrl-order-cache
+    kind: control
+    note: "memoised gold shared across tests; verdicts independent of order"
+  - path: tasks/ctrl-order-shared-readonly
+    kind: control
+    note: "shared read-only class fixture and module constant"

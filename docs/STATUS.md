@@ -1,6 +1,6 @@
 # Status
 
-Last updated: 2026-11-18 (Asia/Calcutta), after B7 (build week complete, local-only).
+Last updated: 2026-11-18 (Asia/Calcutta), during the owner-approved differentiators D1-D5 (local-only).
 
 ## Mode
 
@@ -49,6 +49,12 @@ anyway, so this does not change task isolation). `docker run --rm hello-world` w
   written from a fresh clone and virtualenv, and the Action's shell steps (run with GitHub's
   `bash --noprofile --norc -eo pipefail`) give exit 0 on a clean sample repo, 1 with the report in the
   job summary on a defective one, and 2 on a bad path.
+
+## Differentiators (owner-approved 18 Nov 2026; ROADMAP phase 1D)
+- D1 DONE_LOCAL: C005 test order and isolation (driver inside the sandbox; default, reversed,
+  seeded shuffles, each test alone; same PYTHONHASHSEED; changes must reproduce). Bench 26 tasks
+  (10 controls, 16 defective): precision 1.0, recall 1.0 (16/16), 0 false positives, seed 0,
+  standard. Before D1: precision 1.0, recall 0.8571 (12/14) on 22 tasks.
 
 ## Next (owner actions; the agent stops after B7)
 - Fresh-session hardening review (Prompt 3 in docs/BUILD_PROMPTS.md). NOT done: B7's acceptance

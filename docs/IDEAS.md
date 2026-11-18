@@ -16,3 +16,8 @@ Ideas that came up during the build. AGENTS.md rule 14: write them here, do not 
 - Order-dependence check: rerun the verifier with test order reversed or shuffled (needs a
   harness-specific hook, e.g. unittest's sortTestMethodsUsing or pytest-randomly), to catch
   order-alphabetical-style defects.
+- C005 for pytest verifiers: list node ids with `--collect-only -q` and pass them in the wanted
+  order (needs an image with pytest; pytest's handling of explicit node-id order should be read in
+  its source first). Not built in D1.
+- C005: treat a reordered run that crashes before reporting (e.g. a test calls `os._exit`) as a
+  run-level finding; today such runs are skipped and the limits say so.
