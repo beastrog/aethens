@@ -1,0 +1,152 @@
+project: Aethens
+version: 5
+note: >
+  28 Oct 2026. Open source only (Apache-2.0). Build v0.1 in about a week of full-time agent-driven work
+  (2-3 weeks at 12-15 h/week), then let evidence decide. Spelling Aethens vs Athens pending the owner.
+  All numeric thresholds are the owner's hypotheses and may be changed BEFORE looking at data.
+current_phase: 0
+global_status: PLANNING
+
+phases:
+  - id: 0
+    name: Day 0 setup (owner, about 2 hours)
+    status: NOT_STARTED
+    milestones:
+      - id: P0-01
+        description: spelling chosen; GitHub repo created (private until launch); PyPI name reserved; PyPI trusted publisher configured; gh auth done by the owner; Docker confirmed working
+      - id: P0-02
+        description: owner has read own employment, contractor and university terms for IP and side-project clauses and confirmed nothing blocks a public open-source project in this domain (required before L-01; not a blocker for the private build)
+      - id: P0-03
+        description: AGENTS.md, ROADMAP.yaml, docs/AETHENS_PLAN.md committed; one-line CLAUDE.md saying "Read and follow AGENTS.md in full before any work"
+
+  - id: 1
+    name: Build week (agent-driven, owner reviews at the gate)
+    status: NOT_STARTED
+    timebox: about 7 full-time days
+    milestones:
+      - id: B1
+        day: 1
+        description: repo skeleton, pyproject, Makefile with make check, CI, LICENSE, typed models (Task, Candidate, Finding, Report), errors, schema tests, STATUS.md, DECISIONS.md
+        acceptance: make check green locally and in CI; models round-trip through JSON; mypy --strict clean
+      - id: B2
+        day: 1
+        description: aethens-task/v1 loader and validator (task.yaml, starter, tests, gold, labeled candidate overlay dirs with label_source)
+        acceptance: typed errors for missing files, bad schema, path traversal, symlinks escaping the task dir; example task loads
+      - id: B3
+        day: 2
+        description: runner with Docker default and explicit unsafe-local mode; resource limits, timeouts, environment scrubbing, disposable copy, cleanup
+        acceptance: tests for hung test, container build or start failure, memory blowup, network attempt blocked, output truncation; cleanup verified; no shell=True anywhere
+      - id: B4
+        day: 3
+        description: C001 gold sanity and C002 flakiness with planted-defect fixtures and clean controls
+        acceptance: findings carry full evidence and repro command; deterministic under a seed
+      - id: B5
+        day: 4
+        description: C003 labeled candidates (false accept and false reject, label_source aware) and C004 mutation probes (AST mutations, info severity, equivalent-mutant caveat); C005 exit-zero probe only if time remains
+        acceptance: each check has fixture, control and unit test; bench has at least 12 tasks
+      - id: B6
+        day: 5
+        description: report JSON aethens-report/v1 and Markdown renderer; CLI aethens audit PATH with fail_on and exit codes 0/1/2/3; bench runner computing precision, recall, false positives; bench/baseline.json regression gate
+        acceptance: bench has 20-24 tasks across six defect classes with controls; CI fails on regression
+      - id: B7
+        day: 6
+        description: GitHub Action (composite, pull_request only, read-only); README with CI-generated bench numbers and honest limits; SECURITY.md; CONTRIBUTING; issue templates incl. "I ran it on X"; docs/DISCLOSURE.md; release.yml using Trusted Publishing
+        acceptance: Action tested on a sample repo; README claims all trace to the bench report; fresh-session hardening review done and its findings fixed or logged
+    gate:
+      id: G1
+      pass: >
+        zero false positives on bench controls; every planted defect class caught or listed as a known miss;
+        hardening review findings fixed or logged; owner has read the README cold and could explain every claim
+
+  - id: 2
+    name: Launch (owner actions)
+    status: NOT_STARTED
+    timebox: day 7
+    milestones:
+      - id: L-01
+        description: owner reviews final PR, creates the GitHub release (triggers PyPI publish), flips repo to public
+      - id: L-02
+        description: short launch post using bench numbers and limits only; no named third-party findings
+      - id: L-03
+        description: five discovery conversations started (templates in the plan appendix)
+
+  - id: 3
+    name: Audit and disclosure
+    status: NOT_STARTED
+    timebox: days 5-45
+    milestones:
+      - id: A-01
+        description: choose 2-3 public benchmarks; verify licences; run the tool locally; write findings only to audits/private/
+      - id: A-02
+        description: owner verifies each finding by hand; sends private notices; starts the 2-4 week clock
+      - id: A-03
+        description: public audit post with method, numbers, misses and disclosure status
+    gate:
+      id: G2
+      pass: at least 5 outside users report running it on their own tasks; at least 3 maintainer replies; at least 5 conversations held (checked at day 30)
+
+  - id: 4
+    name: Iterate on evidence (weekly loop)
+    status: NOT_STARTED
+    milestones:
+      - id: I-01
+        description: weekly triage of issues and replies; one improvement per week; bench never regresses
+      - id: I-02
+        description: depth track and adapters only when the trigger in the plan fires (depth on feedback; adapter when 3 users ask)
+
+  - id: 5
+    name: First revenue
+    status: NOT_STARTED
+    timebox: days 45-90
+    milestones:
+      - id: R-01
+        description: fixed-price reviewed-audit offer; first audit at 500-2500 USD or traded for a public case study
+      - id: R-02
+        description: 15 real sales conversations logged
+    gate:
+      id: G3
+      pass: one paid pilot or support engagement at any price
+      fail_action: stop adding features; reconsider buyer or wedge
+
+  - id: 6
+    name: Product layer (only if G2 and G3 pass)
+    status: NOT_STARTED
+    milestones:
+      - id: P-01
+        description: self-hosted dashboard with history and trends
+      - id: P-02
+        description: team features; per-team pricing tested
+      - id: P-03
+        description: company formation decision
+
+deferred_until_evidence:
+  - LLM candidate generation (BYOK, cost cap)
+  - differential equivalence checks
+  - other languages (JS/TS, then Rust and C++)
+  - adapters: Docker repo-level, verifiers, inspect_evals, OpenEnv, Gymnasium
+  - hosted platform and cloud engine
+  - aethens-shield runtime guardrails
+  - hardware and electronics verification
+  - funding
+
+# Scale path: triggers come from invoices and repeated requests, not from stars or downloads.
+# Dollar figures are planning hypotheses; revise with real sales data.
+scale_triggers:
+  - id: A
+    trigger: first paid pilot at any price
+    unlocks: Indian entity, contract and NDA template, invoicing, business bank account (CA advice on export-of-services GST and foreign payments)
+    does_not_unlock: hiring
+  - id: B
+    trigger: 3 paying customers, or about 2k USD per month recurring-equivalent over a quarter
+    unlocks: self-hosted dashboard; 1-2 part-time reviewers under NDA; published pricing
+    does_not_unlock: multi-tenant hosting
+  - id: C
+    trigger: about 5-10k USD per month with repeat customers
+    unlocks: hosted audit service with managed sandboxes and parallel runs; first engineer or regular contractor; security document for buyers
+    does_not_unlock: fundraising unless cash is the constraint
+  - id: D
+    trigger: at least 3 customers ask for the same new area
+    unlocks: systems languages, then hardware and electronics verification, then agent and tool-use environments; optional services arm; optional aethens-shield
+  - id: E
+    trigger: growth limited by cash, not demand or time, with repeatable sales shown
+    unlocks: consider outside capital
