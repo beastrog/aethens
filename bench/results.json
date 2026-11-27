@@ -14,7 +14,7 @@
     "false_positives": 0,
     "precision": 1.0,
     "unexpected_findings": 3,
-    "info_on_controls": 9,
+    "info_on_controls": 6,
     "known_misses": [],
     "per_check": {
       "C001": {
@@ -216,12 +216,6 @@
       "check_id": "C004",
       "severity": "info",
       "id": "C004-ctrl-clamp-42cb6c2a"
-    },
-    {
-      "task_id": "ctrl-clamp",
-      "check_id": "C004",
-      "severity": "info",
-      "id": "C004-ctrl-clamp-875ee207"
     },
     {
       "task_id": "ctrl-clamp",
@@ -491,18 +485,6 @@
       "severity": "error",
       "id": "C007-ctrl-overspec-behaviour-e58477a7",
       "category": "framework-patch"
-    },
-    {
-      "task_id": "ctrl-signature-pinned",
-      "check_id": "C004",
-      "severity": "info",
-      "id": "C004-ctrl-signature-pinned-911e64f3"
-    },
-    {
-      "task_id": "ctrl-signature-pinned",
-      "check_id": "C004",
-      "severity": "info",
-      "id": "C004-ctrl-signature-pinned-f2466766"
     },
     {
       "task_id": "ctrl-signature-pinned",

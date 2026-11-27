@@ -3,12 +3,17 @@
 A *site* is one place where one operator can be applied. Sites are enumerated in ``ast.walk``
 order, which is deterministic for a given source, so a site can be re-applied to a fresh parse.
 Code inside ``if __name__ == "__main__":`` blocks is never mutated.
+
+Trivial compiler equivalence (TCE, D-065): a mutant whose compiled bytecode is identical to the
+gold's (for example when CPython folds both versions to the same constant) is provably equivalent
+and is never selected.
 """
 
 from __future__ import annotations
 
 import ast
 import random
+import types
 from dataclasses import dataclass
 
 _BOUNDARY: dict[type[ast.cmpop], type[ast.cmpop]] = {
@@ -180,6 +185,24 @@ def make_mutant(source: str, site: Site, file: str = "") -> Mutant:
     return Mutant(file=file, site=site, source=ast.unparse(tree))
 
 
+def _code_key(code: types.CodeType) -> tuple[object, ...]:
+    consts = tuple(
+        _code_key(c) if isinstance(c, types.CodeType) else (type(c).__name__, repr(c))
+        for c in code.co_consts
+    )
+    return (code.co_code, consts, code.co_names, code.co_varnames, code.co_freevars)
+
+
+def bytecode_equivalent(original: str, mutant: str) -> bool:
+    """True when both sources compile to the same bytecode (line and column data ignored)."""
+    try:
+        a = compile(original, "<gold>", "exec", dont_inherit=True, optimize=0)
+        b = compile(mutant, "<gold>", "exec", dont_inherit=True, optimize=0)
+    except (SyntaxError, ValueError):
+        return False
+    return _code_key(a) == _code_key(b)
+
+
 def select_mutants(files: dict[str, str], *, seed: int, salt: str, cap: int) -> list[Mutant]:
     """Seeded, capped selection of mutants over several files. Unparsable files are skipped."""
     pool: list[tuple[str, Site]] = []
@@ -199,5 +222,7 @@ def select_mutants(files: dict[str, str], *, seed: int, salt: str, cap: int) -> 
         if m.source in seen:
             continue
         seen.add(m.source)
+        if bytecode_equivalent(files[name], m.source):
+            continue
         chosen.append(m)
     return chosen

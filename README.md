@@ -57,7 +57,7 @@ Reports follow `aethens-report/v2` (v1 plus a `coverage` list of what checks est
 | C001 gold sanity | runs the starting state (must fail) and the gold solution (must pass), once each | tests with no real assertions; a broken gold solution or wrong file layout | defects that only show on some runs (see C002) |
 | C002 flakiness | runs the gold solution at least 3/5/10 times (smoke/standard/deep), varying only `PYTHONHASHSEED`; while every run agrees it keeps going (up to 6/11/59 runs, or 120/300/1800 s of run time) until it can state "flake rate below 0.5/0.25/0.05 at 95% confidence" (exact binomial bound, recorded in the report's coverage list) | verdicts that depend on set or dict ordering or `hash()`; flips rarer than the old fixed run count could see | flakiness from time, unseeded randomness or scheduling, except by chance; a flake rate below the stated bound |
 | C003 labeled candidates | runs each candidate in `candidates/valid` and `candidates/invalid` | false rejects (over-strict tests) and false accepts (weak tests), but only as good as the labels; `llm-unreviewed` labels give warnings marked needs-review | anything for which you have no labeled candidate |
-| C004 mutation probes | runs up to 5/10/30 AST mutants of the gold solution | behaviour the tests never check (surviving mutants, info only) | equivalent mutants look like weaknesses; a killed mutant does not prove the tests are strong |
+| C004 mutation probes | runs up to 5/10/30 AST mutants of the gold solution; each surviving mutant is then called side by side with the gold on the inputs the tests use plus derived inputs, inside the sandbox: a survivor that behaves differently is reported with that input as a counterexample, one that behaved like the gold on every valid input tried is not reported (listed in the report's coverage instead) | behaviour the tests never check (surviving mutants, info only) | a mutant that differs only on inputs the probe never tried is hidden (see the external bench for how often); a counterexample input may be outside the task's intended inputs; a killed mutant does not prove the tests are strong |
 | C005 test order and isolation | reruns the gold's tests in their default order, reversed, in 1/2/5 seeded shuffles and each test alone (up to 10/30/200), all with the same `PYTHONHASHSEED`; a change must reproduce on a second run | tests that pass only because an earlier test left state behind, or that break when another test runs first | orders it did not try; verifiers other than `python -m unittest` (it says it checked nothing) |
 | C006 over-specified tests | reruns the gold after behaviour-preserving AST rewrites (reformat, local renames, swapping adjacent constant assignments, append loop to comprehension, if/else inversion; smoke: the first two), each applied only where its safety conditions hold; a rejection must reproduce and the gold must still pass | tests that read the gold's source, line numbers, local variable names or code shape, so they would reject correct solutions written differently (warning, needs review) | over-strict tests on behaviour the statement leaves open, such as exact messages or float digits (use C003); rewrites it cannot prove safe are skipped |
 | C007 reward-hacking probes | when the unsolved starter fails, runs candidates that do not solve the task, in the same sandbox: `os._exit(0)` on import, an atexit hook forcing exit 0, a unittest patch that reports success, a `sitecustomize.py` hook, functions returning an object equal to everything, and a lookup table of the visible tests' literal answers; an accepted probe must pass twice | verifiers a policy can game without solving the task (error; the lookup-table probe is a warning, needs review, since it matters only when tests are visible) | other gaming routes; pytest `conftest.py` hooks (not probed); a verifier that resists these probes can still be gamed |
@@ -79,7 +79,7 @@ Bench: 34 self-authored tasks, 15 clean controls and 19 with planted defects.
 | recall (planted defects found) | 1.0 (20/20) |
 | false positives on controls | 0 |
 | unexpected error/warning findings on defective tasks | 3 |
-| info findings on controls | 9 |
+| info findings on controls | 6 |
 
 | defect class | found / planted |
 |---|---|
@@ -132,9 +132,10 @@ Generated from `bench/external/results.json` by `bench/external/render_external.
 
 On 164 HumanEval tasks (MIT), judged by EvalPlus's HumanEval+ tests (Apache-2.0) as an outside oracle:
 
-- C004 precision 0.4615: 36 of 78 mutants that HumanEval's own tests accepted are rejected by HumanEval+.
-- C004 recall 0.8387 relative to exhaustive mutation (26 of 31 weak tasks found at budget standard).
-- Error/warning findings on checks without labels in this data (presumed clean): C001 0, C002 1, C005 0. Details: [docs/EXTERNAL_BENCH.md](docs/EXTERNAL_BENCH.md).
+- C004 precision 0.8158: 31 of 38 mutants that HumanEval's own tests accepted are rejected by HumanEval+.
+- C004 recall 0.8 relative to exhaustive mutation (24 of 30 weak tasks found at budget standard).
+- Without C004's equivalent-mutant filter (same run): precision 0.4615, recall 0.8667; the filter hid 51 survivors, 5 of which HumanEval+ rejects.
+- Error/warning findings on checks without labels in this data (presumed clean): C001 0, C002 0, C005 0, C006 0. Details: [docs/EXTERNAL_BENCH.md](docs/EXTERNAL_BENCH.md).
 <!-- external:end -->
 
 ## Known misses and limits

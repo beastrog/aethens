@@ -285,4 +285,31 @@ CI installs uv with `pip install uv==0.13.7` instead of a third-party setup acti
   after the fix: 0/300. Thresholds, the default `timeout_s` values and isolation flags are
   unchanged; only what the clock covers changed. `RunResult.duration_s` stays host wall time (it
   feeds C002's time budget, which therefore still counts overhead).
+- D-065 (owner-requested via the parent agent: "add equivalent-mutant filtering"; approval of the
+  final semantics requested) C004 equivalent-mutant filter. Analysis of the 42 unconfirmed
+  survivors of the previous full external run: nearly all were semantically equivalent mutants
+  (running-max `>`/`>=`, loop bounds one step too far, flags set to 2 instead of 1, `(a+b)%2` vs
+  `(a-b)%2`, guarded comparisons), none bytecode-identical, so TCE alone removes nothing (0 of 2007
+  mutants over both benches; kept because it is provable and cheap). Chosen method: a differential
+  probe (`aethens/sandbox/equiv_driver.py`, stdlib only, one extra sandbox run per survivor, same
+  isolation): record the arguments test code passes to module-level functions of the mutated file,
+  derive inputs EvalPlus-style (sign-preserving neighbouring numbers, one-character and token-level
+  string edits, list drops/duplicates/swaps, boundary values c-1/c/c+1 around integer constants in
+  the gold file, string constants as words, rare out-of-sample characters), compare gold and mutant
+  results and argument side effects (`==`, floats rel 1e-9), skipping inputs where the gold raises,
+  times out or is nondeterministic. Verdicts: distinguished (reported with the counterexample),
+  equivalent (>= MIN_VALID=20 valid inputs, no difference: not reported, listed in coverage with
+  the mutant keys), inconclusive (anything else: reported exactly as before). Budgets (agent-chosen):
+  100/300/1000 inputs and 5/8/30 s per probe for smoke/standard/deep, 2 s per call. Severity,
+  confidence (needs-review), mutant caps and the report schema are unchanged; `C004MutationProbes(
+  filter_equivalent=False)` restores the old behaviour in code (no CLI flag, see IDEAS).
+  Tuning disclosure: the input derivation was designed while looking at the HumanEval false
+  positives (first prototype kept 31/36 confirmed and 7/42 unconfirmed survivors of the old run;
+  boundary constants and token edits were added after seeing the misses). Full run with the filter
+  (seed 0, standard, exhaustive): precision 0.8158 (31/38), recall 0.80 (24/30 weak tasks); the
+  same run without the filter: precision 0.4615, recall 0.8667 (26/30); the filter hid 51
+  survivors, 5 of which HumanEval+ rejects. The previous full run reported 31 weak tasks; this run
+  30 (the earlier run had load-induced timeouts, see D-064). Remaining false positives are mostly
+  counterexamples outside the task's precondition (e.g. `factorize(0)`, duplicates in an array
+  declared duplicate-free), which the probe cannot know without a spec.
 

@@ -31,3 +31,7 @@ Ideas that came up during the build. AGENTS.md rule 14: write them here, do not 
 - External bench: add EvalPlus MBPP+ (re-check MBPP CC-BY-4.0 and MBPP+ Apache-2.0 first) and any
   public dataset with labelled flaky, order-dependent or over-specified tests, so C002/C005/C006 get
   real recall numbers, not only false-positive counts.
+- C004: a CLI switch to turn the equivalent-mutant filter off (`--no-equivalence-filter`), and a
+  deeper probe budget that also reuses inputs across survivors of the same task (D-065).
+- C004: precondition inference for the equivalence probe (skip derived inputs the gold's own guards
+  or docstring examples suggest are outside the domain) to cut the remaining false positives.
