@@ -1,0 +1,100 @@
+---
+import numbers from "../data/numbers.json";
+import { fmtScore, frac } from "../lib/format";
+const m = numbers.internal;
+---
+
+<section id="top" class="relative overflow-hidden" aria-labelledby="hero-heading">
+  <div
+    class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold to-transparent"
+    aria-hidden="true"
+  ></div>
+  <div class="wrap pt-16 pb-14 sm:pt-24 sm:pb-20">
+    <p class="kicker mb-8">
+      <span>Open source</span>
+      <span class="num" aria-hidden="true">/</span>
+      <span>Apache-2.0</span>
+      <span class="num" aria-hidden="true">/</span>
+      <span>Pre-release 0.1.0.dev0</span>
+      <span class="num" aria-hidden="true">/</span>
+      <span>Python tasks</span>
+    </p>
+
+    <h1
+      id="hero-heading"
+      class="font-serif italic font-semibold text-display leading-[0.95] tracking-[-0.03em] max-w-5xl"
+    >
+      Audit the tests that score your agents.
+    </h1>
+
+    <p class="mt-8 max-w-2xl text-lg sm:text-xl text-paper/90 leading-relaxed">
+      Aethens is an open-source Python CLI and GitHub Action that audits the
+      verifiers of RL environments and code-task benchmarks by running them in a
+      Docker sandbox. Every finding comes with evidence and a one-line repro
+      command. The checks themselves have published precision and recall you can
+      reproduce.
+    </p>
+
+    <p class="mt-5 max-w-2xl text-sm text-muted">
+      Not on PyPI yet. Install from a clone of{' '}
+      <a class="prose-link" href="https://github.com/beastrog/aethens">the repository</a>.
+      Needs Docker and Python 3.11+. No LLMs, no network access for task code, no telemetry.
+    </p>
+
+    <div class="mt-12 grid gap-4 lg:grid-cols-2">
+      <div>
+        <p class="cmd-label">Install and run</p>
+        <pre class="cmd" tabindex="0"><code>git clone https://github.com/beastrog/aethens.git
+cd aethens
+python -m pip install .
+docker pull python:3.12-slim
+aethens audit path/to/task --format markdown</code></pre>
+      </div>
+      <div>
+        <p class="cmd-label">GitHub Action</p>
+        <pre class="cmd" tabindex="0"><code>- uses: beastrog/aethens@main
+  with:
+    path: path/to/tasks
+    budget: standard
+    fail-on: error
+    seed: "0"</code></pre>
+        <p class="mt-2 text-xs text-muted">
+          Pin a release tag once one exists. <code class="text-gold">@main</code> is pre-release.
+        </p>
+      </div>
+    </div>
+
+    <dl
+      class="mt-12 grid grid-cols-2 gap-px bg-line sm:grid-cols-4 border border-line"
+      aria-label={`Internal bench summary, ${m.label}`}
+    >
+      <div class="bg-ink px-4 py-4 sm:px-5">
+        <dt class="metric-label">Precision</dt>
+        <dd class="font-serif italic text-4xl sm:text-5xl leading-none">{fmtScore(m.precision)}</dd>
+      </div>
+      <div class="bg-ink px-4 py-4 sm:px-5">
+        <dt class="metric-label">Recall</dt>
+        <dd class="font-serif italic text-4xl sm:text-5xl leading-none">
+          {fmtScore(m.recall)}
+          <span class="block font-mono text-[0.7rem] not-italic tracking-normal text-muted mt-2 normal-case">
+            {frac(m.found, m.planted)} planted defects
+          </span>
+        </dd>
+      </div>
+      <div class="bg-ink px-4 py-4 sm:px-5">
+        <dt class="metric-label">False positives</dt>
+        <dd class="font-serif italic text-4xl sm:text-5xl leading-none">{m.false_positives}</dd>
+      </div>
+      <div class="bg-ink px-4 py-4 sm:px-5">
+        <dt class="metric-label">Reward-hacking</dt>
+        <dd class="font-serif italic text-4xl sm:text-5xl leading-none">{frac(m.reward_hack.found, m.reward_hack.labelled)}</dd>
+      </div>
+    </dl>
+    <p class="mt-3 font-mono text-[0.7rem] text-muted tracking-wide">
+      Internal self-authored bench, 34 tasks, seed 0, budget standard.{' '}
+      {m.label}.
+      External-bench figures, including a weak C004 precision of {fmtScore(numbers.external.c004.precision)}, are in{' '}
+      <a class="prose-link" href="#accuracy">Published accuracy</a>.
+    </p>
+  </div>
+</section>

@@ -1,0 +1,119 @@
+---
+const groups = [
+  {
+    title: "Accept correct solutions",
+    checks: [
+      {
+        id: "C001",
+        name: "Gold sanity",
+        does: "Runs the unsolved starting state (must fail) and the reference gold solution (must pass), once each.",
+        catch: "Tests with no real assertions; a broken gold solution or a wrong file layout.",
+        miss: "Defects that only show on some runs — see C002.",
+      },
+      {
+        id: "C006",
+        name: "Over-specified tests",
+        does: "Reruns the gold after behaviour-preserving rewrites: reformat, local renames, swapping adjacent constant assignments, turning an append loop into a comprehension, if/else inversion. A rejection must reproduce, and the gold must still pass.",
+        catch: "Tests that read the gold’s source, line numbers, local variable names or code shape, and would reject a correct solution written differently. Findings are warnings and need review.",
+        miss: "Over-strict tests on behaviour the statement leaves open, such as exact messages or float digits (use C003). Rewrites it cannot prove safe are skipped. The five rewrites are argued and tested to preserve behaviour, not machine-proved.",
+      },
+    ],
+  },
+  {
+    title: "Reject wrong solutions",
+    checks: [
+      {
+        id: "C003",
+        name: "Labelled candidates",
+        does: "Runs each candidate in candidates/valid and candidates/invalid.",
+        catch: "False rejects (over-strict tests) and false accepts (weak tests), but only as good as the labels you provide. llm-unreviewed labels give warnings marked needs-review.",
+        miss: "Anything for which you have no labelled candidate. Aethens does not decide whether a solution is correct.",
+      },
+      {
+        id: "C004",
+        name: "Mutation probes",
+        does: "Runs up to 5, 10 or 30 AST mutants of the gold solution, depending on the budget (smoke, standard, deep).",
+        catch: "Behaviour the tests never check (surviving mutants, reported at info level).",
+        miss: "Equivalent mutants look like weaknesses. A killed mutant does not prove the tests are strong. This is the check with the weakest published precision on public data — see the accuracy section.",
+      },
+      {
+        id: "C007",
+        name: "Reward-hacking probes",
+        does: "When the unsolved starter fails, runs candidates that do not solve the task, in the same sandbox: os._exit(0) on import, an atexit hook forcing exit 0, a unittest patch that reports success, a sitecustomize.py hook, functions returning an object equal to everything, and a lookup table of the visible tests’ literal answers. An accepted probe must pass twice.",
+        catch: "Verifiers a policy can game without solving the task (error). The lookup-table probe is a warning, needs review, since it matters only when tests are visible.",
+        miss: "Other gaming routes. Pytest conftest.py hooks are not probed. A verifier that resists these probes can still be gamed. Almost every plain python -m unittest verifier is gameable by the exit-code probes, so expect C007 errors until the harness judges results outside the solution’s process.",
+      },
+    ],
+  },
+  {
+    title: "Behave the same on every run",
+    checks: [
+      {
+        id: "C002",
+        name: "Adaptive flakiness",
+        does: "Runs the gold at least 3, 5 or 10 times (smoke, standard, deep), varying only PYTHONHASHSEED. While every run agrees it keeps going — up to 6, 11 or 59 runs, or 120, 300 or 1800 seconds — until it can state a flake rate below 0.5, 0.25 or 0.05 at 95% confidence (exact binomial bound, recorded in the report’s coverage list).",
+        catch: "Verdicts that depend on set or dict ordering or hash(). Flips rarer than a fixed run count could see.",
+        miss: "Flakiness from time, unseeded randomness or scheduling, except by chance. A flake rate below the stated bound. The time budget can stop the check before the target bound. The bound assumes independent runs.",
+      },
+      {
+        id: "C005",
+        name: "Test order and isolation",
+        does: "Reruns the gold’s tests in their default order, reversed, in 1, 2 or 5 seeded shuffles, and each test alone (up to 10, 30 or 200), all with the same PYTHONHASHSEED. A changed verdict must reproduce on a second run.",
+        catch: "Tests that pass only because an earlier test left state behind, or that break when another test runs first.",
+        miss: "Orders it did not try. Verifiers other than python -m unittest (the check reports that it checked nothing).",
+      },
+    ],
+  },
+];
+---
+
+<section id="checks" class="border-t border-line py-20 sm:py-28" aria-labelledby="checks-heading">
+  <div class="wrap">
+    <p class="kicker mb-5"><span class="num">02</span> The checks</p>
+    <h2 id="checks-heading" class="font-serif italic font-semibold text-section leading-[1.1] max-w-3xl">
+      Seven checks, each with a stated limit.
+    </h2>
+    <p class="mt-6 max-w-2xl text-paper/90">
+      Aethens does not prove a verifier is sound. No findings means only that these checks found
+      nothing at the chosen budget and seed. It is not a sandbox product: task code runs in Docker
+      with a locked-down configuration that reduces risk but is not a guarantee.
+    </p>
+
+    <div class="mt-14 space-y-16">
+      {
+        groups.map((group) => (
+          <div>
+            <h3 class="font-mono text-[0.72rem] uppercase tracking-[0.14em] text-gold mb-6">
+              {group.title}
+            </h3>
+            <div class="grid gap-4 lg:grid-cols-2">
+              {group.checks.map((c) => (
+                <article class:list={["border border-line p-6 bg-ink/80", c.id === "C007" && "lg:col-span-2"]} id={c.id.toLowerCase()}>
+                  <p class="font-mono text-[0.72rem] uppercase tracking-[0.16em] text-muted">
+                    {c.id}
+                  </p>
+                  <h4 class="mt-2 font-serif italic text-2xl">{c.name}</h4>
+                  <p class="mt-4 text-[0.98rem] text-paper/90">{c.does}</p>
+                  <dl class="mt-5 grid gap-3 text-sm">
+                    <div>
+                      <dt class="font-mono text-[0.65rem] uppercase tracking-[0.12em] text-ok">
+                        Can catch
+                      </dt>
+                      <dd class="mt-1 text-paper/85">{c.catch}</dd>
+                    </div>
+                    <div>
+                      <dt class="font-mono text-[0.65rem] uppercase tracking-[0.12em] text-muted">
+                        Cannot catch
+                      </dt>
+                      <dd class="mt-1 text-paper/75">{c.miss}</dd>
+                    </div>
+                  </dl>
+                </article>
+              ))}
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>

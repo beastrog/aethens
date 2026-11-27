@@ -11,3 +11,7 @@ build/
 audits/private/
 bench/external/data/
 bench/external/full/
+
+# Website (Astro) build and deps. `dist/` above already covers website/dist/.
+node_modules/
+.astro/

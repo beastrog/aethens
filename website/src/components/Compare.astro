@@ -1,0 +1,138 @@
+---
+import numbers from "../data/numbers.json";
+const survey = numbers.competitive_survey;
+---
+
+<section id="compare" class="border-t border-line py-20 sm:py-28" aria-labelledby="compare-heading">
+  <div class="wrap">
+    <p class="kicker mb-5"><span class="num">04</span> Comparison</p>
+    <h2 id="compare-heading" class="font-serif italic font-semibold text-section leading-[1.1] max-w-3xl">
+      What other free auditors already do — and what they don’t publish.
+    </h2>
+    <p class="mt-6 max-w-2xl text-paper/90">
+      Feature lists are easy to copy. The comparison below is factual, linked, and{' '}
+      {survey.label} from public GitHub READMEs, arXiv, and project blogs, recorded in{' '}
+      <code class="text-sm text-gold">docs/COMPETITIVE.md</code>. Where a claim comes from a
+      project’s own README or paper, it is that project’s claim and has not been reproduced here.
+    </p>
+
+    <div class="mt-10 scroll-x">
+      <table class="sheet min-w-[52rem]">
+        <caption class="sr-only">
+          Comparison of Aethens with rlgate, BenchJack and Assay as of 18 November 2026
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Capability</th>
+            <th scope="col">Aethens</th>
+            <th scope="col"><a class="prose-link" href="https://github.com/deepak-foundryai/rlgate">rlgate</a></th>
+            <th scope="col"><a class="prose-link" href="https://github.com/benchjack/benchjack">BenchJack</a></th>
+            <th scope="col"><a class="prose-link" href="https://github.com/caiotheodoro/assay">Assay</a></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row" class="font-normal text-paper">What it is</th>
+            <td>Python CLI and GitHub Action that runs a task’s tests in Docker</td>
+            <td>Python CLI (Harbor, SWE-bench, MiMo, YAML layouts), GitHub Action, on PyPI as 1.0.0</td>
+            <td>
+              Hackability scanner: static tools plus Claude Code or Codex agents. Paper:{' '}
+              <a class="prose-link" href="https://arxiv.org/abs/2605.12673">arXiv:2605.12673</a>
+            </td>
+            <td>Probe battery plus an LLM “auditor” that emits an Environment Card</td>
+          </tr>
+          <tr>
+            <th scope="row" class="font-normal text-paper">Findings proven by execution</th>
+            <td class="yes">Yes</td>
+            <td class="yes">Yes</td>
+            <td class="partial">PoCs, in part</td>
+            <td class="yes">Yes (probes)</td>
+          </tr>
+          <tr>
+            <th scope="row" class="font-normal text-paper">Gold / baseline sanity</th>
+            <td class="yes">C001</td>
+            <td class="yes">Yes (5 runs each)</td>
+            <td class="no">Not seen</td>
+            <td class="partial">Partial</td>
+          </tr>
+          <tr>
+            <th scope="row" class="font-normal text-paper">Flakiness</th>
+            <td class="yes">C002, with a stated 95% confidence bound</td>
+            <td class="yes">Yes</td>
+            <td class="no">Not seen</td>
+            <td class="no">Not seen</td>
+          </tr>
+          <tr>
+            <th scope="row" class="font-normal text-paper">Test order and isolation</th>
+            <td class="yes">C005</td>
+            <td class="no">Not seen</td>
+            <td class="no">Not seen</td>
+            <td class="no">Not seen</td>
+          </tr>
+          <tr>
+            <th scope="row" class="font-normal text-paper">Weak tests (false accepts)</th>
+            <td class="yes">C003, C004, C007</td>
+            <td class="yes">Yes</td>
+            <td class="partial">Partial</td>
+            <td class="yes">Yes</td>
+          </tr>
+          <tr>
+            <th scope="row" class="font-normal text-paper">Over-strict tests (false rejects), no LLM</th>
+            <td class="yes">C006 rewrites; C003 if you supply labels</td>
+            <td class="partial">Only with the optional LLM layer</td>
+            <td class="no">Not seen</td>
+            <td class="no">Not seen</td>
+          </tr>
+          <tr>
+            <th scope="row" class="font-normal text-paper">Reward-hacking probes</th>
+            <td class="yes">C007 (six families)</td>
+            <td class="yes">Yes (exit 0, hooks, always-equal, hardcoded answers, and more)</td>
+            <td class="yes">Yes</td>
+            <td class="yes">Yes</td>
+          </tr>
+          <tr>
+            <th scope="row" class="font-normal text-paper">Solution / answer leakage</th>
+            <td class="no">Not built</td>
+            <td class="yes">Yes</td>
+            <td class="yes">Yes</td>
+            <td class="no">Not seen</td>
+          </tr>
+          <tr>
+            <th scope="row" class="font-normal text-paper">Published accuracy of the auditor</th>
+            <td class="yes">Own planted-defect bench, and HumanEval judged by HumanEval+</td>
+            <td class="no">README: “Not yet built: dedup and calibration.”</td>
+            <td class="no">Not seen</td>
+            <td class="partial">Deterministic precision 0.757 on its own 33-environment, 54-defect corpus (project’s claim). No public-data calibration seen.</td>
+          </tr>
+          <tr>
+            <th scope="row" class="font-normal text-paper">LLM required?</th>
+            <td class="yes">No</td>
+            <td class="partial">Optional <span class="font-mono">--deep-review</span></td>
+            <td class="partial">Agents used for exploitation</td>
+            <td class="partial">LLM auditor arm; probes can run without it</td>
+          </tr>
+          <tr>
+            <th scope="row" class="font-normal text-paper">Licence</th>
+            <td>Apache-2.0</td>
+            <td>MIT</td>
+            <td>Apache-2.0</td>
+            <td>Apache-2.0</td>
+          </tr>
+          <tr>
+            <th scope="row" class="font-normal text-paper">Where Aethens is behind</th>
+            <td>Own task format only; not on PyPI; no leak scanner; no Harbor or SWE-bench adapter yet</td>
+            <td>Broader task formats, leak detection, a 1.0 PyPI release</td>
+            <td>A published paper and a community audit archive (1 audit when surveyed)</td>
+            <td>A browser demo; scores itself under cost profiles on its own corpus</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="mt-6 max-w-2xl text-sm text-muted">
+      Aethens does not claim to have more probe families than these tools. Several already ship
+      reward-hacking probes. The difference we are willing to put a number on is published,
+      reproducible accuracy — including the weak C004 precision on public data.
+    </p>
+  </div>
+</section>
