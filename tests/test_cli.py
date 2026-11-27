@@ -160,6 +160,49 @@ def test_unwritable_output_is_exit_2(tmp_path: Path, monkeypatch: pytest.MonkeyP
     assert cli.main(["audit", "examples/add-two", "--output", str(out)]) == 2
 
 
+def _aethens_containers() -> set[str]:
+    """IDs of containers with label aethens.run currently on the daemon."""
+    out = subprocess.run(
+        ["docker", "ps", "-aq", "--filter", "label=aethens.run"],
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout
+    return set(out.split())
+
+
+def _owned_containers(tmp_root: Path) -> set[str]:
+    """aethens.run containers that bind-mount a path under this test's tmp_root.
+
+    Same approach as tests/test_runner_docker.py (PR #17). The CLI constructs
+    DockerRunner() with no tmp_root, so workdirs are created via tempfile and
+    honour TMPDIR. Pointing the CLI subprocess at this test's directory means
+    only containers this run started are in scope, even when other aethens.run
+    containers come and go on a shared daemon. Leftovers are still a failure:
+    a bind mount under tmp_root is enough, including after the workdir itself
+    has been deleted.
+    """
+    root = tmp_root.resolve()
+    owned: set[str] = set()
+    for cid in _aethens_containers():
+        r = subprocess.run(
+            ["docker", "inspect", "--format", "{{range .Mounts}}{{.Source}}\n{{end}}", cid],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if r.returncode != 0:
+            continue  # already gone
+        for src in r.stdout.splitlines():
+            if not src:
+                continue
+            path = Path(src).resolve()
+            if path == root or path.is_relative_to(root):
+                owned.add(cid)
+                break
+    return owned
+
+
 @pytest.mark.docker
 def test_sigterm_removes_running_containers(tmp_path: Path) -> None:
     import os
@@ -167,30 +210,35 @@ def test_sigterm_removes_running_containers(tmp_path: Path) -> None:
     import signal
     import time
 
-    def ours() -> set[str]:
-        out = subprocess.run(
-            ["docker", "ps", "-aq", "--filter", "label=aethens.run"],
-            capture_output=True,
-            text=True,
-            check=True,
-        ).stdout
-        return set(out.split())
-
     task = tmp_path / "hung"
     shutil.copytree(REPO / "tests" / "fixtures" / "hung-gold", task)
-    before = ours()
+    # DockerRunner() uses tempfile.mkdtemp(dir=None), which honours TMPDIR.
+    runs = tmp_path / "runs"
+    runs.mkdir()
+    env = os.environ.copy()
+    env["TMPDIR"] = str(runs.resolve())
+
     proc = subprocess.Popen(
         [sys.executable, "-m", "aethens", "audit", str(task), "--check", "C001"],
         cwd=REPO,
+        env=env,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
     )
+    started: set[str] = set()
     try:
         deadline = time.monotonic() + 60
-        while not (ours() - before) and time.monotonic() < deadline:
-            time.sleep(0.2)
-        assert ours() - before, "the audit never started a container"
+        while not started and time.monotonic() < deadline:
+            if proc.poll() is not None:
+                _out, err = proc.communicate()
+                raise AssertionError(
+                    f"the audit exited before starting a container (code {proc.returncode}): {err}"
+                )
+            started = _owned_containers(runs)
+            if not started:
+                time.sleep(0.2)
+        assert started, "the audit never started a container"
         os.kill(proc.pid, signal.SIGTERM)
         _out, err = proc.communicate(timeout=90)
     finally:
@@ -198,4 +246,7 @@ def test_sigterm_removes_running_containers(tmp_path: Path) -> None:
             proc.kill()
     assert proc.returncode == 2, err
     assert "terminated" in err.lower()
-    assert ours() == before
+    leftover = _owned_containers(runs)
+    assert leftover == set(), leftover
+    # IDs we saw this run must be gone even if their workdir was deleted first.
+    assert _aethens_containers() & started == set()
