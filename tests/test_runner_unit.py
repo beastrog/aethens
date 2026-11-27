@@ -140,3 +140,18 @@ def test_in_container_seconds() -> None:
     assert in_container_seconds(state) == pytest.approx(2.5)
     assert in_container_seconds({"StartedAt": "0001-01-01T00:00:00Z"}) is None
     assert in_container_seconds(None) is None
+
+
+def test_capped_in_container_seconds_ignores_inflated_daemon_delta() -> None:
+    from aethens.runner.docker import capped_in_container_seconds, in_container_seconds
+
+    state = {
+        "StartedAt": "2026-11-27T07:13:15.000000000Z",
+        "FinishedAt": "2026-11-27T07:13:45.000000000Z",  # 30 s on the daemon clock
+    }
+    assert in_container_seconds(state) == pytest.approx(30.0)
+    # Host only waited 0.5 s: a clock jump must not invent a timeout.
+    assert capped_in_container_seconds(state, 0.5) == pytest.approx(0.5)
+    # A genuinely long run still reports the daemon delta (host elapsed is at least that).
+    assert capped_in_container_seconds(state, 30.2) == pytest.approx(30.0)
+    assert capped_in_container_seconds(None, 1.0) is None
