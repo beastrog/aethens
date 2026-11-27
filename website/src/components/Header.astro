@@ -9,28 +9,61 @@ const links = [
 ];
 ---
 
-<header class="sticky top-0 z-40 border-b border-line bg-ink/95">
-  <div class="wrap flex flex-wrap items-center justify-between gap-x-6 gap-y-2 py-3">
+<header class="sticky top-0 z-40 border-b border-line bg-ink">
+  <div class="wrap flex flex-wrap items-center justify-between gap-x-6 py-3">
     <a href="#top" class="font-serif italic text-[1.35rem] leading-none tracking-tight text-paper">
       Aethens
     </a>
-    <nav aria-label="Primary" class="flex flex-wrap items-center gap-x-5 gap-y-1">
+    <button
+      type="button"
+      class="nav-toggle"
+      aria-expanded="false"
+      aria-controls="primary-nav"
+      aria-label="Open menu"
+    >
+      <span class="nav-toggle-bars" aria-hidden="true"></span>
+    </button>
+    <nav id="primary-nav" aria-label="Primary" class="nav-panel">
       {
         links.map((l) => (
-          <a
-            href={l.href}
-            class="font-mono text-[0.7rem] uppercase tracking-[0.14em] text-muted hover:text-paper"
-          >
+          <a href={l.href} class="text-muted hover:text-paper">
             {l.label}
           </a>
         ))
       }
-      <a
-        href="https://github.com/beastrog/aethens"
-        class="font-mono text-[0.7rem] uppercase tracking-[0.14em] text-gold hover:text-gold-bright"
-      >
+      <a href="https://github.com/beastrog/aethens" class="text-gold hover:text-gold-bright">
         GitHub
       </a>
     </nav>
   </div>
 </header>
+
+<script>
+  function bindNav() {
+    const header = document.querySelector("body > header");
+    const button = header?.querySelector(".nav-toggle");
+    const panel = header?.querySelector("#primary-nav");
+    if (!header || !button || !panel) return;
+    if (button.dataset.bound === "true") return;
+    button.dataset.bound = "true";
+
+    const setOpen = (open: boolean) => {
+      button.setAttribute("aria-expanded", open ? "true" : "false");
+      button.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+      panel.classList.toggle("is-open", open);
+    };
+
+    button.addEventListener("click", () => {
+      setOpen(button.getAttribute("aria-expanded") !== "true");
+    });
+    panel.querySelectorAll("a").forEach((link) => {
+      link.addEventListener("click", () => setOpen(false));
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") setOpen(false);
+    });
+  }
+
+  bindNav();
+  document.addEventListener("astro:page-load", bindNav);
+</script>

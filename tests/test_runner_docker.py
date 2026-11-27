@@ -386,7 +386,8 @@ def test_inflated_daemon_runtime_does_not_timeout_a_fast_verifier(tmp_path: Path
         r.duration_s,
         r.stderr_tail,
     )
-    assert r.duration_s < 10
+    # Host wall time includes create/teardown; 30 s is comfortably below STARTUP_GRACE_S.
+    assert r.duration_s < 30
     assert "fast" in r.stdout_tail
     # Assert only this runner's workdir; do not compare the global aethens.run
     # container set (shared-daemon flake; fixed separately).
