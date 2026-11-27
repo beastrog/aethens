@@ -1,0 +1,617 @@
+---
+// Terminal replay of two REAL local `aethens audit` runs. The text comes verbatim from
+// src/data/audit-runs/*.md (unedited stdout; see the README there). Blank lines are dropped and
+// the per-finding <details> blocks are folded into one marked line; nothing else is changed.
+import "../styles/motion.css";
+import orderRun from "../data/audit-runs/order-alphabetical.md?raw";
+import addTwoRun from "../data/audit-runs/add-two.md?raw";
+
+type Tok = { t: string; c?: string };
+type Line = { kind: "cmd" | "out" | "fold" | "exit"; toks: Tok[]; text: string; flash?: "error" };
+
+const runs = [
+  {
+    cmd: "aethens audit examples/add-two --seed 0 --budget smoke --format markdown",
+    report: addTwoRun,
+    exit: 0,
+  },
+  {
+    cmd: "aethens audit bench/tasks/order-alphabetical --seed 0 --budget smoke --format markdown",
+    report: orderRun,
+    exit: 1,
+  },
+];
+
+const sevClass: Record<string, string> = { error: "t-err", warning: "t-warn", info: "t-info" };
+
+function inline(s: string, base = ""): Tok[] {
+  // `code` spans and **bold** markers, kept as literal characters but coloured.
+  const out: Tok[] = [];
+  for (const part of s.split(/(`[^`]*`|\*\*)/)) {
+    if (!part) continue;
+    if (part.startsWith("`")) out.push({ t: part, c: "t-code" });
+    else if (part === "**") out.push({ t: part, c: "t-dim" });
+    else out.push({ t: part, c: base || undefined });
+  }
+  return out;
+}
+
+function row(s: string): Tok[] {
+  const cells = s.split("|").slice(1, -1);
+  const toks: Tok[] = [{ t: "|", c: "t-pipe" }];
+  cells.forEach((cell, i) => {
+    const v = cell.trim();
+    let c = "t-out";
+    if (i === 0 && sevClass[v]) c = sevClass[v];
+    else if (/^C00\d$/.test(v)) c = "t-check";
+    else if (/^-+$/.test(v) || v === "severity" || v === "check" || v === "task" || v === "title" || v === "statement")
+      c = "t-dim";
+    toks.push({ t: ` ${v} `, c }, { t: "|", c: "t-pipe" });
+  });
+  return toks;
+}
+
+function summary(s: string): Tok[] {
+  const inner = s.replace(/\*\*/g, "");
+  const toks: Tok[] = [{ t: "**", c: "t-dim" }];
+  inner.split(", ").forEach((p, i) => {
+    if (i) toks.push({ t: ", ", c: "t-dim" });
+    const [n, sev] = p.split(" ");
+    toks.push({ t: p, c: Number(n) > 0 ? sevClass[sev] : "t-dim" });
+  });
+  toks.push({ t: "**", c: "t-dim" });
+  return toks;
+}
+
+const lines: Line[] = [];
+for (const run of runs) {
+  const cmdToks: Tok[] = [];
+  run.cmd.split(" ").forEach((w, i) => {
+    if (i) cmdToks.push({ t: " " });
+    cmdToks.push({ t: w, c: i === 0 ? "t-bin" : w.startsWith("--") ? "t-flag" : "t-arg" });
+  });
+  lines.push({ kind: "cmd", toks: cmdToks, text: run.cmd });
+  let folded = false;
+  let details = 0;
+  for (const raw of run.report.split("\n")) {
+    if (raw.startsWith("<details>")) details++;
+  }
+  let inDetails = false;
+  let inFence = false;
+  for (const raw of run.report.split("\n")) {
+    if (raw.startsWith("```")) inFence = !inFence;
+    if (raw.startsWith("<details>")) inDetails = true;
+    if (inDetails) {
+      if (!folded) {
+        const n = details;
+        lines.push({
+          kind: "fold",
+          toks: [{ t: `[ ${n} <details> block${n === 1 ? "" : "s"} folded: evidence, limits, repro command ]`, c: "t-fold" }],
+          text: `${n} details blocks folded`,
+        });
+        folded = true;
+      }
+      if (raw.startsWith("</details>") && !inFence) inDetails = false;
+      continue;
+    }
+    if (!raw.trim()) continue;
+    if (raw.startsWith("Info findings")) continue; // footnote prose; kept in the transcript
+    let toks: Tok[];
+    let flash: Line["flash"];
+    if (raw.startsWith("#")) {
+      const m = raw.match(/^(#+ )(.*)$/)!;
+      toks = [{ t: m[1], c: "t-dim" }, { t: m[2], c: "t-head" }];
+    } else if (raw.startsWith("**")) toks = summary(raw);
+    else if (raw.startsWith("|")) {
+      toks = row(raw);
+      if (raw.startsWith("| error")) flash = "error";
+    } else toks = inline(raw, "t-meta");
+    lines.push({ kind: "out", toks, text: raw, flash });
+  }
+  lines.push({ kind: "cmd", toks: [{ t: "echo", c: "t-bin" }, { t: " " }, { t: "$?", c: "t-arg" }], text: "echo $?" });
+  lines.push({ kind: "exit", toks: [{ t: String(run.exit), c: run.exit ? "t-err" : "t-ok" }], text: String(run.exit) });
+}
+
+const transcript = runs
+  .map((r) => `$ ${r.cmd}\n${r.report.trimEnd()}\n$ echo $?\n${r.exit}`)
+  .join("\n\n");
+---
+
+<section id="demo" class="border-t border-line py-20 sm:py-28" aria-labelledby="demo-heading">
+  <script is:inline>
+    if (!matchMedia("(prefers-reduced-motion: reduce)").matches) document.documentElement.classList.add("motion-ok");
+  </script>
+  <div class="wrap">
+    <p class="kicker mb-5"><span>A real run</span><span class="num" aria-hidden="true">/</span><span>Replayed</span></p>
+    <h2 id="demo-heading" class="font-serif italic font-semibold text-section leading-[1.1] max-w-3xl">
+      One command. Every finding comes with its evidence.
+    </h2>
+    <p class="mt-6 max-w-2xl text-paper/90">
+      Two unedited local runs. The bundled example has hardened tests and exits 0. The second task
+      is from the self-authored bench and has a planted order-dependent test; Aethens finds it,
+      finds that the same verifier accepts four reward-hacking probes, and exits 1.
+    </p>
+
+    <figure class="mt-12">
+      <div class="term" data-term aria-hidden="true">
+        <div class="term-bar">
+          <span class="term-mark" aria-hidden="true"></span>
+          <span class="term-title">aethens audit</span>
+          <span class="term-status" data-status>local · Docker</span>
+          <button type="button" class="term-replay" data-replay tabindex="-1">Replay</button>
+          <span class="term-progress" data-progress></span>
+        </div>
+        <div class="term-body" data-scroll>
+          {
+            lines.map((l) =>
+              l.kind === "cmd" ? (
+                <div class="ln ln-cmd" data-ln data-kind="cmd">
+                  <span class="t-prompt">$ </span>
+                  <span class="cmd-stack">
+                    <span class="cmd-ghost">{l.toks.map((t) => <span class={t.c}>{t.t}</span>)}</span>
+                    <span class="cmd-typed" data-typed data-len={l.text.length}>
+                      {l.toks.map((t) => <span class={t.c}>{t.t}</span>)}
+                    </span>
+                  </span>
+                </div>
+              ) : (
+                <div class:list={["ln", `ln-${l.kind}`, l.flash && "ln-flash"]} data-ln data-kind={l.kind}>
+                  {l.toks.map((t) => <span class={t.c}>{t.t}</span>)}
+                </div>
+              ),
+            )
+          }
+          <div class="ln ln-cmd ln-idle" data-ln data-kind="idle"><span class="t-prompt">$ </span><span class="caret"></span></div>
+        </div>
+      </div>
+      <figcaption class="mt-4 font-mono text-[0.72rem] leading-relaxed text-muted max-w-3xl">
+        aethens 0.1.0.dev0, seed 0, budget smoke, local Docker run on 27 Nov 2026. Replayed faster
+        than real time (the runs took 73.6 s and 70.2 s); blank lines dropped and finding details
+        folded. Source: <code class="text-paper/80">website/src/data/audit-runs/</code>.
+      </figcaption>
+      <details class="mt-4 max-w-full">
+        <summary class="cursor-pointer font-mono text-[0.72rem] uppercase tracking-[0.12em] text-gold">
+          Full transcript (plain text)
+        </summary>
+        <pre class="cmd mt-3 max-h-[28rem] overflow-auto" tabindex="0"><code>{transcript}</code></pre>
+      </details>
+    </figure>
+  </div>
+</section>
+
+<style>
+  .term {
+    position: relative;
+    background: var(--color-code);
+    border: 1px solid var(--color-line-strong);
+    box-shadow:
+      0 0 0 1px rgba(9, 10, 12, 0.6),
+      0 30px 80px -30px rgba(0, 0, 0, 0.8),
+      0 0 120px -40px rgba(215, 181, 109, 0.18);
+    font-family: var(--font-mono);
+    font-variant-ligatures: none;
+    font-size: 0.74rem;
+    line-height: 1.62;
+    color: #e6e1d6;
+    overflow: hidden;
+  }
+  @media (min-width: 640px) {
+    .term {
+      font-size: 0.8rem;
+    }
+  }
+  .term::before {
+    /* soft top light, static */
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 160px;
+    background: radial-gradient(60% 100% at 50% 0%, rgba(215, 181, 109, 0.07), transparent 70%);
+    pointer-events: none;
+  }
+  .term-bar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 0.9rem;
+    border-bottom: 1px solid var(--color-line);
+    background: rgba(243, 239, 230, 0.025);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    color: var(--color-muted);
+  }
+  .term-mark {
+    width: 0.5rem;
+    height: 0.5rem;
+    border: 1px solid var(--color-gold);
+  }
+  .term-title {
+    color: var(--color-paper);
+    letter-spacing: 0.04em;
+  }
+  .term-status {
+    margin-left: auto;
+    min-width: 18ch;
+    text-align: right;
+    white-space: nowrap;
+    text-transform: uppercase;
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+  .term-status[data-state="run"] {
+    color: var(--color-gold-bright);
+  }
+  .term-status[data-state="err"] {
+    color: var(--color-error);
+  }
+  .term-status[data-state="ok"] {
+    color: var(--color-ok);
+  }
+  .term-replay {
+    display: none;
+    font: inherit;
+    text-transform: uppercase;
+    color: var(--color-paper);
+    border: 1px solid var(--color-line-strong);
+    padding: 0.1rem 0.5rem;
+    background: transparent;
+    cursor: pointer;
+    transition:
+      border-color var(--dur-fast) var(--ease-out),
+      color var(--dur-fast) var(--ease-out);
+  }
+  .term-replay:hover {
+    border-color: var(--color-gold);
+    color: var(--color-gold-bright);
+  }
+  .term-progress {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 1px;
+    background: var(--color-gold);
+    transform-origin: 0 50%;
+    transform: scaleX(var(--p, 1));
+    opacity: 0.7;
+  }
+  .term-body {
+    position: relative;
+    padding: 1rem 1.1rem 1.2rem;
+    height: 27rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(243, 239, 230, 0.18) transparent;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 1.6rem, #000 100%);
+    mask-image: linear-gradient(to bottom, transparent 0, #000 1.6rem, #000 100%);
+  }
+  @media (min-width: 640px) {
+    .term-body {
+      height: 33rem;
+    }
+  }
+  .term-body:focus-visible {
+    outline-offset: -2px;
+  }
+  .ln {
+    position: relative;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    min-height: 1.62em;
+  }
+  .ln-cmd + .ln-out,
+  .ln-exit + .ln-cmd {
+    margin-top: 0.15rem;
+  }
+  .ln-exit {
+    margin-bottom: 0.9rem;
+  }
+  .cmd-stack {
+    display: inline-grid;
+  }
+  .cmd-ghost,
+  .cmd-typed {
+    grid-area: 1 / 1;
+  }
+  .cmd-ghost {
+    visibility: hidden;
+  }
+  .ln-flash::before {
+    content: "";
+    position: absolute;
+    inset: 0 -1.1rem;
+    background: linear-gradient(90deg, rgba(224, 112, 88, 0.22), rgba(224, 112, 88, 0.04) 70%, transparent);
+    border-left: 2px solid var(--color-error);
+    opacity: 0.35;
+    pointer-events: none;
+  }
+  .t-prompt {
+    color: var(--color-gold);
+  }
+  .t-bin {
+    color: var(--color-paper);
+    font-weight: 500;
+  }
+  .t-arg {
+    color: #e6e1d6;
+  }
+  .t-flag {
+    color: var(--color-muted);
+  }
+  .t-head {
+    color: var(--color-paper);
+    font-weight: 500;
+  }
+  .t-meta,
+  .t-dim {
+    color: var(--color-muted);
+  }
+  .t-pipe {
+    color: rgba(243, 239, 230, 0.26);
+  }
+  .t-code {
+    color: var(--color-gold-bright);
+  }
+  .t-check {
+    color: var(--color-gold);
+  }
+  .t-err {
+    color: var(--color-error);
+  }
+  .t-warn {
+    color: var(--color-warn);
+  }
+  .t-info {
+    color: #b9c4d6;
+  }
+  .t-ok {
+    color: var(--color-ok);
+  }
+  .t-out {
+    color: #e6e1d6;
+  }
+  .t-fold {
+    color: var(--color-muted);
+    font-style: italic;
+  }
+  .caret {
+    display: inline-block;
+    width: 0.6em;
+    height: 1.15em;
+    vertical-align: -0.2em;
+    background: var(--color-gold);
+    animation: blink 1.1s steps(1) infinite;
+  }
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  /* ---------- motion states (only when html.motion-ok) ---------- */
+  :global(.motion-ok) .term[data-armed] .ln {
+    opacity: 0;
+    transform: translate3d(0, 4px, 0);
+  }
+  :global(.motion-ok) .term[data-armed] .ln[data-on] {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity var(--dur-base) var(--ease-out),
+      transform var(--dur-base) var(--ease-out);
+  }
+  :global(.motion-ok) .term[data-armed] .ln-cmd[data-on] {
+    transition: none;
+  }
+  :global(.motion-ok) .term[data-armed] .ln-flash::before {
+    opacity: 0;
+  }
+  :global(.motion-ok) .term[data-armed] .ln-flash[data-on]::before {
+    animation: flash 1400ms var(--ease-out) both;
+  }
+  @keyframes flash {
+    0% {
+      opacity: 0;
+    }
+    12% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0.35;
+    }
+  }
+  :global(.motion-ok) .term[data-armed] .cmd-typed :global(span) {
+    visibility: hidden;
+  }
+  :global(.motion-ok) .term[data-armed] .cmd-typed :global([data-c]) {
+    visibility: visible;
+  }
+  :global(.motion-ok) .term[data-armed] .cmd-typed :global([data-cur])::after {
+    content: "";
+    display: inline-block;
+    width: 0.6em;
+    height: 1.15em;
+    vertical-align: -0.2em;
+    background: var(--color-gold);
+    margin-left: 1px;
+    visibility: visible;
+  }
+  :global(.motion-ok) .term[data-armed] .ln-idle .caret {
+    visibility: hidden;
+  }
+  :global(.motion-ok) .term[data-armed][data-done] .ln-idle .caret {
+    visibility: visible;
+  }
+  :global(.motion-ok) .term[data-done] .term-replay {
+    display: inline-block;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .caret {
+      animation: none;
+    }
+    .term-progress {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  import { startMotion, motionOk, onVisible, onReduce } from "../scripts/motion";
+
+  startMotion();
+
+  // Deterministic jitter so the typing feels human but the timeline is reproducible.
+  const jitter = (i: number) => ((Math.sin(i * 12.9898) * 43758.5453) % 1 + 1) % 1;
+
+  for (const term of document.querySelectorAll<HTMLElement>("[data-term]")) {
+    const lines = [...term.querySelectorAll<HTMLElement>("[data-ln]")];
+    const status = term.querySelector<HTMLElement>("[data-status]")!;
+    const progress = term.querySelector<HTMLElement>("[data-progress]")!;
+    const replay = term.querySelector<HTMLButtonElement>("[data-replay]")!;
+    const box = term.querySelector<HTMLElement>("[data-scroll]")!;
+    let userScrolled = false;
+    let lastFollow: HTMLElement | null = null;
+    // Keep the newest revealed line in view, like a real terminal, unless the reader scrolled.
+    const follow = (ln: HTMLElement) => {
+      if (userScrolled || ln === lastFollow) return;
+      lastFollow = ln;
+      const target = ln.offsetTop + ln.offsetHeight + 20 - box.clientHeight;
+      if (target > box.scrollTop + 1) box.scrollTo({ top: target, behavior: "smooth" });
+    };
+    box.addEventListener("wheel", () => (userScrolled = true), { passive: true });
+    box.addEventListener("touchmove", () => (userScrolled = true), { passive: true });
+
+    // Build the timeline: [time ms, action].
+    type Step = { at: number; run: () => void };
+    const steps: Step[] = [];
+    let t = 400;
+    let runIdx = 0;
+    const setStatus = (txt: string, state: string) => () => {
+      status.textContent = txt;
+      status.dataset.state = state;
+    };
+    lines.forEach((ln, i) => {
+      const kind = ln.dataset.kind;
+      if (kind === "cmd") {
+        const typed = ln.querySelector<HTMLElement>("[data-typed]")!;
+        const chars: HTMLElement[] = [];
+        // split each coloured token into per-character spans once
+        for (const tok of [...typed.children] as HTMLElement[]) {
+          const txt = tok.textContent || "";
+          tok.textContent = "";
+          for (const ch of txt) {
+            const s = document.createElement("span");
+            s.textContent = ch;
+            tok.appendChild(s);
+            chars.push(s);
+          }
+        }
+        const isEcho = typed.dataset.len === "7";
+        if (!isEcho) runIdx++;
+        steps.push({ at: t, run: () => ln.setAttribute("data-on", "") });
+        const per = isEcho ? 55 : 17;
+        chars.forEach((c, k) => {
+          t += per + jitter(i * 97 + k) * (isEcho ? 40 : 22) + (c.textContent === " " ? 24 : 0);
+          const before = k ? chars[k - 1] : null;
+          steps.push({
+            at: t,
+            run: () => {
+              before?.removeAttribute("data-cur");
+              c.setAttribute("data-c", "");
+              c.setAttribute("data-cur", "");
+              follow(ln);
+            },
+          });
+        });
+        t += 260;
+        const lastChar = chars[chars.length - 1];
+        steps.push({ at: t, run: () => lastChar.removeAttribute("data-cur") });
+        if (!isEcho) {
+          steps.push({ at: t, run: setStatus(`running · run ${runIdx} of 2`, "run") });
+          t += 1200; // the real run takes ~70 s; this is the compressed wait
+        } else t += 160;
+      } else if (kind === "exit") {
+        const code = ln.textContent?.trim();
+        steps.push({ at: t, run: () => (ln.setAttribute("data-on", ""), follow(ln)) });
+        steps.push({ at: t, run: setStatus(`exit ${code}`, code === "0" ? "ok" : "err") });
+        t += 1400;
+      } else if (kind === "idle") {
+        steps.push({ at: t, run: () => (ln.setAttribute("data-on", ""), follow(ln)) });
+      } else {
+        const gap = ln.classList.contains("ln-flash") ? 230 : kind === "fold" ? 320 : 70;
+        t += gap;
+        steps.push({ at: t, run: () => (ln.setAttribute("data-on", ""), follow(ln)) });
+      }
+    });
+    const total = t + 200;
+
+    let clock = 0;
+    let next = 0;
+    let raf = 0;
+    let last = 0;
+    let visible = false;
+    let armed = false;
+
+    const finish = () => {
+      while (next < steps.length) steps[next++].run();
+      term.setAttribute("data-done", "");
+      if (!userScrolled) box.scrollTo({ top: box.scrollHeight, behavior: "smooth" });
+      progress.style.setProperty("--p", "1");
+      cancelAnimationFrame(raf);
+      raf = 0;
+    };
+    const frame = (now: number) => {
+      clock += Math.min(64, now - last);
+      last = now;
+      while (next < steps.length && steps[next].at <= clock) steps[next++].run();
+      progress.style.setProperty("--p", String(Math.min(1, clock / total)));
+      if (next >= steps.length) return finish();
+      raf = visible ? requestAnimationFrame(frame) : 0;
+    };
+    const play = () => {
+      if (raf || term.hasAttribute("data-done")) return;
+      last = performance.now();
+      raf = requestAnimationFrame(frame);
+    };
+    const reset = () => {
+      clock = 0;
+      next = 0;
+      userScrolled = false;
+      lastFollow = null;
+      box.scrollTop = 0;
+      term.removeAttribute("data-done");
+      term.querySelectorAll("[data-on]").forEach((e) => e.removeAttribute("data-on"));
+      term.querySelectorAll("[data-c]").forEach((e) => e.removeAttribute("data-c"));
+      term.querySelectorAll("[data-cur]").forEach((e) => e.removeAttribute("data-cur"));
+      status.textContent = "local · Docker";
+      status.dataset.state = "";
+      progress.style.setProperty("--p", "0");
+    };
+
+    if (!motionOk()) {
+      // static, complete transcript; show the end of it (the failing run) like a finished terminal
+      box.scrollTop = box.scrollHeight;
+      continue;
+    }
+    term.setAttribute("data-armed", "");
+    armed = true;
+    reset();
+    onVisible(term, (v) => {
+      visible = v;
+      if (v) play();
+      else if (raf) {
+        cancelAnimationFrame(raf);
+        raf = 0;
+      }
+    });
+    replay.addEventListener("click", () => {
+      reset();
+      play();
+    });
+    onReduce(() => {
+      if (armed) finish();
+      term.removeAttribute("data-armed");
+    });
+  }
+</script>

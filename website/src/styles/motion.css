@@ -1,0 +1,57 @@
+/*
+ * Motion tokens and shared motion states. See /design/motion-system.md (outside the repo)
+ * for the rationale. Only opacity, transform and filter animate. Initial hidden states are
+ * scoped under html.motion-ok, which the motion helper sets only when JS runs and the user
+ * has not asked for reduced motion; everyone else sees the final state.
+ */
+:root {
+  --dur-instant: 90ms;
+  --dur-fast: 160ms;
+  --dur-base: 240ms;
+  --dur-slow: 480ms;
+  --dur-slower: 720ms;
+  --dur-ambient: 2400ms;
+  --ease-out: cubic-bezier(0.165, 0.84, 0.44, 1);
+  --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+  --ease-sheet: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-swift: cubic-bezier(0.175, 0.885, 0.32, 1.1);
+  --rise-sm: 8px;
+  --rise: 16px;
+  --rise-lg: 28px;
+  --reveal-blur: 6px;
+  --stagger: 60ms;
+}
+
+/* Generic reveal: [data-reveal] (optional style="--i: n" for stagger, capped by authors at 8). */
+.motion-ok [data-reveal] {
+  opacity: 0;
+  transform: translate3d(0, var(--rise), 0);
+  filter: blur(var(--reveal-blur));
+  transition:
+    opacity var(--dur-slower) var(--ease-out-expo),
+    transform var(--dur-slower) var(--ease-out-expo),
+    filter var(--dur-slow) var(--ease-out);
+  transition-delay: calc(var(--i, 0) * var(--stagger));
+}
+.motion-ok [data-reveal][data-in] {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+/* Anything that loops pauses while its container is off-screen or the tab is hidden. */
+[data-play]:not([data-visible]) *,
+[data-play]:not([data-visible])::before,
+[data-play]:not([data-visible])::after {
+  animation-play-state: paused !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-ok [data-reveal] {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    transition: none;
+  }
+}
