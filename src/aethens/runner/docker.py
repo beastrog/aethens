@@ -205,11 +205,14 @@ class DockerRunner:
     def _execute(self, spec: RunSpec, argv: list[str], name: str) -> RunResult:
         limit = spec.limits.max_output_bytes
         start = time.monotonic()
-        LEDGER.started += 1
-        LEDGER.unconfirmed.add(name)  # until run()'s finally confirms the removal
         proc = subprocess.Popen(  # noqa: S603 - argument list, never a shell
             argv, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
+        # Count only after the docker CLI process exists. Incrementing before Popen
+        # let a signal or a Popen failure, plus _remove treating "No such container"
+        # as success, report "removal of all N container(s) confirmed".
+        LEDGER.started += 1
+        LEDGER.unconfirmed.add(name)  # until run()'s finally confirms the removal
         assert proc.stdout is not None and proc.stderr is not None
         out, err = TailPump(proc.stdout, limit), TailPump(proc.stderr, limit)
         timed_out = False

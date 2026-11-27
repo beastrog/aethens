@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -140,3 +141,43 @@ def test_in_container_seconds() -> None:
     assert in_container_seconds(state) == pytest.approx(2.5)
     assert in_container_seconds({"StartedAt": "0001-01-01T00:00:00Z"}) is None
     assert in_container_seconds(None) is None
+
+
+def test_popen_failure_is_not_reported_as_confirmed_cleanup(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A container that was never created must not be counted as removal-confirmed.
+
+    LEDGER.started used to be incremented before Popen. Combined with _remove
+    treating "No such container" as success, an exception or signal before the
+    container existed still produced "cleanup ran: removal of all N confirmed".
+    """
+    from aethens.cli.main import cleanup_summary
+    from aethens.runner import docker as docker_mod
+    from aethens.runner.docker import LEDGER
+
+    LEDGER.reset()
+    (tmp_path / "runs").mkdir()
+    runner = DockerRunner(tmp_root=tmp_path / "runs")
+    monkeypatch.setattr(runner, "ensure_available", lambda: None)
+
+    def boom(*_a: object, **_k: object) -> object:
+        raise OSError("docker CLI could not be started")
+
+    monkeypatch.setattr(subprocess, "Popen", boom)
+
+    class _Missing:
+        returncode = 1
+        stdout = ""
+        stderr = "Error response from daemon: No such container: aethens-missing\n"
+
+    monkeypatch.setattr(docker_mod, "run_quiet", lambda *_a, **_k: _Missing())
+
+    try:
+        with pytest.raises(OSError, match="could not be started"):
+            runner.run(spec(tmp_path))
+        assert LEDGER.started == 0
+        assert not LEDGER.unconfirmed
+        assert cleanup_summary() == "no container had been started"
+    finally:
+        LEDGER.reset()
