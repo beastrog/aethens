@@ -23,6 +23,7 @@ Guides and generated records for [Aethens](https://github.com/beastrog/aethens),
 | [task-format.md](task-format.md) | The `aethens-task/v1` directory layout Aethens reads |
 | [report-schema.json](report-schema.json) | The `aethens-report/v2` report schema |
 | [EXTERNAL_BENCH.md](EXTERNAL_BENCH.md) | External-bench method, ground truth, and generated results (HumanEval / HumanEval+) |
+| [REAL_WORLD_RESULTS.md](REAL_WORLD_RESULTS.md) | Audits of public benchmarks (MBPP+, HumanEval+) with every finding checked by hand; per-check TP/FP tallies |
 | [../bench/external/README.md](../bench/external/README.md) | How to fetch, convert, and rerun the external bench |
 
 ## Run and report it
