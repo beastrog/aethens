@@ -42,6 +42,7 @@ DRIVER_PATH = (DRIVER_DIR / "equiv_driver.py").as_posix()
 PROBE_INPUTS = {Budget.SMOKE: 100, Budget.STANDARD: 300, Budget.DEEP: 1000}
 PROBE_SECONDS = {Budget.SMOKE: 5.0, Budget.STANDARD: 8.0, Budget.DEEP: 30.0}
 MIN_VALID = 20  # fewer valid inputs than this and "no difference" means nothing (inconclusive)
+UNSTABLE_DIVISOR = 10  # gold self-disagreement on >= 1/10 of inputs: inconclusive (D-087)
 
 
 @dataclass(frozen=True)
@@ -83,6 +84,17 @@ def judge(data: dict[str, object] | None, min_valid: int = MIN_VALID) -> Equival
     if not data.get("functions"):
         return Equivalence(
             "inconclusive", "the tests call no module-level function of the mutated file"
+        )
+    unstable = data.get("unstable")
+    unstable_n = unstable if isinstance(unstable, int) else 0
+    if unstable_n and unstable_n * UNSTABLE_DIVISOR >= valid_n + unstable_n:
+        # The gold's own results differ between two calls on many inputs: the inputs that
+        # remain "valid" are a biased sample, so "no difference" means nothing (D-087).
+        return Equivalence(
+            "inconclusive",
+            f"the gold's results differ between two calls on {unstable_n} of "
+            f"{valid_n + unstable_n} inputs",
+            valid_n,
         )
     if valid_n < min_valid:
         return Equivalence(

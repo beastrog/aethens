@@ -264,6 +264,14 @@ def same(a: Any, b: Any, depth: int = 0) -> bool:
         )
     if isinstance(a, dict) and isinstance(b, dict):
         return a.keys() == b.keys() and all(same(a[k], b[k], depth + 1) for k in a)
+    identity_eq: Any = type(a).__eq__
+    if type(a) is type(b) and a is not b and identity_eq is object.__eq__:
+        # No value equality (re.Match, plain class instances): `==` is identity, so two equal
+        # results would never compare equal. Compare their repr instead (D-087).
+        try:
+            return repr(a) == repr(b)
+        except Exception:
+            return False
     try:
         return bool(a == b) and (a is None) == (b is None)
     except Exception:
@@ -298,6 +306,7 @@ def main(argv: list[str]) -> int:
         "seeds": 0,
         "tried": 0,
         "valid": 0,
+        "unstable": 0,
         "difference": None,
     }
     try:
@@ -343,6 +352,7 @@ def main(argv: list[str]) -> int:
                     continue
                 g2 = call(g, args, kwargs)
                 if g2[0] != "ok" or not same(g1[1], g2[1]) or not same(g1[2], g2[2]):
+                    result["unstable"] += 1  # the gold disagrees with itself here (D-087)
                     continue
                 result["valid"] += 1
                 mm = call(m, args, kwargs)
