@@ -30,9 +30,13 @@ Guides and generated records for [Aethens](https://github.com/beastrog/aethens),
 | Document | What it is |
 |---|---|
 | [../CONTRIBUTING.md](../CONTRIBUTING.md) | Setup, `make check`, and the rules that matter most |
+| [../SUPPORT.md](../SUPPORT.md) | How to get help: Discussions, issue templates, disclosure |
 | [../SECURITY.md](../SECURITY.md) | How to report a vulnerability; Docker isolation limits |
 | [../CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md) | Contributor Covenant |
+| [../GOVERNANCE.md](../GOVERNANCE.md) | How the project is maintained |
 | [DISCLOSURE.md](DISCLOSURE.md) | How findings about other people's benchmarks are handled |
+| [LICENSING.md](LICENSING.md) | Third-party notices and dependency licences |
+| [../NOTICE](../NOTICE) | Apache-2.0 NOTICE shipped in the sdist |
 
 ## Design record
 
@@ -46,4 +50,4 @@ These files are the project's working notes. Numbers in [EXTERNAL_BENCH.md](EXTE
 | [IDEAS.md](IDEAS.md) | Ideas not scheduled to build |
 | [AETHENS_PLAN.md](AETHENS_PLAN.md) | Original plan (source of truth with `AGENTS.md` and `ROADMAP.yaml`) |
 
-The marketing site, which reads `bench/results.json` and `bench/external/results.json` at build time, is at [beastrog.github.io/aethens](https://beastrog.github.io/aethens/).
+The marketing site, which reads `bench/results.json` and `bench/external/results.json` at build time, is at [beastrog.github.io/aethens](https://beastrog.github.io/aethens/). Questions and audit enquiries: [GitHub Discussions](https://github.com/beastrog/aethens/discussions). Founder: [Ani Dey](https://linkedin.com/in/aniruddha-dey-887b26312/).
