@@ -56,5 +56,5 @@ vulnerability in Discussions while it is unfixed.
 
 ## Supported versions
 
-Aethens is pre-release (`0.1.0.dev0`). Security fixes land on `main` and in the most recent
+Aethens is at its first release (`0.1.0`). Security fixes land on `main` and in the most recent
 published release, once one exists.
