@@ -46,6 +46,7 @@ def test_required_files_exist() -> None:
         ".github/workflows/ci.yml",
         ".github/workflows/release.yml",
         ".github/workflows/action-selftest.yml",
+        ".github/workflows/website.yml",
     ):
         assert (REPO / name).is_file(), name
 
@@ -74,16 +75,57 @@ def test_ci_and_selftest_are_read_only() -> None:
     assert set(_yaml(WORKFLOWS / "action-selftest.yml")["on"]) == {"pull_request"}
 
 
+def test_website_workflow_is_read_only_sha_pinned_and_does_not_deploy() -> None:
+    path = WORKFLOWS / "website.yml"
+    text = path.read_text()
+    wf = _yaml(path)
+    assert wf["permissions"] == {"contents": "read"}
+    on = wf["on"]
+    assert set(on) == {"pull_request", "push"}
+    assert "main" in on["push"]["branches"]
+    expected_paths = [
+        "website/**",
+        "bench/results.json",
+        "bench/external/results.json",
+        ".github/workflows/website.yml",
+    ]
+    assert on["pull_request"]["paths"] == expected_paths
+    assert on["push"]["paths"] == expected_paths
+    assert "pull_request_target" not in text
+    assert "id-token" not in text
+    assert "pages: write" not in text
+    assert "deploy-pages" not in text
+    assert "upload-pages-artifact" not in text
+    assert "configure-pages" not in text
+    for ref in USES.findall(text):
+        assert re.fullmatch(r"[\w.-]+/[\w./-]+@[0-9a-f]{40}", ref), ref
+    concurrency = wf["concurrency"]
+    assert concurrency["cancel-in-progress"] == "${{ github.event_name == 'pull_request' }}"
+    jobs = wf["jobs"]
+    assert len(jobs) == 1
+    job = jobs["build"]
+    assert job["name"] == "website build"
+    assert job["timeout-minutes"] == 10
+    assert job["runs-on"] == "ubuntu-24.04"
+
+
 def test_release_uses_trusted_publishing_only_in_publish_job() -> None:
     wf = _yaml(WORKFLOWS / "release.yml")
-    assert wf["on"] == {"release": {"types": ["published"]}}
+    assert wf["on"]["release"] == {"types": ["published"]}
+    assert set(wf["on"]) == {"release", "workflow_dispatch"}
     assert wf["permissions"] == {"contents": "read"}
     jobs = wf["jobs"]
     with_id_token = [n for n, j in jobs.items() if j.get("permissions", {}).get("id-token")]
-    assert with_id_token == ["publish"]
-    assert jobs["publish"]["permissions"] == {"id-token": "write"}
+    assert set(with_id_token) == {"publish", "publish-testpypi"}
+    for name in ("publish", "publish-testpypi"):
+        assert jobs[name]["permissions"] == {"id-token": "write"}
+    assert jobs["publish"]["environment"]["name"] == "pypi"
+    assert jobs["publish"]["if"] == "github.event_name == 'release'"
+    assert jobs["publish-testpypi"]["environment"]["name"] == "testpypi"
+    assert jobs["publish-testpypi"]["if"] == "github.event_name == 'workflow_dispatch'"
     text = (WORKFLOWS / "release.yml").read_text()
     assert "pypa/gh-action-pypi-publish@" in text
+    assert "uv build" in text
     for job in jobs.values():
         for step in job["steps"]:
             inputs = {k.lower() for k in (step.get("with") or {})}
@@ -141,3 +183,46 @@ def test_release_drafter_never_publishes() -> None:
             inputs = step.get("with") or {}
             if "publish" in inputs:
                 assert inputs["publish"] is False, step
+
+
+def test_action_has_marketplace_metadata() -> None:
+    action = _yaml(REPO / "action.yml")
+    assert action["name"] == "Aethens audit"
+    assert action.get("author")
+    assert action["description"]
+    branding = action["branding"]
+    assert branding["icon"]
+    assert branding["color"]
+
+
+def test_pyproject_has_release_metadata() -> None:
+    import tomllib
+
+    project = tomllib.loads((REPO / "pyproject.toml").read_text())["project"]
+    assert project["requires-python"] == ">=3.11"
+    classifiers = project["classifiers"]
+    assert "Programming Language :: Python :: 3.11" in classifiers
+    assert "Programming Language :: Python :: 3.12" in classifiers
+    urls = project["urls"]
+    assert urls["Homepage"]
+    assert urls["Repository"] == "https://github.com/beastrog/aethens"
+    assert urls["Issues"].startswith("https://github.com/beastrog/aethens")
+    assert urls["Discussions"] == "https://github.com/beastrog/aethens/discussions"
+    assert "Changelog" in urls
+    for author in project["authors"]:
+        assert "email" not in author
+
+
+def test_sdist_excludes_website() -> None:
+    import tomllib
+
+    hatch = tomllib.loads((REPO / "pyproject.toml").read_text())["tool"]["hatch"]
+    exclude = hatch["build"]["targets"]["sdist"]["exclude"]
+    assert "website" in exclude
+
+
+def test_package_metadata_files_have_no_folric() -> None:
+    # Contact is GitHub Discussions; Folric is a separate project.
+    for name in ("pyproject.toml", "action.yml", ".github/workflows/release.yml"):
+        text = (REPO / name).read_text().lower()
+        assert "folric" not in text, name

@@ -93,8 +93,8 @@ anyway, so this does not change task isolation). `docker run --rm hello-world` w
   independent; an outside read is still advised).
 
 ## Next (owner actions)
-- Approve or revert the semantics changes D-064 (what timeout_s measures, 60 s grace) and D-065
-  (C004 hides likely-equivalent survivors; budgets and MIN_VALID=20 are agent-chosen).
+- D-064 (what timeout_s measures, 60 s grace) and D-065 (C004 equivalent-mutant filter) were
+  approved by the owner on 27 Nov 2026; no semantics approvals are pending.
 - Decide the open review items, above all O1 (no size limit on /work writes) and O2 (containers
   outlive a SIGKILLed Aethens); see docs/review-2026-11-27.md.
 - Confirm exit code 3 semantics (D-032) and the agent-chosen limits (D-008, D-013).
