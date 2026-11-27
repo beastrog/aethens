@@ -343,7 +343,9 @@ branches (D-065 onwards).
   sandbox (network at test time, root paths). Options: (a) a "harbor" runner profile with
   dependencies baked at image-build time, writable container layer, root inside the container,
   still --network none; (b) leave Harbor unsupported. (a) changes the isolation settings and needs
-  the owner's approval. Only the static scan is built.
+  the owner's approval. Only the static scan is built; merging the scan is not approval of (a).
+  If (a) is approved it ships in its own PR as an opt-in profile, off by default (selected only
+  per run, never by a task file), and the default sandbox stays unchanged.
 - D-085 Prime Intellect `verifiers` environments: no generic importer (each environment's reward
   code would have to run in the sandbox with its dependencies). Not built; noted in docs/IDEAS.md.
 - D-086 Real-world audit runner `bench/real/run_real.py` calls the public CLI once per task so

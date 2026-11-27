@@ -6,6 +6,7 @@ from the public exports listed in bench/LICENSES.md); no network is used.
 
 from __future__ import annotations
 
+import importlib
 import json
 from pathlib import Path
 
@@ -281,6 +282,29 @@ def test_cli_import(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     assert main(["import", "mbppplus", str(src), str(out), "--only", "902"]) == 2
     assert "already exists" in capsys.readouterr().err
     assert main(["import", "swebench", str(src), str(out)]) == 2
+
+
+def test_cli_import_tool_errors_exit_2(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    out = tmp_path / "out"
+    assert main(["import", "mbppplus", str(tmp_path / "missing.jsonl"), str(out)]) == 2
+    bad = tmp_path / "bad.jsonl"
+    bad.write_text('{"task_id": 1}\n{not json\n')
+    assert main(["import", "mbppplus", str(bad), str(out)]) == 2
+    assert "ImporterError" in capsys.readouterr().err
+
+    # An unexpected importer crash is a tool error (exit 2), never "findings" (exit 1).
+    cli = importlib.import_module("aethens.cli.main")
+
+    def boom(rows: object) -> object:
+        raise RuntimeError("importer bug")
+
+    monkeypatch.setitem(cli.IMPORT_FORMATS, "mbppplus", boom)
+    good = tmp_path / "rows.jsonl"
+    good.write_text(json.dumps(MBPP_ROW) + "\n")
+    assert main(["import", "mbppplus", str(good), str(out)]) == 2
+    assert "internal error" in capsys.readouterr().err
 
 
 @pytest.mark.docker

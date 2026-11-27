@@ -35,7 +35,7 @@ Ideas that came up during the build. AGENTS.md rule 14: write them here, do not 
 - (27 Nov 2026) Prime Intellect `verifiers` environment importer: run an environment's reward
   functions inside the sandbox on gold and on probe completions (D-085).
 - (27 Nov 2026) Harbor / Terminal-Bench runner profile with dependencies baked at image build
-  time (D-084, needs owner approval).
+  time (D-084, needs owner approval; opt-in and off by default if built).
 - (27 Nov 2026) Patch-hunk mutation for SWE-bench: mutate only the lines the gold patch touches
   (C004 currently needs whole Python files in gold/).
 - C004: a CLI switch to turn the equivalent-mutant filter off (`--no-equivalence-filter`), and a
