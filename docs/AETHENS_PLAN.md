@@ -102,7 +102,7 @@ Launch content: the tool, the bench numbers with known misses, honest limits. No
 ## 10. Expansion plan (build only what a trigger demands)
 
 Outcome rules at day 30 and day 60:
-- **Strong pull** (G2 met plus at least one inbound request for help or an audit): offer fixed-price reviewed audits ($500 to $2,500 first audit, or traded for a public case study; these are guesses, not market data); build the adapter the most-asked-for user needs; start the public audit log.
+- **Strong pull** (G2 met plus at least one inbound request for help or an audit): offer reviewed audits (expert audits available on request, or traded for a public case study); build the adapter the most-asked-for user needs; start the public audit log.
 - **Use without money** (people run it, nobody pays): stay open source, keep it as a credibility asset, add adapters on request, test sponsorship or support contracts, and do not build a product layer.
 - **No use** (G2 missed at day 60): run a post-mortem; options are a reviewed-audit service only, a different failure class, or stop. The repo still stands as portfolio work.
 

@@ -135,7 +135,7 @@ phases:
     timebox: days 45-90
     milestones:
       - id: R-01
-        description: fixed-price reviewed-audit offer; first audit at 500-2500 USD or traded for a public case study
+        description: reviewed-audit offer; expert audits available on request, or traded for a public case study
       - id: R-02
         description: 15 real sales conversations logged
     gate:
