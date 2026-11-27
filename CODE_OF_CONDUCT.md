@@ -59,13 +59,12 @@ representative at an online or offline event.
 ## Enforcement
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported privately to the community leaders responsible for enforcement through
-[GitHub private vulnerability reporting](https://github.com/beastrog/aethens/security/advisories/new).
-Mark the report as a code-of-conduct issue so it is not treated as a product
+reported privately to the community leaders responsible for enforcement by
+email at [deyani845@gmail.com](mailto:deyani845@gmail.com). You can also use
+[GitHub private vulnerability reporting](https://github.com/beastrog/aethens/security/advisories/new);
+mark the report as a code-of-conduct issue so it is not treated as a product
 vulnerability. All complaints will be reviewed and investigated promptly and
 fairly.
-
-<!-- TODO for Ani: add a private 'conduct' Discussions category (or another private contact) and point this section at it, so conduct reports are not mixed with security advisories. -->
 
 All community leaders are obligated to respect the privacy and security of the
 reporter of any incident.

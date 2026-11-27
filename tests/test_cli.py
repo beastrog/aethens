@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -210,18 +211,17 @@ def test_sigterm_removes_running_containers(tmp_path: Path) -> None:
     import signal
     import time
 
+    # Only this audit's containers count. DockerRunner() uses tempfile.mkdtemp, which
+    # honours TMPDIR, so a container is ours when its /work bind mount is under that
+    # directory. Other aethens.run containers on a shared daemon are ignored.
     task = tmp_path / "hung"
     shutil.copytree(REPO / "tests" / "fixtures" / "hung-gold", task)
-    # DockerRunner() uses tempfile.mkdtemp(dir=None), which honours TMPDIR.
     runs = tmp_path / "runs"
     runs.mkdir()
-    env = os.environ.copy()
-    env["TMPDIR"] = str(runs.resolve())
-
     proc = subprocess.Popen(
         [sys.executable, "-m", "aethens", "audit", str(task), "--check", "C001"],
         cwd=REPO,
-        env=env,
+        env={**os.environ, "TMPDIR": str(runs.resolve())},
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
@@ -246,7 +246,79 @@ def test_sigterm_removes_running_containers(tmp_path: Path) -> None:
             proc.kill()
     assert proc.returncode == 2, err
     assert "terminated" in err.lower()
+    assert re.search(r"cleanup ran: removal of all [1-9][0-9]* container\(s\) confirmed", err), err
     leftover = _owned_containers(runs)
     assert leftover == set(), leftover
     # IDs we saw this run must be gone even if their workdir was deleted first.
     assert _aethens_containers() & started == set()
+
+
+_SLEEPING_AUDIT = """
+import importlib, time
+cli = importlib.import_module("aethens.cli.main")
+def stall(*_a, **_k):
+    print("ready", flush=True)
+    time.sleep(60)
+cli.load_tasks = stall
+raise SystemExit(cli.main(["audit", "examples/add-two"]))
+"""
+
+
+def test_sigterm_before_any_container_is_exit_2_without_cleanup_claim() -> None:
+    import os
+    import signal
+
+    proc = subprocess.Popen(
+        [sys.executable, "-c", _SLEEPING_AUDIT],
+        cwd=REPO,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    try:
+        assert proc.stdout is not None and proc.stdout.readline().strip() == "ready"
+        os.kill(proc.pid, signal.SIGTERM)
+        _out, err = proc.communicate(timeout=30)
+    finally:
+        if proc.poll() is None:
+            proc.kill()
+    assert proc.returncode == 2, err
+    assert "terminated by signal" in err
+    assert "no container had been started" in err
+    assert "removed" not in err and "Traceback" not in err
+
+
+def test_ctrl_c_is_exit_2(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # README and the CLI docstring: interruptions are tool errors (2), never "findings" (1).
+    cli = importlib.import_module("aethens.cli.main")
+
+    def interrupted(*_a: object, **_k: object) -> object:
+        raise KeyboardInterrupt
+
+    monkeypatch.setattr(cli, "run_audit", interrupted)
+    monkeypatch.setattr(cli.DockerRunner, "ensure_available", lambda self: None)
+    assert cli.main(["audit", "examples/add-two", "--check", "C001"]) == 2
+    err = capsys.readouterr().err
+    assert "interrupted (Ctrl-C); no container had been started" in err
+    assert "Traceback" not in err
+
+
+def test_interruption_message_names_unconfirmed_containers(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    cli = importlib.import_module("aethens.cli.main")
+    from aethens.runner.docker import LEDGER
+
+    def interrupted(*_a: object, **_k: object) -> object:
+        LEDGER.started += 2
+        LEDGER.unconfirmed.add("aethens-0123456789abcdef")  # removal failed or was cut short
+        raise KeyboardInterrupt
+
+    monkeypatch.setattr(cli, "run_audit", interrupted)
+    monkeypatch.setattr(cli.DockerRunner, "ensure_available", lambda self: None)
+    assert cli.main(["audit", "examples/add-two", "--check", "C001"]) == 2
+    err = capsys.readouterr().err
+    assert "removal of 1 container(s) was not confirmed: aethens-0123456789abcdef" in err
+    assert "cleanup ran" not in err
