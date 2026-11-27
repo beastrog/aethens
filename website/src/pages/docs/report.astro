@@ -1,0 +1,169 @@
+---
+import Docs from "../../layouts/Docs.astro";
+const base = import.meta.env.BASE_URL;
+const required = `schema, tool_version, task_ids, checks_run, budget, seed,
+findings, coverage, started_at, duration_s`;
+---
+
+<Docs
+  current="report"
+  title="Report format"
+  description="The aethens-report/v2 JSON schema and the Markdown report that aethens audit can write."
+>
+  <p class="kicker mb-5"><span>Docs</span><span class="num" aria-hidden="true">/</span><span>Report</span></p>
+  <h1 class="font-serif italic font-semibold text-section leading-[1.1]">Report format</h1>
+  <p class="mt-6 text-paper/90">
+    <code class="text-gold">aethens audit --format json</code> writes a report that
+    follows <code class="text-gold">aethens-report/v2</code>. The formal schema is
+    <a class="prose-link" href="https://github.com/beastrog/aethens/blob/main/docs/report-schema.json">docs/report-schema.json</a>.
+    JSON is the CLI default. <code class="text-gold">--format markdown</code>
+    renders the same report as Markdown sized for a pull-request comment. The
+    GitHub Action always writes Markdown to
+    <code class="text-gold">aethens-report.md</code>.
+  </p>
+
+  <h2 id="top-level" class="mt-12 font-serif italic text-2xl">Top-level fields</h2>
+  <p class="mt-4 text-paper/90">
+    Required fields, in schema order:
+  </p>
+  <pre class="cmd mt-4" tabindex="0"><code>{required}</code></pre>
+  <div class="scroll-x mt-6">
+    <table class="sheet">
+      <thead>
+        <tr>
+          <th>Field</th>
+          <th>Meaning</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>schema</code></td>
+          <td>The constant <code>aethens-report/v2</code>. v2 adds <code>coverage</code>; v1 reports had no coverage list but still load.</td>
+        </tr>
+        <tr>
+          <td><code>tool_version</code></td>
+          <td>The Aethens version that produced the report.</td>
+        </tr>
+        <tr>
+          <td><code>task_ids</code></td>
+          <td>The task ids included in the run.</td>
+        </tr>
+        <tr>
+          <td><code>checks_run</code></td>
+          <td>Check ids of the form <code>C000</code>, for example C001–C007.</td>
+        </tr>
+        <tr>
+          <td><code>budget</code></td>
+          <td><code>smoke</code>, <code>standard</code>, or <code>deep</code>.</td>
+        </tr>
+        <tr>
+          <td><code>seed</code></td>
+          <td>Integer seed used for the run.</td>
+        </tr>
+        <tr>
+          <td><code>started_at</code></td>
+          <td>ISO 8601 timestamp with a UTC offset.</td>
+        </tr>
+        <tr>
+          <td><code>duration_s</code></td>
+          <td>Run duration in seconds, at least 0.</td>
+        </tr>
+        <tr>
+          <td><code>findings</code></td>
+          <td>The list of findings. Additional properties on the report object are not allowed.</td>
+        </tr>
+        <tr>
+          <td><code>coverage</code></td>
+          <td>Statements a check can make where it found nothing, for example C002’s flake-rate bound.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="finding" class="mt-12 font-serif italic text-2xl">A finding</h2>
+  <p class="mt-4 text-paper/90">
+    Every finding has these required fields:
+    <code class="text-gold">id</code>,
+    <code class="text-gold">check_id</code>,
+    <code class="text-gold">severity</code>,
+    <code class="text-gold">task_id</code>,
+    <code class="text-gold">title</code>,
+    <code class="text-gold">detail</code>,
+    <code class="text-gold">evidence</code>,
+    <code class="text-gold">repro</code>,
+    <code class="text-gold">seed</code>,
+    <code class="text-gold">confidence</code>, and
+    <code class="text-gold">limits</code>.
+  </p>
+  <ul class="mt-4 list-disc pl-5 space-y-2 text-paper/90">
+    <li><code class="text-gold">severity</code> is <code>error</code>, <code>warning</code>, or <code>info</code>.</li>
+    <li><code class="text-gold">confidence</code> is <code>confirmed</code> or <code>needs-review</code>.</li>
+    <li><code class="text-gold">repro</code> is a one-line command that reproduces the finding.</li>
+    <li><code class="text-gold">limits</code> records what the check did and did not try.</li>
+  </ul>
+
+  <h2 id="evidence" class="mt-12 font-serif italic text-2xl">Evidence</h2>
+  <p class="mt-4 text-paper/90">
+    Each finding’s <code class="text-gold">evidence</code> object has
+    <code class="text-gold">subject</code>,
+    <code class="text-gold">command</code> (an argument list),
+    <code class="text-gold">observed</code>,
+    <code class="text-gold">exit_codes</code> (integers or null),
+    <code class="text-gold">timed_out</code>,
+    <code class="text-gold">stdout_tail</code>,
+    <code class="text-gold">stderr_tail</code>, and
+    <code class="text-gold">extra</code> (a string-to-string map).
+  </p>
+  <p class="mt-4 text-paper/90">
+    <code class="text-gold">subject</code> is one of
+    <code class="text-gold">starter</code>,
+    <code class="text-gold">gold</code>,
+    <code class="text-gold">candidate:&lt;name&gt;</code>,
+    <code class="text-gold">mutant:&lt;key&gt;</code>,
+    <code class="text-gold">test:&lt;id&gt;</code> (C005),
+    <code class="text-gold">rewrite:&lt;family&gt;</code> (C006), or
+    <code class="text-gold">probe:&lt;category&gt;</code> (C007).
+  </p>
+
+  <h2 id="coverage" class="mt-12 font-serif italic text-2xl">Coverage</h2>
+  <p class="mt-4 text-paper/90">
+    A coverage entry has <code class="text-gold">check_id</code>,
+    <code class="text-gold">task_id</code>,
+    <code class="text-gold">statement</code>, and
+    <code class="text-gold">stats</code> (a string-to-string map). It records
+    something a check can say even though it found nothing, for example C002:
+    flake rate below p at 95% confidence, or a C004 equivalent mutant that was
+    not reported.
+  </p>
+
+  <h2 id="markdown" class="mt-12 font-serif italic text-2xl">Markdown reports</h2>
+  <p class="mt-4 text-paper/90">
+    A Markdown report starts with the heading “Aethens report”, then a line with
+    the tool version, budget, seed, checks run, task count, and duration, then a
+    count of error, warning, and info findings.
+  </p>
+  <p class="mt-4 text-paper/90">
+    If there are no findings, it says: “No findings. This only means the checks
+    listed above found nothing at this budget and seed; it is not a guarantee
+    about the verifier.”
+  </p>
+  <p class="mt-4 text-paper/90">
+    If there are findings, it prints a summary table (severity, check, task,
+    title), then a details block for each finding with the observed result,
+    subject, confidence, seed, command, limits, the repro command, and output
+    tails when present. Findings are ordered by severity (error, then warning,
+    then info), task id, check id, and finding id. A closing note reminds
+    readers that C004 info findings may be semantically equivalent to the gold,
+    and that findings rely on what was run.
+  </p>
+  <p class="mt-4 text-paper/90">
+    If the coverage list is not empty, a “Coverage (what was established where
+    nothing was found)” table follows, with check, task, and statement columns.
+  </p>
+  <p class="mt-8 text-sm text-muted">
+    Sources: <a class="prose-link" href="https://github.com/beastrog/aethens/blob/main/docs/report-schema.json">docs/report-schema.json</a>
+    and <code>src/aethens/report.py</code>. See also
+    <a class="prose-link" href={`${base}docs/checks/`}>the checks</a> and
+    <a class="prose-link" href={`${base}docs/cli/`}>the CLI</a>.
+  </p>
+</Docs>

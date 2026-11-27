@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "aethens"
 version = "0.1.0"
-description = "Validate the verifiers of code tasks by running them: accept correct, reject wrong, same result every run."
+description = "Audit verifiers of code tasks by running them: correct solutions should pass, wrong ones should fail, and repeated runs should agree."
 readme = "README.md"
 license = "Apache-2.0"
 license-files = ["LICENSE", "NOTICE"]

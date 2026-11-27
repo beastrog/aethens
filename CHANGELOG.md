@@ -6,6 +6,13 @@ All notable changes are recorded here. The format follows Keep a Changelog; vers
 
 ### Added
 - CI: a non-required `website build` job runs `npm ci` and `npm run build` in `website/` on pull requests and pushes to main that touch `website/**`, `bench/results.json`, `bench/external/results.json`, or the workflow file. It does not deploy, and it is not a required ruleset check.
+- Docs section on the marketing site at `/docs/`: getting started, CLI, checks C001–C007, GitHub Action, report format, and FAQ. The site header links to it.
+
+### Changed
+- Launch copy: the site and package metadata say version 0.1.0 (not on PyPI yet). Bench provenance stays `0.1.0.dev0`, which is the `tool_version` recorded in `bench/results.json`. Public docs no longer list audit prices. The hosted-CI card is labelled "Not available".
+
+### Fixed
+- Docker runner: the post-exit timeout cap now uses the host-monotonic time the container was observed running, not the full `docker run` wall time. The previous cap (total elapsed) still counted create and teardown, so a start or teardown longer than `timeout_s` combined with an inflated `FinishedAt - StartedAt` reported a fast verifier as timed out (`exit_code` `None`). That is the same symptom as `test_deterministic_under_seed` on hosted `check (3.12)` (run 45989844568, attempt 1): `[1, 1, None, 0, 1]` versus `[1, 1, 0, 0, 1]`. `timeout_s` still means in-container time; a genuinely slow run is still a timeout. Isolation settings are unchanged.
 
 ## [0.1.0] - 2026-11-27
 
