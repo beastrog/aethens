@@ -52,7 +52,7 @@ aethens audit bench/tasks/brokengold-offbyone --check C001 --format markdown
 
 This exits 1 and reports "Gold solution fails the verifier", with the verifier's output and a repro command you can paste.
 
-Useful options: `--budget smoke|standard|deep`, `--fail-on error|warning`, `--format json|markdown`, `--seed N`, `--check C00X` (repeatable), `--output FILE`. Exit codes: 0 pass, 1 findings at or above `--fail-on`, 2 tool error, 3 the gold solution timed out.
+Useful options: `--budget smoke|standard|deep`, `--fail-on error|warning`, `--format json|markdown`, `--seed N`, `--check C00X` (repeatable), `--output FILE`. Exit codes: 0 pass, 1 findings at or above `--fail-on`, 2 tool error (including Ctrl-C and SIGTERM), 3 the gold solution timed out.
 
 `--unsafe-local` runs task code directly on your machine without container isolation, with a scrubbed environment and timeouts. Only use it on code you trust.
 

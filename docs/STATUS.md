@@ -4,7 +4,7 @@ Last updated: 2026-11-27 (Asia/Calcutta), after the pre-launch fixes and the har
 
 ## Mode
 
-GitHub remote connected on 27 Nov 2026: origin = github.com/beastrog/aethens (private). Work goes
+GitHub remote connected on 27 Nov 2026: origin = github.com/beastrog/aethens (public; it was private until 27 Nov 2026). Work goes
 through PRs (`gh pr create`, `gh pr checks --watch`, squash-merge). Hosted CI (`ci` on Python 3.11
 and 3.12, `action-selftest`) has run and is green on main; the first `bench-results` artifact (main
 at 8af4d39) is identical to the committed bench/results.json. Before that (B1-D5) everything was
@@ -93,6 +93,8 @@ anyway, so this does not change task isolation). `docker run --rm hello-world` w
   0.8667 -> 0.80 (same run, filter off vs on).
 - PR #2: hardened example verifiers; README quickstart and action-selftest exit 0 again.
 - PR #5: CLI exit 2 on internal errors, unwritable --output, SIGTERM (with container cleanup).
+  Post-merge review follow-up: Ctrl-C also exits 2, and the interruption message states what
+  cleanup confirmed instead of always claiming containers were removed.
 - Hardening review written to docs/review-2026-11-27.md (run by the build agent, so not truly
   independent; an outside read is still advised).
 
@@ -102,7 +104,8 @@ anyway, so this does not change task isolation). `docker run --rm hello-world` w
 - Decide the open review items, above all O1 (no size limit on /work writes) and O2 (containers
   outlive a SIGKILLed Aethens); see docs/review-2026-11-27.md.
 - Confirm exit code 3 semantics (D-032) and the agent-chosen limits (D-008, D-013).
-- Terms check, README cold read, PyPI trusted publisher, release, flip public.
+- Terms check, README cold read, PyPI trusted publisher, release (the repository is already
+  public). Enable private vulnerability reporting now if it is not on (SECURITY.md relies on it).
 
 ## Open risks
 - Exit code 3 semantics are an agent decision (D-032); the owner should confirm.
