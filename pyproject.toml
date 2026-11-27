@@ -46,6 +46,7 @@ extend-exclude = [
   "bench/external/sample",
   "bench/external/full",
   "bench/external/data",
+  "website",
 ]
 
 [tool.ruff.lint]

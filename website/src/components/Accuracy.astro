@@ -1,0 +1,244 @@
+---
+import numbers from "../data/numbers.json";
+import { fmtScore, frac } from "../lib/format";
+
+const m = numbers.internal;
+const x = numbers.external;
+const classes = Object.entries(m.per_class) as [string, { planted: number; found: number }][];
+const checks = Object.entries(m.per_check) as [
+  string,
+  { planted: number; found: number; false_positives: number },
+][];
+const cats = Object.entries(m.reward_hack.per_category) as [
+  string,
+  { labelled: number; found: number; false_positives: number },
+][];
+---
+
+<section id="accuracy" class="border-t border-line py-20 sm:py-28" aria-labelledby="accuracy-heading">
+  <div class="wrap">
+    <p class="kicker mb-5"><span class="num">03</span> Published accuracy</p>
+    <h2 id="accuracy-heading" class="font-serif italic font-semibold text-section leading-[1.1] max-w-3xl">
+      Numbers you can regenerate, including the weak ones.
+    </h2>
+    <p class="mt-6 max-w-2xl text-paper/90">
+      The brand claim is accuracy you can verify. Both benches below were generated from JSON
+      checked into the repository. The figures on this page are produced at site build time from
+      those files, not typed in by hand. The internal bench is labelled {m.label}; the external
+      bench is labelled {x.label}.
+    </p>
+
+    <div class="mt-16">
+      <h3 class="font-serif italic text-3xl">Internal bench</h3>
+      <p class="mt-3 max-w-2xl text-sm text-muted">
+        {m.tasks} self-authored tasks ({m.controls} clean controls, {m.defective} with planted
+        defects). aethens {m.tool_version}, seed {m.seed}, budget {m.budget}. {m.label}.
+        {m.note}
+      </p>
+
+      <div class="mt-8 grid grid-cols-2 gap-px bg-line sm:grid-cols-4 border border-line">
+        <div class="bg-ink px-5 py-6">
+          <p class="metric-label">Precision</p>
+          <p class="metric-figure">{fmtScore(m.precision)}</p>
+        </div>
+        <div class="bg-ink px-5 py-6">
+          <p class="metric-label">Recall</p>
+          <p class="metric-figure">{fmtScore(m.recall)}</p>
+          <p class="mt-3 font-mono text-xs text-muted">{frac(m.found, m.planted)} planted defects</p>
+        </div>
+        <div class="bg-ink px-5 py-6">
+          <p class="metric-label">False positives</p>
+          <p class="metric-figure">{m.false_positives}</p>
+          <p class="mt-3 font-mono text-xs text-muted">on clean controls</p>
+        </div>
+        <div class="bg-ink px-5 py-6">
+          <p class="metric-label">Known misses</p>
+          <p class="metric-figure">{m.known_misses.length}</p>
+          <p class="mt-3 font-mono text-xs text-muted">in this run</p>
+        </div>
+      </div>
+
+      <div class="mt-8 grid gap-4 lg:grid-cols-2">
+        <div class="scroll-x">
+          <table class="sheet">
+            <caption class="sr-only">Planted defects found, by class</caption>
+            <thead>
+              <tr>
+                <th scope="col">Defect class</th>
+                <th scope="col">Found / planted</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                classes.map(([name, row]) => (
+                  <tr>
+                    <td class="font-mono text-sm">{name}</td>
+                    <td class="font-mono">{frac(row.found, row.planted)}</td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+        <div class="scroll-x">
+          <table class="sheet">
+            <caption class="sr-only">Planted defects found, by check</caption>
+            <thead>
+              <tr>
+                <th scope="col">Check</th>
+                <th scope="col">Found / planted</th>
+                <th scope="col">False positives</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                checks.map(([name, row]) => (
+                  <tr>
+                    <td class="font-mono text-sm">{name}</td>
+                    <td class="font-mono">{frac(row.found, row.planted)}</td>
+                    <td class="font-mono">{row.false_positives}</td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <p class="mt-6 text-sm text-muted">
+        Unexpected error/warning findings on defective tasks: {m.unexpected_findings}. Info findings
+        on controls: {m.info_on_controls} (typically C004 surviving mutants, which may be equivalent
+        to the gold and are not counted as false positives).
+      </p>
+    </div>
+
+    <div class="mt-16">
+      <h3 class="font-serif italic text-3xl">Reward-hacking probes (C007)</h3>
+      <p class="mt-3 max-w-2xl text-sm text-muted">
+        Scored separately. Each task lists the probe categories that should get through its
+        verifier. {m.label}.
+      </p>
+      <div class="mt-8 grid grid-cols-2 gap-px bg-line sm:grid-cols-3 border border-line">
+        <div class="bg-ink px-5 py-6">
+          <p class="metric-label">Recall</p>
+          <p class="metric-figure">{fmtScore(m.reward_hack.recall)}</p>
+          <p class="mt-3 font-mono text-xs text-muted">{frac(m.reward_hack.found, m.reward_hack.labelled)}</p>
+        </div>
+        <div class="bg-ink px-5 py-6">
+          <p class="metric-label">Precision</p>
+          <p class="metric-figure">{fmtScore(m.reward_hack.precision)}</p>
+        </div>
+        <div class="bg-ink px-5 py-6 col-span-2 sm:col-span-1">
+          <p class="metric-label">False positives</p>
+          <p class="metric-figure">{m.reward_hack.false_positives}</p>
+        </div>
+      </div>
+      <div class="mt-8 scroll-x">
+        <table class="sheet">
+          <caption class="sr-only">C007 results by exploit category</caption>
+          <thead>
+            <tr>
+              <th scope="col">Category</th>
+              <th scope="col">Found / labelled</th>
+              <th scope="col">False positives</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              cats.map(([name, row]) => (
+                <tr>
+                  <td class="font-mono text-sm">{name}</td>
+                  <td class="font-mono">{frac(row.found, row.labelled)}</td>
+                  <td class="font-mono">{row.false_positives}</td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="mt-16 border border-warn/40 bg-warn/5 p-6 sm:p-8">
+      <h3 class="font-serif italic text-3xl">External bench — and the weak number</h3>
+      <p class="mt-3 max-w-2xl text-sm text-paper/85">
+        The internal bench can only show that Aethens finds defects its authors planted. The
+        external bench runs Aethens on public tasks it did not write, and judges C004 with an
+        outside oracle: EvalPlus HumanEval+ tests. {x.tasks} HumanEval tasks (MIT), seed {x.seed},
+        budget {x.budget}, exhaustive mutation on. {x.label}.
+      </p>
+      <p class="mt-3 max-w-2xl text-sm text-muted">
+        C003 was not run (HumanEval has no labelled candidates). C007 was not run (the verifier is
+        Aethens' own unittest conversion, so probe results would describe the converter, not
+        HumanEval). {x.tasks_without_oracle} tasks whose original canonical solution fails the
+        HumanEval+ oracle are excluded from C004 precision and recall.
+      </p>
+
+      <div class="mt-8 grid grid-cols-2 gap-px bg-line border border-line">
+        <div class="bg-ink px-5 py-6">
+          <p class="metric-label">C004 precision</p>
+          <p class="metric-figure">{fmtScore(x.c004.precision)}</p>
+          <p class="mt-3 font-mono text-xs text-muted">
+            {x.c004.confirmed} of {x.c004.survivors_judged_by_oracle} surviving mutants rejected by HumanEval+
+          </p>
+        </div>
+        <div class="bg-ink px-5 py-6">
+          <p class="metric-label">C004 recall</p>
+          <p class="metric-figure">{fmtScore(x.c004.recall)}</p>
+          <p class="mt-3 font-mono text-xs text-muted">
+            {x.c004.weak_tasks_found_at_budget} of {x.c004.weak_tasks} weak tasks found at budget standard
+          </p>
+        </div>
+      </div>
+      <p class="mt-5 max-w-2xl text-sm text-paper/90">
+        Precision of {fmtScore(x.c004.precision)} is the weakest published figure. Of{' '}
+        {x.c004.survivors_judged_by_oracle} mutants that HumanEval’s own tests accepted,
+        HumanEval+ rejected only {x.c004.confirmed}. The other {x.c004.unconfirmed} may be
+        equivalent mutants, or behaviour that even HumanEval+ does not check. A surviving mutant is
+        therefore not, by itself, evidence of a weak test. We publish the number anyway.
+      </p>
+      <p class="mt-4 max-w-2xl text-sm text-muted">
+        Checks without labels in this data are treated as presumed clean; no precision is claimed
+        from zero findings. Error/warning findings on those checks: C001{' '}
+        {x.presumed_clean.C001.loud_findings}, C002 {x.presumed_clean.C002.loud_findings}
+        {
+          x.presumed_clean.C002.loud_finding_list.length
+            ? ` (${x.presumed_clean.C002.loud_finding_list.map((f) => `${f.task}: ${f.title}`).join("; ")})`
+            : ""
+        }, C005 {x.presumed_clean.C005.loud_findings}. {x.tasks_without_oracle} tasks whose original
+        canonical solution fails the HumanEval+ oracle are excluded from C004 precision and recall.
+      </p>
+    </div>
+
+    <div class="mt-16">
+      <h3 class="font-serif italic text-3xl">How to reproduce</h3>
+      <p class="mt-3 max-w-2xl text-sm text-muted">
+        From a checkout of{' '}
+        <a class="prose-link" href="https://github.com/beastrog/aethens">beastrog/aethens</a>,
+        with Docker available. The internal bench and a six-task external sample are part of{' '}
+        <code class="text-gold">make check</code>. The full 164-task external run needs a network
+        fetch of the pinned HumanEval and HumanEval+ files the first time.
+      </p>
+      <div class="mt-6 grid gap-4 lg:grid-cols-2">
+        <div>
+          <p class="cmd-label">Internal bench</p>
+          <pre class="cmd" tabindex="0"><code>python bench/run_bench.py
+# writes bench/results.json; then
+python bench/render_readme.py</code></pre>
+        </div>
+        <div>
+          <p class="cmd-label">External bench (full)</p>
+          <pre class="cmd" tabindex="0"><code>python bench/external/fetch.py
+python bench/external/convert.py
+python bench/external/run_external.py --full --exhaustive --workers 6
+python bench/external/render_external.py</code></pre>
+        </div>
+      </div>
+      <p class="mt-4 text-sm text-muted">
+        To refresh the numbers on this website after those files change, from the website folder run{' '}
+        <code class="text-gold">npm run numbers</code> (or just <code class="text-gold">npm run build</code>).
+        Then update the date labels in <code class="text-gold">website/data/bench/meta.json</code> so they
+        still match how the results were produced.
+      </p>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,65 @@
+<section id="problem" class="border-t border-line py-20 sm:py-28" aria-labelledby="problem-heading">
+  <div class="wrap">
+    <p class="kicker mb-5"><span class="num">01</span> The problem</p>
+    <h2 id="problem-heading" class="font-serif italic font-semibold text-section leading-[1.1] max-w-3xl">
+      If the tests that judge an agent are wrong, the leaderboard is too.
+    </h2>
+    <div class="mt-8 max-w-3xl space-y-5 text-[1.05rem] text-paper/90">
+      <p>
+        Reinforcement-learning environments and coding benchmarks score a policy by running a
+        verifier: a test suite, a grader, a reward function. When those tests accept a wrong
+        solution, reject a correct one, or change their verdict from run to run, training and
+        evaluation are measuring the wrong thing.
+      </p>
+      <p>
+        This is already documented in public sources. The citations below are from those sources,
+        not from an Aethens audit of the same benchmarks — Aethens has not published findings on
+        them.
+      </p>
+    </div>
+
+    <ul class="mt-12 grid gap-6 md:grid-cols-3">
+      <li class="border border-line bg-raised/40 p-6">
+        <p class="font-mono text-[0.68rem] uppercase tracking-[0.14em] text-gold">OpenAI, Feb 2026</p>
+        <p class="mt-4 text-paper/95 leading-relaxed">
+          OpenAI explained why it no longer evaluates on SWE-bench Verified. It had audited 27.6% of
+          the Verified set and found that at least 59.4% of the audited problems had tests that
+          reject functionally correct submissions.
+        </p>
+        <p class="mt-4">
+          <a
+            class="prose-link font-mono text-[0.75rem]"
+            href="https://openai.com/index/why-we-no-longer-evaluate-swe-bench-verified/"
+          >
+            openai.com — retirement post
+          </a>
+        </p>
+      </li>
+      <li class="border border-line bg-raised/40 p-6">
+        <p class="font-mono text-[0.68rem] uppercase tracking-[0.14em] text-gold">SWE-Bench+, 2024</p>
+        <p class="mt-4 text-paper/95 leading-relaxed">
+          The SWE-Bench+ paper reported that 31.08% of “resolved” patches passed through weak tests,
+          and that 32.67% copied solutions leaked in issue text.
+        </p>
+        <p class="mt-4">
+          <a class="prose-link font-mono text-[0.75rem]" href="https://arxiv.org/abs/2410.06992">
+            arXiv:2410.06992
+          </a>
+        </p>
+      </li>
+      <li class="border border-line bg-raised/40 p-6">
+        <p class="font-mono text-[0.68rem] uppercase tracking-[0.14em] text-gold">EvalPlus / HumanEval+</p>
+        <p class="mt-4 text-paper/95 leading-relaxed">
+          EvalPlus’s HumanEval+ adds roughly 80× more tests than the original HumanEval suite —
+          public evidence that widely used coding tests can be incomplete. Aethens uses HumanEval+
+          only as an outside oracle for its own mutation check.
+        </p>
+        <p class="mt-4">
+          <a class="prose-link font-mono text-[0.75rem]" href="https://github.com/evalplus/evalplus">
+            github.com/evalplus/evalplus
+          </a>
+        </p>
+      </li>
+    </ul>
+  </div>
+</section>

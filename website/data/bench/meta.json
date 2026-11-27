@@ -1,0 +1,24 @@
+{
+  "internal": {
+    "label": "hosted CI, 27 Nov 2026",
+    "note": "Self-authored bench of small original tasks with planted defects. Figures match the bench-results artifact of GitHub Actions run 45960554224 on beastrog/aethens (27 Nov 2026; aethens 0.1.0.dev0, seed 0, budget standard), identical to bench/results.json."
+  },
+  "external": {
+    "label": "local run, 18 Nov 2026",
+    "note": "164 HumanEval tasks (MIT), judged by EvalPlus HumanEval+ tests (Apache-2.0) as an outside oracle. Figures are taken from bench/external/results.json (aethens 0.1.0.dev0, seed 0, budget standard, exhaustive mutation on), committed on 18 Nov 2026. C003 was not run (HumanEval has no labelled candidates). C007 was not run (the verifier is Aethens' own unittest conversion, so probe results would describe the converter, not HumanEval). 20 tasks whose original canonical solution fails the HumanEval+ oracle are excluded from C004 precision and recall. C004 precision is low: many mutants that HumanEval accepts are also accepted by HumanEval+, so a surviving mutant is not by itself evidence of a weak test."
+  },
+  "competitive_survey": {
+    "label": "surveyed 18 Nov 2026",
+    "note": "Competitor capabilities in the comparison table are taken from docs/COMPETITIVE.md, researched from public GitHub READMEs, arXiv, and project blogs on 18 Nov 2026. Where a claim comes from a project's own README or paper, it is that project's claim and has not been reproduced by Aethens."
+  },
+  "report_snippet": {
+    "task": "order-alphabetical",
+    "check": "C005",
+    "seed": 0,
+    "budget": "smoke",
+    "tool_version": "0.1.0.dev0",
+    "command": "aethens audit bench/tasks/order-alphabetical --check C005 --seed 0 --budget smoke",
+    "label": "local run, 27 Nov 2026",
+    "duration_s": 32.1
+  }
+}

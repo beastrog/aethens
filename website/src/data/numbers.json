@@ -1,0 +1,213 @@
+{
+  "generated_by": "scripts/generate-numbers.mjs",
+  "source": {
+    "internal": "bench/results.json",
+    "external": "bench/external/results.json",
+    "meta": "website/data/bench/meta.json"
+  },
+  "internal": {
+    "label": "hosted CI, 27 Nov 2026",
+    "note": "Self-authored bench of small original tasks with planted defects. Figures match the bench-results artifact of GitHub Actions run 45960554224 on beastrog/aethens (27 Nov 2026; aethens 0.1.0.dev0, seed 0, budget standard), identical to bench/results.json.",
+    "schema": "aethens-bench-results/v1",
+    "tool_version": "0.1.0.dev0",
+    "seed": 0,
+    "budget": "standard",
+    "tasks": 34,
+    "controls": 15,
+    "defective": 19,
+    "precision": 1,
+    "recall": 1,
+    "planted": 20,
+    "found": 20,
+    "false_positives": 0,
+    "unexpected_findings": 3,
+    "info_on_controls": 9,
+    "known_misses": [],
+    "per_check": {
+      "C001": {
+        "planted": 4,
+        "found": 4,
+        "false_positives": 0
+      },
+      "C002": {
+        "planted": 4,
+        "found": 4,
+        "false_positives": 0
+      },
+      "C003": {
+        "planted": 4,
+        "found": 4,
+        "false_positives": 0
+      },
+      "C004": {
+        "planted": 1,
+        "found": 1,
+        "false_positives": 0
+      },
+      "C005": {
+        "planted": 4,
+        "found": 4,
+        "false_positives": 0
+      },
+      "C006": {
+        "planted": 3,
+        "found": 3,
+        "false_positives": 0
+      }
+    },
+    "per_class": {
+      "weak-tests": {
+        "planted": 3,
+        "found": 3
+      },
+      "over-strict": {
+        "planted": 5,
+        "found": 5
+      },
+      "flaky": {
+        "planted": 3,
+        "found": 3
+      },
+      "no-assertions": {
+        "planted": 2,
+        "found": 2
+      },
+      "broken-gold": {
+        "planted": 2,
+        "found": 2
+      },
+      "order-dependence": {
+        "planted": 5,
+        "found": 5
+      }
+    },
+    "reward_hack": {
+      "labelled": 116,
+      "found": 116,
+      "false_positives": 0,
+      "recall": 1,
+      "precision": 1,
+      "per_category": {
+        "exit-zero": {
+          "labelled": 30,
+          "found": 30,
+          "false_positives": 0,
+          "recall": 1,
+          "precision": 1
+        },
+        "atexit-override": {
+          "labelled": 30,
+          "found": 30,
+          "false_positives": 0,
+          "recall": 1,
+          "precision": 1
+        },
+        "framework-patch": {
+          "labelled": 30,
+          "found": 30,
+          "false_positives": 0,
+          "recall": 1,
+          "precision": 1
+        },
+        "sitecustomize-hook": {
+          "labelled": 1,
+          "found": 1,
+          "false_positives": 0,
+          "recall": 1,
+          "precision": 1
+        },
+        "always-equal": {
+          "labelled": 15,
+          "found": 15,
+          "false_positives": 0,
+          "recall": 1,
+          "precision": 1
+        },
+        "hardcoded-visible": {
+          "labelled": 10,
+          "found": 10,
+          "false_positives": 0,
+          "recall": 1,
+          "precision": 1
+        }
+      }
+    }
+  },
+  "external": {
+    "label": "local run, 18 Nov 2026",
+    "note": "164 HumanEval tasks (MIT), judged by EvalPlus HumanEval+ tests (Apache-2.0) as an outside oracle. Figures are taken from bench/external/results.json (aethens 0.1.0.dev0, seed 0, budget standard, exhaustive mutation on), committed on 18 Nov 2026. C003 was not run (HumanEval has no labelled candidates). C007 was not run (the verifier is Aethens' own unittest conversion, so probe results would describe the converter, not HumanEval). 20 tasks whose original canonical solution fails the HumanEval+ oracle are excluded from C004 precision and recall. C004 precision is low: many mutants that HumanEval accepts are also accepted by HumanEval+, so a surviving mutant is not by itself evidence of a weak test.",
+    "schema": "aethens-external-bench/v1",
+    "tool_version": "0.1.0.dev0",
+    "subset": "full",
+    "seed": 0,
+    "budget": "standard",
+    "exhaustive": true,
+    "checks": [
+      "C001",
+      "C002",
+      "C004",
+      "C005"
+    ],
+    "datasets": [
+      {
+        "name": "HumanEval",
+        "role": "tasks: prompt, original canonical solution, original base tests",
+        "licence": "MIT",
+        "source": "github.com/openai/human-eval @ b9453e8f"
+      },
+      {
+        "name": "HumanEval+ (EvalPlus)",
+        "role": "oracle only: extended tests with expected outputs from EvalPlus's reference",
+        "licence": "Apache-2.0",
+        "source": "huggingface.co/datasets/evalplus/humanevalplus @ d32357cf"
+      }
+    ],
+    "tasks": 164,
+    "tasks_without_oracle": 20,
+    "c004": {
+      "precision": 0.4615,
+      "recall": 0.8387,
+      "survivors_judged_by_oracle": 78,
+      "confirmed": 36,
+      "unconfirmed": 42,
+      "weak_tasks": 31,
+      "weak_tasks_found_at_budget": 26
+    },
+    "presumed_clean": {
+      "C001": {
+        "loud_findings": 0,
+        "tasks_with_loud_findings": 0
+      },
+      "C002": {
+        "loud_findings": 1,
+        "tasks_with_loud_findings": 1,
+        "loud_finding_list": [
+          {
+            "task": "he-063",
+            "id": "C002-he-063-b1a6265b",
+            "severity": "warning",
+            "title": "Gold solution run time varies: some runs time out"
+          }
+        ]
+      },
+      "C005": {
+        "loud_findings": 0,
+        "tasks_with_loud_findings": 0
+      }
+    }
+  },
+  "competitive_survey": {
+    "label": "surveyed 18 Nov 2026",
+    "note": "Competitor capabilities in the comparison table are taken from docs/COMPETITIVE.md, researched from public GitHub READMEs, arXiv, and project blogs on 18 Nov 2026. Where a claim comes from a project's own README or paper, it is that project's claim and has not been reproduced by Aethens."
+  },
+  "report_snippet": {
+    "task": "order-alphabetical",
+    "check": "C005",
+    "seed": 0,
+    "budget": "smoke",
+    "tool_version": "0.1.0.dev0",
+    "command": "aethens audit bench/tasks/order-alphabetical --check C005 --seed 0 --budget smoke",
+    "label": "local run, 27 Nov 2026",
+    "duration_s": 32.1
+  }
+}
