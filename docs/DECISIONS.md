@@ -269,7 +269,7 @@ CI installs uv with `pip install uv==0.13.7` instead of a third-party setup acti
   first-version reward-hack recall was 115/116 (framework-patch 29/30).
 - D-063 (D5) The external bench does not run C007: its verifier is Aethens' own unittest conversion
   of HumanEval's check function, so probe results would describe the converter, not HumanEval.
-- D-064 (fix, owner approval requested) Timeout accounting in the Docker runner. Root cause of the
+- D-064 (fix, approved by the owner on 27 Nov 2026) Timeout accounting in the Docker runner. Root cause of the
   intermittent ctrl-tags-sorted false positive: `timeout_s` was measured on the host around the
   whole `docker run`, so container create/start/teardown counted as verifier time. Reproduced with
   300 gold runs of ctrl-tags-sorted at 128-way concurrency plus 24 CPU burners: 38/300 passing runs
