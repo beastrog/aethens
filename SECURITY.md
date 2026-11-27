@@ -42,8 +42,19 @@ What it does not protect against:
 
 ## Reporting a vulnerability
 
-Please report security problems privately, not in a public issue. Use GitHub's private vulnerability
-reporting for this repository ("Security" tab, "Report a vulnerability"). Include steps to reproduce.
+Please report security problems privately, not in a public issue or discussion.
+
+Use [GitHub private vulnerability reporting](https://github.com/beastrog/aethens/security/advisories/new)
+for this repository: **Security** → **Report a vulnerability**. Include steps to reproduce, the
+Aethens version (`aethens --version` or the commit), and whether the issue is in the auditor, the
+sandbox, the GitHub Action, or the default examples.
+
 You should get a reply within 7 days. Please allow up to 90 days for a fix before public disclosure.
 
-(Owner: enable private vulnerability reporting in the repository settings before launch.)
+Do not file a public issue, open a public pull request that demonstrates the exploit, or discuss the
+vulnerability in Discussions while it is unfixed.
+
+## Supported versions
+
+Aethens is at its first release (`0.1.0`). Security fixes land on `main` and in the most recent
+published release, once one exists.
