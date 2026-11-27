@@ -1,0 +1,30 @@
+name: Feature request
+description: Suggest a capability that is not a new audit check.
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For a new class of verifier defect, use the new-check proposal template instead.
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What is awkward, missing, or blocked today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you would like
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you considered
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Links, screenshots, or related issues. Do not paste secrets.

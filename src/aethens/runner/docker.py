@@ -12,7 +12,9 @@ load that overhead alone reached 20+ seconds and turned fast, passing verifiers 
 the host-side wait reaches ``timeout_s`` the runner asks the daemon whether and when the container
 started and keeps waiting until the container itself has run for ``timeout_s`` (never longer than
 ``timeout_s + STARTUP_GRACE_S`` in total). After a normal exit, a container whose daemon-recorded
-run time (FinishedAt - StartedAt) exceeds ``timeout_s`` is still reported as timed out.
+run time (FinishedAt - StartedAt) exceeds ``timeout_s`` is still reported as timed out,
+but that daemon delta is capped by the host's elapsed wait so a clock that jumps
+forward cannot invent a timeout (D-064).
 """
 
 from __future__ import annotations
@@ -63,6 +65,22 @@ def in_container_seconds(state: Mapping[str, object] | None) -> float | None:
     if start is None or end is None or end < start:
         return None
     return end - start
+
+
+def capped_in_container_seconds(
+    state: Mapping[str, object] | None, host_elapsed_s: float
+) -> float | None:
+    """Daemon in-container time, never larger than the host's elapsed wait (D-064).
+
+    ``_wait`` already caps ``time.time() - StartedAt`` by monotonic host elapsed time so a
+    daemon clock that runs ahead cannot shorten ``timeout_s``. The post-exit check must
+    do the same: a forward clock jump (or a bogus FinishedAt/StartedAt pair) would
+    otherwise mark a fast verifier as timed out (exit code ``None``).
+    """
+    ran = in_container_seconds(state)
+    if ran is None:
+        return None
+    return min(ran, max(host_elapsed_s, 0.0))
 
 
 class CleanupLedger:
@@ -239,7 +257,7 @@ class DockerRunner:
                 f"(docker exit {proc.returncode}): {stderr.strip()[-500:]}"
                 + (f" -- try: docker pull {spec.image}" if "No such image" in stderr else "")
             )
-        ran = in_container_seconds(state)
+        ran = capped_in_container_seconds(state, duration)
         if not timed_out and ran is not None and ran > spec.timeout_s:
             # It exited by itself, but only after running longer than its timeout (D-064).
             timed_out = True

@@ -95,6 +95,10 @@ const out = {
       unconfirmed: c004.unconfirmed,
       weak_tasks: c004.recall_detail.weak_tasks,
       weak_tasks_found_at_budget: c004.recall_detail.weak_tasks_found_at_budget,
+      precision_without_filter: c004.precision_without_filter ?? null,
+      recall_without_filter: c004.recall_without_filter ?? null,
+      filtered_as_equivalent: c004.filtered_as_equivalent ?? null,
+      filtered_rejected_by_oracle: c004.filtered_rejected_by_oracle ?? null,
     },
     presumed_clean: {
       C001: {
