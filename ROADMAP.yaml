@@ -135,12 +135,12 @@ phases:
     timebox: days 45-90
     milestones:
       - id: R-01
-        description: fixed-price reviewed-audit offer; first audit at 500-2500 USD or traded for a public case study
+        description: reviewed-audit offer; expert audits available on request, or traded for a public case study
       - id: R-02
         description: 15 real sales conversations logged
     gate:
       id: G3
-      pass: one paid pilot or support engagement at any price
+      pass: one paid pilot or support engagement
       fail_action: stop adding features; reconsider buyer or wedge
 
   - id: 6
@@ -165,18 +165,17 @@ deferred_until_evidence:
   - funding
 
 # Scale path: triggers come from invoices and repeated requests, not from stars or downloads.
-# Dollar figures are planning hypotheses; revise with real sales data.
 scale_triggers:
   - id: A
-    trigger: first paid pilot at any price
+    trigger: first paid pilot
     unlocks: Indian entity, contract and NDA template, invoicing, business bank account (CA advice on export-of-services GST and foreign payments)
     does_not_unlock: hiring
   - id: B
-    trigger: 3 paying customers, or about 2k USD per month recurring-equivalent over a quarter
-    unlocks: self-hosted dashboard; 1-2 part-time reviewers under NDA; published pricing
+    trigger: 3 paying customers over a quarter
+    unlocks: self-hosted dashboard; 1-2 part-time reviewers under NDA; a written offer for reviewed audits
     does_not_unlock: multi-tenant hosting
   - id: C
-    trigger: about 5-10k USD per month with repeat customers
+    trigger: repeat customers, sustained, beyond trigger B
     unlocks: hosted audit service with managed sandboxes and parallel runs; first engineer or regular contractor; security document for buyers
     does_not_unlock: fundraising unless cash is the constraint
   - id: D

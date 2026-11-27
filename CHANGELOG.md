@@ -7,6 +7,9 @@ All notable changes are recorded here. The format follows Keep a Changelog; vers
 ### Added
 - CI: a non-required `website build` job runs `npm ci` and `npm run build` in `website/` on pull requests and pushes to main that touch `website/**`, `bench/results.json`, `bench/external/results.json`, or the workflow file. It does not deploy, and it is not a required ruleset check.
 
+### Changed
+- Launch copy: the site and package metadata say version 0.1.0 (not on PyPI yet). Bench provenance stays `0.1.0.dev0`, which is the `tool_version` recorded in `bench/results.json`. Public docs no longer list audit prices. The hosted-CI card is labelled "Not available".
+
 ## [0.1.0] - 2026-11-27
 
 ### Added

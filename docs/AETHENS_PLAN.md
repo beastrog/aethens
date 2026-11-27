@@ -21,7 +21,7 @@ Status: 2 Nov 2026 (v5 drafted 28 Oct). Supersedes v4. Nothing is built yet. Dec
 
 - **Assay** (github.com/caiotheodoro/assay). Apache-2.0, `assay audit`, 11 probe families, 9 deterministic programs plus an LLM "Challenger" that proposes attacks which programs score. 4 stars, 276 commits. Its own page reports external recall of 0.339 on tau2-bench (not statistically significant) and 0 of 12 on ScienceAgentBench. As summarized by my fetch tool, it does not test valid alternative solutions.
 - **AgentSynth** (`agentsynth-ai` on PyPI). MIT, one maintainer, about 15 releases between 9 and 23 June 2026, Beta. Trivial-adversary checks on scenario packs, contamination canaries, a CI Action.
-- **ABA** (arXiv 2605.26079). Agentic LLM auditor for benchmark tasks, taxonomy includes tests that are too narrow or too broad. 34,285 tasks audited, 25.7% with major issues, about $0.60 per task. Licence of its repo unverified (fetch blocked).
+- **ABA** (arXiv 2605.26079). Agentic LLM auditor for benchmark tasks, taxonomy includes tests that are too narrow or too broad. 34,285 tasks audited, 25.7% with major issues. Licence of its repo unverified (fetch blocked).
 - **SWE-ABS** (arXiv 2603.00520). Strengthens SWE-bench Verified tests with LLM-generated tests and mutants, filtered by execution and LLM judges. Strengthened 251 of 500 instances. For false rejects, its mutation stage flags tests that fail equivalent mutants; manual review found 53 instances (10.6%) with overfitting tests. Data and scripts reported public at OpenAgentEval/SWE-ABS; licence and maintenance unverified.
 - **"Judging Is Not Enumerating"** (arXiv 2608.01000). LLM-authored test suites on HumanEval+ admit only 19 to 42% of oracle-correct solutions; discarding suites that reject a known-correct solution cut false rejection from 58 to 92% down to 5% or less, though only 5 to 39% of suites survived. This is direct evidence that "run the verifier against known-correct solutions" catches real, common failures in LLM-authored verifiers. I read the first 100,000 characters of the paper.
 - **EvalPlus** (NeurIPS 2023). HumanEval+ and MBPP+ add tests to catch wrong solutions the original tests accepted. The false-accept side of function-level code benchmarks is therefore already well covered.
@@ -97,12 +97,12 @@ Launch content: the tool, the bench numbers with known misses, honest limits. No
 - **G1 build quality (day 7):** zero false positives on bench controls; each planted class caught or listed as a known miss; Action runs in a few minutes; the hardening review's findings fixed.
 - **G2 traction (day 30):** at least 5 people outside your circle report running it on their own tasks; at least 3 maintainer replies on private notices; at least 5 conversations held. Without telemetry this is counted from issues, replies and DMs, which is slow but honest.
 - **G3 audit (about day 35 to 45):** one public audit post with method, numbers and misses, after the disclosure window.
-- **G4 paid pilot (day 90):** one paid audit or support engagement at any price. If 15 logged conversations produce none, stop adding features and reconsider the buyer or the wedge.
+- **G4 paid pilot (day 90):** one paid audit or support engagement. If 15 logged conversations produce none, stop adding features and reconsider the buyer or the wedge.
 
 ## 10. Expansion plan (build only what a trigger demands)
 
 Outcome rules at day 30 and day 60:
-- **Strong pull** (G2 met plus at least one inbound request for help or an audit): offer fixed-price reviewed audits ($500 to $2,500 first audit, or traded for a public case study; these are guesses, not market data); build the adapter the most-asked-for user needs; start the public audit log.
+- **Strong pull** (G2 met plus at least one inbound request for help or an audit): offer reviewed audits (expert audits available on request, or traded for a public case study); build the adapter the most-asked-for user needs; start the public audit log.
 - **Use without money** (people run it, nobody pays): stay open source, keep it as a credibility asset, add adapters on request, test sponsorship or support contracts, and do not build a product layer.
 - **No use** (G2 missed at day 60): run a post-mortem; options are a reviewed-audit service only, a different failure class, or stop. The repo still stands as portfolio work.
 
@@ -110,7 +110,7 @@ Tracks, each unlocked by a trigger:
 1. **Depth** (after launch, on feedback): differential equivalence checks that auto-label candidate validity on pure functions; a bring-your-own-key candidate generator with cost cap; patch-format candidates; more mutation operators; JavaScript or TypeScript, then Rust and C++, which fit your systems strengths.
 2. **Adapters** (pull-based, build when 3 users ask): Docker repo-level tasks in SWE-bench style; verifiers environments (read the source first, the API is moving); inspect_evals; OpenEnv; Gymnasium last.
 3. **Distribution:** GitHub Action and pre-commit hook; a static public audit log site (benchmarks audited, disclosure status, findings) that doubles as the corpus moat; docs PRs into adjacent projects.
-4. **Revenue ladder:** A first paid pilot: entity, invoicing. B three customers or about $2k a month for a quarter: self-hosted dashboard, a part-time reviewer. C about $5 to 10k a month: hosted audit service, first hire. D three customers ask for the same new area: systems languages, then hardware and electronics verification, then agent and tool-use environments. E outside capital only if cash is the limit. All dollar figures are hypotheses.
+4. **Revenue ladder:** A first paid pilot: entity, invoicing. B three customers for a quarter: self-hosted dashboard, a part-time reviewer. C repeat customers beyond that: hosted audit service, first hire. D three customers ask for the same new area: systems languages, then hardware and electronics verification, then agent and tool-use environments. E outside capital only if cash is the limit.
 5. **Optional later:** `aethens-shield` runtime guardrails only on customer pull.
 
 ## 11. Risks
