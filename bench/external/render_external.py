@@ -37,6 +37,19 @@ def summary_table(res: dict[str, Any]) -> list[str]:
             rd = v.get("recall_detail")
             if rd:
                 text += f" ({rd['weak_tasks_found_at_budget']} of {rd['weak_tasks']} weak tasks)"
+            if "filtered_as_equivalent" in v:
+                text += (
+                    f". Equivalent-mutant filter (D-065): {v['filtered_as_equivalent']} survivors "
+                    f"not reported, {v['filtered_rejected_by_oracle']} of them rejected by "
+                    f"HumanEval+ (true positives hidden); without the filter: precision "
+                    f"{_fmt(v['precision_without_filter'])}"
+                )
+                if rd:
+                    text += (
+                        f", recall {_fmt(v.get('recall_without_filter'))} "
+                        f"({rd['weak_tasks_found_at_budget_without_filter']} of "
+                        f"{rd['weak_tasks']} weak tasks)"
+                    )
         else:
             text = (
                 f"{v['loud_findings']} error/warning findings on {v['tasks_with_loud_findings']} "
@@ -127,6 +140,11 @@ def readme_block(full: dict[str, Any]) -> str:
         f"- C004 recall {_fmt(c004.get('recall'))} relative to exhaustive mutation "
         f"({rd.get('weak_tasks_found_at_budget')} of {rd.get('weak_tasks')} weak tasks found at "
         f"budget {full['budget']}).",
+        f"- Without C004's equivalent-mutant filter (same run): precision "
+        f"{_fmt(c004.get('precision_without_filter'))}, recall "
+        f"{_fmt(c004.get('recall_without_filter'))}; the filter hid "
+        f"{c004.get('filtered_as_equivalent')} survivors, "
+        f"{c004.get('filtered_rejected_by_oracle')} of which HumanEval+ rejects.",
         "- Error/warning findings on checks without labels in this data (presumed clean): "
         + ", ".join(f"{c} {n}" for c, n in loud.items())
         + ". Details: [docs/EXTERNAL_BENCH.md](docs/EXTERNAL_BENCH.md).",

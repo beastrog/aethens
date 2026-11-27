@@ -14,6 +14,9 @@ Ground truth (see bench/external/README.md):
   one mutant passes the base tests but fails the oracle; recall = weak tasks on which the budgeted
   C004 run reported a confirmed survivor / weak tasks (recall relative to exhaustive mutation with
   Aethens' own operators, not to every possible wrong program).
+  C004's equivalent-mutant filter (D-065) hides survivors that behaved like the gold on every
+  input its probe tried. Those are judged by the oracle too, so the same run also gives the
+  numbers without the filter, and how many true positives the filter hid.
 - C001, C002, C005, C006: HumanEval's tasks carry no labels for these defect classes. They
   are treated as presumed clean: every error/warning finding is counted and listed for review, and
   no precision is claimed from zero findings.
@@ -136,6 +139,7 @@ def audit_task(
             for f in findings
         ],
         "survivors": [],
+        "filtered": [],
     }
     files = gold_files(task)
     mutants = select_mutants(files, seed=seed, salt=task.id, cap=MUTANT_CAP[budget])
@@ -151,6 +155,20 @@ def audit_task(
                 killed = not run_mutant(runner, task, m, oracle_tests, tmp)
                 verdict = "confirmed" if killed else "unconfirmed"
             out["survivors"].append({"mutant": m.key, "line": m.site.line, "oracle": verdict})
+        hidden = [
+            key
+            for c in report.coverage
+            if c.check_id == "C004"
+            for key in c.stats.get("likely_equivalent_mutants", "").split(",")
+            if key
+        ]
+        for key in hidden:
+            m = by_key[f"mutant:{key}"]
+            verdict = "no-oracle"
+            if gold_ok:
+                killed = not run_mutant(runner, task, m, oracle_tests, tmp)
+                verdict = "confirmed" if killed else "unconfirmed"
+            out["filtered"].append({"mutant": m.key, "line": m.site.line, "oracle": verdict})
         if exhaustive and gold_ok:
             every = select_mutants(files, seed=seed, salt=task.id, cap=10**6)
             weak_keys = []
@@ -185,6 +203,10 @@ def compute(results: list[dict[str, Any]], check_ids: Sequence[str]) -> dict[str
             surv = [s for r in results for s in r["survivors"]]
             judged = [s for s in surv if s["oracle"] != "no-oracle"]
             confirmed = sum(1 for s in judged if s["oracle"] == "confirmed")
+            hid = [s for r in results for s in r.get("filtered", [])]
+            hid_judged = [s for s in hid if s["oracle"] != "no-oracle"]
+            hid_confirmed = sum(1 for s in hid_judged if s["oracle"] == "confirmed")
+            all_judged = len(judged) + len(hid_judged)
             entry.update(
                 {
                     "ground_truth": "HumanEval+ (EvalPlus) tests reject the surviving mutant",
@@ -193,6 +215,12 @@ def compute(results: list[dict[str, Any]], check_ids: Sequence[str]) -> dict[str
                     "confirmed": confirmed,
                     "unconfirmed": len(judged) - confirmed,
                     "precision": round(confirmed / len(judged), 4) if judged else None,
+                    "filtered_as_equivalent": len(hid),
+                    "filtered_judged_by_oracle": len(hid_judged),
+                    "filtered_rejected_by_oracle": hid_confirmed,
+                    "precision_without_filter": (
+                        round((confirmed + hid_confirmed) / all_judged, 4) if all_judged else None
+                    ),
                     "tasks_with_confirmed_survivor": len(
                         {
                             r["task"]
@@ -206,13 +234,22 @@ def compute(results: list[dict[str, Any]], check_ids: Sequence[str]) -> dict[str
             if ex:
                 weak = [r for r in ex if r["exhaustive"]["base_pass_oracle_fail"] > 0]
                 hit = [r for r in weak if any(s["oracle"] == "confirmed" for s in r["survivors"])]
+                hit_nf = [
+                    r
+                    for r in weak
+                    if any(
+                        s["oracle"] == "confirmed" for s in r["survivors"] + r.get("filtered", [])
+                    )
+                ]
                 entry["recall"] = round(len(hit) / len(weak), 4) if weak else None
+                entry["recall_without_filter"] = round(len(hit_nf) / len(weak), 4) if weak else None
                 entry["recall_detail"] = {
                     "definition": "weak = some mutant (exhaustive, Aethens operators) passes the "
                     "base tests and fails HumanEval+",
                     "tasks_exhaustively_mutated": len(ex),
                     "weak_tasks": len(weak),
                     "weak_tasks_found_at_budget": len(hit),
+                    "weak_tasks_found_at_budget_without_filter": len(hit_nf),
                 }
         per_check[c] = entry
     return {"tasks_without_oracle": no_oracle, "per_check": per_check}
@@ -292,7 +329,9 @@ def main(argv: list[str] | None = None) -> int:
             line += (
                 f", survivors {v['survivors']}, confirmed {v['confirmed']}/"
                 f"{v['survivors_judged_by_oracle']}, precision {v['precision']}, "
-                f"recall {v['recall']}"
+                f"recall {v['recall']}; filtered as equivalent {v['filtered_as_equivalent']} "
+                f"(oracle rejects {v['filtered_rejected_by_oracle']}), precision without the "
+                f"filter {v['precision_without_filter']}"
             )
         print(line)
     if not args.sample:

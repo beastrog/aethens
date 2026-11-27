@@ -146,6 +146,23 @@ def test_compute_recall_against_exhaustive() -> None:
     assert m["per_check"]["C004"]["recall_detail"]["weak_tasks"] == 2
 
 
+def test_compute_reports_the_equivalent_mutant_filter() -> None:
+    a = _result("a", True, [("C004", "info")], ["confirmed"])
+    a["filtered"] = [
+        {"mutant": "f0", "line": 1, "oracle": "unconfirmed"},
+        {"mutant": "f1", "line": 2, "oracle": "unconfirmed"},
+    ]
+    a["exhaustive"] = {"mutants": 5, "base_pass_oracle_fail": 1}
+    b = _result("b", True, [], [])
+    b["filtered"] = [{"mutant": "f2", "line": 1, "oracle": "confirmed"}]
+    b["exhaustive"] = {"mutants": 5, "base_pass_oracle_fail": 1}
+    c004 = run_external.compute([a, b], ["C004"])["per_check"]["C004"]
+    assert c004["precision"] == 1.0
+    assert (c004["filtered_as_equivalent"], c004["filtered_rejected_by_oracle"]) == (3, 1)
+    assert c004["precision_without_filter"] == 0.5  # 2 confirmed of 4 judged
+    assert c004["recall"] == 0.5 and c004["recall_without_filter"] == 1.0
+
+
 def test_regressions() -> None:
     base = {"per_check": {"C004": {"loud_findings": 0, "precision": 0.8, "recall": None}}}
     ok = {"per_check": {"C004": {"loud_findings": 0, "precision": 0.8, "recall": 0.5}}}
