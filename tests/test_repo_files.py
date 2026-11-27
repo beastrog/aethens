@@ -47,6 +47,7 @@ def test_required_files_exist() -> None:
         ".github/workflows/ci.yml",
         ".github/workflows/release.yml",
         ".github/workflows/action-selftest.yml",
+        ".github/workflows/website.yml",
     ):
         assert (REPO / name).is_file(), name
 
@@ -73,6 +74,40 @@ def test_ci_and_selftest_are_read_only() -> None:
         assert wf["permissions"] == {"contents": "read"}, name
         assert "pull_request" in wf["on"], name
     assert set(_yaml(WORKFLOWS / "action-selftest.yml")["on"]) == {"pull_request"}
+
+
+def test_website_workflow_is_read_only_sha_pinned_and_does_not_deploy() -> None:
+    path = WORKFLOWS / "website.yml"
+    text = path.read_text()
+    wf = _yaml(path)
+    assert wf["permissions"] == {"contents": "read"}
+    on = wf["on"]
+    assert set(on) == {"pull_request", "push"}
+    assert "main" in on["push"]["branches"]
+    expected_paths = [
+        "website/**",
+        "bench/results.json",
+        "bench/external/results.json",
+        ".github/workflows/website.yml",
+    ]
+    assert on["pull_request"]["paths"] == expected_paths
+    assert on["push"]["paths"] == expected_paths
+    assert "pull_request_target" not in text
+    assert "id-token" not in text
+    assert "pages: write" not in text
+    assert "deploy-pages" not in text
+    assert "upload-pages-artifact" not in text
+    assert "configure-pages" not in text
+    for ref in USES.findall(text):
+        assert re.fullmatch(r"[\w.-]+/[\w./-]+@[0-9a-f]{40}", ref), ref
+    concurrency = wf["concurrency"]
+    assert concurrency["cancel-in-progress"] == "${{ github.event_name == 'pull_request' }}"
+    jobs = wf["jobs"]
+    assert len(jobs) == 1
+    job = jobs["build"]
+    assert job["name"] == "website build"
+    assert job["timeout-minutes"] == 10
+    assert job["runs-on"] == "ubuntu-24.04"
 
 
 def test_release_uses_trusted_publishing_only_in_publish_job() -> None:
