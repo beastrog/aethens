@@ -1,0 +1,429 @@
+---
+// Check-by-check view of the same REAL run that AuditDemo replays
+// (src/data/audit-runs/order-alphabetical.md). Check order and per-check results are parsed from
+// that report at build time; nothing is hand-typed except the short check names, which match
+// the Checks section.
+import "../styles/motion.css";
+import report from "../data/audit-runs/order-alphabetical.md?raw";
+
+const names: Record<string, string> = {
+  C001: "Gold sanity",
+  C002: "Adaptive flakiness",
+  C003: "Labelled candidates",
+  C004: "Mutation probes",
+  C005: "Test order and isolation",
+  C006: "Over-specified tests",
+  C007: "Reward-hacking probes",
+};
+
+const order = (report.match(/Checks run: ([^·]+)·/)?.[1] ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+const summary = report.match(/\*\*(.+?)\*\*/)?.[1] ?? "";
+const counts: Record<string, { error: number; warning: number; info: number }> = {};
+for (const line of report.split("\n")) {
+  const m = line.match(/^\| (error|warning|info) \| (C00\d) \|/);
+  if (!m) continue;
+  counts[m[2]] ??= { error: 0, warning: 0, info: 0 };
+  counts[m[2]][m[1] as "error"]++;
+}
+const steps = order.map((id) => {
+  const c = counts[id];
+  const parts = c
+    ? (["error", "warning", "info"] as const).filter((k) => c[k]).map((k) => `${c[k]} ${k}${c[k] > 1 && k !== "info" ? "s" : ""}`)
+    : [];
+  const state = c?.error ? "fail" : c?.warning ? "warn" : "pass";
+  return { id, name: names[id] ?? id, result: parts.length ? parts.join(", ") : "no findings", state };
+});
+const n = steps.length;
+const tool = report.match(/Tool `([^`]+)`/)?.[1] ?? "";
+const summaryParts = summary.split(", ").map((text) => ({ text, n: Number(text.split(" ")[0]) }));
+---
+
+<section id="pipeline" class="border-t border-line py-20 sm:py-24" aria-labelledby="pipeline-heading">
+  <script is:inline>
+    if (!matchMedia("(prefers-reduced-motion: reduce)").matches) document.documentElement.classList.add("motion-ok");
+  </script>
+  <div class="wrap">
+    <p class="kicker mb-5"><span>The same run</span><span class="num" aria-hidden="true">/</span><span>Check by check</span></p>
+    <h2 id="pipeline-heading" class="font-serif italic font-semibold text-section leading-[1.1] max-w-3xl">
+      Seven checks. Two of them catch this verifier.
+    </h2>
+    <p class="mt-6 max-w-2xl text-paper/90">
+      Per-check results of the failing bench task replayed above, parsed from its recorded report and shown in report order.
+      Aethens runs each check in the same Docker sandbox and reports what each one established.
+    </p>
+
+    <div class="pipe mt-12" data-pipe style={`--n: ${n}`}>
+      <p class="pipe-meta">
+        <span><span class="text-muted">task</span> bench/tasks/order-alphabetical</span>
+        <span><span class="text-muted">seed</span> 0 <span class="text-muted">· budget</span> smoke</span>
+        <span class="pipe-meta-tool">{tool}</span>
+      </p>
+      <div class="pipe-track">
+      <div class="pipe-rail" aria-hidden="true">
+        <span class="pipe-fill"></span>
+        <span class="pipe-head"><span class="pipe-dot"></span></span>
+      </div>
+      <ol class="pipe-list" aria-label={`Checks in the order run, with results: ${summary}`}>
+        {
+          steps.map((s, i) => (
+            <li class="pipe-step" data-step data-state={s.state} style={`--k: ${i}`}>
+              <span class="pipe-node" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  {s.state === "fail" ? <path d="M8 8l8 8M16 8l-8 8" /> : <path d="M6.5 12.5l3.5 3.5 7.5-8" />}
+                </svg>
+                <span class="pipe-ripple"></span>
+              </span>
+              <span class="pipe-text">
+                <span class="pipe-id">{s.id}</span>
+                <span class="pipe-name">{s.name}</span>
+                <span class="pipe-result">{s.result}</span>
+              </span>
+            </li>
+          ))
+        }
+      </ol>
+      </div>
+      <p class="pipe-summary">
+        <span class="text-muted">report</span>
+        {summaryParts.map((p) => <span class:list={[p.n > 0 ? "text-error" : "text-muted"]}>{p.text}</span>)}
+        <span class="text-muted">· exit code</span> <span class="text-error">1</span>
+      </p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .pipe {
+    --node: 3rem;
+    position: relative;
+    border: 1px solid var(--color-line);
+    background:
+      radial-gradient(70% 120% at 50% 0%, rgba(215, 181, 109, 0.06), transparent 60%),
+      rgba(12, 13, 17, 0.72);
+    padding: 1.1rem 1.25rem 1.4rem;
+  }
+  .pipe-meta,
+  .pipe-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    color: rgba(243, 239, 230, 0.88);
+  }
+  .pipe-meta {
+    padding-bottom: 0.9rem;
+    margin-bottom: 2.4rem;
+    border-bottom: 1px solid var(--color-line);
+  }
+  .pipe-meta-tool {
+    margin-left: auto;
+    color: var(--color-muted);
+  }
+  .pipe-summary {
+    gap: 0.4rem 0.75rem;
+    margin-top: 2.4rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--color-line);
+  }
+  .pipe-track {
+    position: relative;
+  }
+  .pipe-list {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+    gap: 0;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .pipe-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+    padding: 0 0.35rem;
+  }
+  .pipe-node {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: var(--node);
+    height: var(--node);
+    border-radius: 999px;
+    background: var(--color-code);
+    border: 1px solid var(--color-line-strong);
+    color: var(--color-ok);
+    box-shadow: 0 0 0 6px var(--color-ink);
+  }
+  .pipe-node svg {
+    stroke: currentColor;
+    transition:
+      opacity var(--dur-base) var(--ease-out),
+      transform var(--dur-slow) var(--ease-swift);
+  }
+  .pipe-step[data-state="pass"] .pipe-node {
+    border-color: rgba(143, 191, 159, 0.55);
+  }
+  .pipe-step[data-state="fail"] .pipe-node {
+    color: var(--color-error);
+    border-color: var(--color-error);
+    background: radial-gradient(circle, rgba(224, 112, 88, 0.22), var(--color-code) 70%);
+  }
+  .pipe-ripple {
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    border: 1px solid var(--color-error);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .pipe-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+  }
+  .pipe-id {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    color: var(--color-gold);
+  }
+  .pipe-name {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 1.05rem;
+    line-height: 1.2;
+    color: var(--color-paper);
+  }
+  .pipe-result {
+    margin-top: 0.3rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    color: var(--color-muted);
+  }
+  .pipe-step[data-state="fail"] .pipe-result {
+    color: var(--color-error);
+  }
+  .pipe-step[data-state="pass"] .pipe-result {
+    color: var(--color-ok);
+  }
+  .pipe-rail {
+    position: absolute;
+    top: calc(var(--node) / 2);
+    left: calc(100% / var(--n) / 2);
+    right: calc(100% / var(--n) / 2);
+    height: 1px;
+    background: var(--color-line-strong);
+  }
+  .pipe-fill {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(215, 181, 109, 0.25), var(--color-gold));
+    transform-origin: 0 50%;
+    transform: scaleX(1);
+  }
+  .pipe-head {
+    position: absolute;
+    inset: 0;
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  .pipe-dot {
+    position: absolute;
+    left: -5px;
+    top: -5px;
+    width: 11px;
+    height: 11px;
+    border-radius: 2px;
+    background: var(--color-gold-bright);
+    box-shadow:
+      0 0 0 3px rgba(215, 181, 109, 0.18),
+      0 0 18px 4px rgba(240, 211, 146, 0.45);
+  }
+
+  /* Vertical layout on narrow screens */
+  @media (max-width: 760px) {
+    .pipe {
+      --node: 2.25rem;
+    }
+    .pipe-list {
+      grid-template-columns: 1fr;
+      row-gap: 1.4rem;
+    }
+    .pipe-step {
+      flex-direction: row;
+      align-items: flex-start;
+      text-align: left;
+      padding: 0;
+    }
+    .pipe-text {
+      padding-top: 0.1rem;
+    }
+    .pipe-name {
+      font-size: 1rem;
+    }
+    .pipe-result {
+      margin-top: 0.1rem;
+    }
+    .pipe-rail {
+      top: calc(var(--node) / 2);
+      bottom: calc(var(--node) / 2 + 2.9rem);
+      left: calc(var(--node) / 2);
+      right: auto;
+      width: 1px;
+      height: auto;
+    }
+    .pipe-fill {
+      background: linear-gradient(180deg, rgba(215, 181, 109, 0.25), var(--color-gold));
+      transform-origin: 50% 0;
+      transform: scaleY(1);
+    }
+    .pipe-head {
+      transform: translateY(100%);
+    }
+    .pipe-meta-tool {
+      margin-left: 0;
+    }
+  }
+
+  /* ---------- motion (html.motion-ok + armed by script) ---------- */
+  :global(.motion-ok) .pipe[data-armed] .pipe-fill {
+    transform: scaleX(calc(var(--pos, 0) / (var(--n) - 1)));
+    transition: transform var(--dur-slower) var(--ease-in-out);
+  }
+  :global(.motion-ok) .pipe[data-armed] .pipe-head {
+    opacity: 1;
+    transform: translateX(calc(var(--pos, 0) / (var(--n) - 1) * 100%));
+    transition:
+      transform var(--dur-slower) var(--ease-in-out),
+      opacity var(--dur-base) var(--ease-out);
+  }
+  :global(.motion-ok) .pipe[data-armed][data-done] .pipe-head {
+    opacity: 0;
+  }
+  @media (max-width: 760px) {
+    :global(.motion-ok) .pipe[data-armed] .pipe-fill {
+      transform: scaleY(calc(var(--pos, 0) / (var(--n) - 1)));
+    }
+    :global(.motion-ok) .pipe[data-armed] .pipe-head {
+      transform: translateY(calc(var(--pos, 0) / (var(--n) - 1) * 100%));
+    }
+  }
+  /* pending: neutral node, no glyph, result hidden (text stays in the DOM for AT) */
+  :global(.motion-ok) .pipe[data-armed] .pipe-step:not([data-on]) .pipe-node {
+    color: var(--color-muted);
+    border-color: var(--color-line-strong);
+    background: var(--color-code);
+  }
+  :global(.motion-ok) .pipe[data-armed] .pipe-step:not([data-on]) .pipe-node svg {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  :global(.motion-ok) .pipe[data-armed] .pipe-step:not([data-on]) .pipe-result {
+    opacity: 0;
+    transform: translate3d(0, 4px, 0);
+  }
+  :global(.motion-ok) .pipe[data-armed] .pipe-step:not([data-on]) .pipe-name {
+    opacity: 0.55;
+  }
+  :global(.motion-ok) .pipe[data-armed] .pipe-step[data-scan] .pipe-node {
+    border-color: var(--color-gold-bright);
+    box-shadow:
+      0 0 0 6px var(--color-ink),
+      0 0 24px 2px rgba(240, 211, 146, 0.35);
+  }
+  :global(.motion-ok) .pipe[data-armed] .pipe-node,
+  :global(.motion-ok) .pipe[data-armed] .pipe-result,
+  :global(.motion-ok) .pipe[data-armed] .pipe-name {
+    transition:
+      opacity var(--dur-slow) var(--ease-out),
+      transform var(--dur-slow) var(--ease-out),
+      border-color var(--dur-base) var(--ease-out),
+      box-shadow var(--dur-base) var(--ease-out),
+      color var(--dur-base) var(--ease-out);
+  }
+  :global(.motion-ok) .pipe[data-armed] .pipe-step[data-state="fail"][data-on] .pipe-ripple {
+    animation: ripple 1100ms var(--ease-out) 2 both;
+  }
+  @keyframes ripple {
+    0% {
+      opacity: 0.8;
+      transform: scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(2.3);
+    }
+  }
+</style>
+
+<script>
+  import { startMotion, motionOk, onVisible, onReduce } from "../scripts/motion";
+
+  startMotion();
+
+  for (const pipe of document.querySelectorAll<HTMLElement>("[data-pipe]")) {
+    if (!motionOk()) continue; // final state is the static render
+    const steps = [...pipe.querySelectorAll<HTMLElement>("[data-step]")];
+    const STEP = 820; // ms per check
+    const SCAN = 360; // gold scan before the verdict lands
+    const HOLD = 3600; // rest on the finished state before looping
+    const total = 500 + steps.length * STEP + HOLD;
+
+    let clock = 0;
+    let raf = 0;
+    let last = 0;
+    let visible = false;
+    let shown = -1;
+
+    const render = () => {
+      const t = clock - 500;
+      const idx = Math.floor(t / STEP); // check currently being run
+      const within = t - idx * STEP;
+      const pos = Math.max(0, Math.min(steps.length - 1, idx));
+      if (pos !== shown) {
+        pipe.style.setProperty("--pos", String(pos));
+        shown = pos;
+      }
+      steps.forEach((s, i) => {
+        const on = i < idx || (i === idx && within >= SCAN);
+        s.toggleAttribute("data-on", on && t >= 0);
+        s.toggleAttribute("data-scan", i === idx && within < SCAN && t >= 0);
+      });
+      pipe.toggleAttribute("data-done", idx >= steps.length);
+    };
+    const frame = (now: number) => {
+      clock += Math.min(64, now - last);
+      last = now;
+      if (clock >= total) {
+        clock = 0;
+        shown = -1;
+      }
+      render();
+      raf = visible ? requestAnimationFrame(frame) : 0;
+    };
+    pipe.setAttribute("data-armed", "");
+    render();
+    onVisible(pipe, (v) => {
+      visible = v;
+      if (v && !raf) {
+        last = performance.now();
+        raf = requestAnimationFrame(frame);
+      } else if (!v && raf) {
+        cancelAnimationFrame(raf);
+        raf = 0;
+      }
+    });
+    onReduce(() => {
+      cancelAnimationFrame(raf);
+      raf = 0;
+      pipe.removeAttribute("data-armed");
+    });
+  }
+</script>
