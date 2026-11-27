@@ -30,7 +30,7 @@ Real report from <code>aethens audit bench/tasks/order-alphabetical --check C005
 
 </div>
 
-Status: pre-release (`0.1.0.dev0`), Python tasks only. Licence: Apache-2.0. No LLMs, no network access for task code, no telemetry, no hosted service yet.
+Status: first release (`0.1.0`), Python tasks only. Licence: Apache-2.0. No LLMs, no network access for task code, no telemetry, no hosted service yet.
 
 Use it before you train or evaluate on a set of coding tasks, to find tests that accept wrong solutions, reject right ones, or give different answers on different runs.
 
