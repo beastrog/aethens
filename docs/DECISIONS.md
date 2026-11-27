@@ -313,3 +313,20 @@ CI installs uv with `pip install uv==0.13.7` instead of a third-party setup acti
   counterexamples outside the task's precondition (e.g. `factorize(0)`, duplicates in an array
   declared duplicate-free), which the probe cannot know without a spec.
 
+- D-087 (fix to D-065, check semantics: owner approval requested) The equivalence probe compared
+  results with `==`, which is identity for objects without value equality (`re.Match`, plain class
+  instances). A gold returning such objects then "disagreed with itself" on every input where it
+  returned one; those inputs were silently skipped, the remaining "valid" inputs were a biased
+  sample, and the probe declared clearly wrong mutants equivalent. Found while auditing a public
+  benchmark (details stay in audits/private until disclosure, docs/DISCLOSURE.md): golds returning
+  `re.search(...)`, whose "return None" mutants the tests accept, were hidden. Changes: (1) objects of the
+  same type whose `__eq__` is `object.__eq__` are compared by `repr` (two equal matches compare
+  equal; a match vs None still differs); (2) the driver counts inputs on which the gold's two calls
+  differ (`unstable`), and if they are at least 1/10 of the inputs the gold handled, the verdict
+  is inconclusive (the survivor is reported as before D-065) instead of equivalent. The 1/10 ratio
+  is agent-chosen. Effect on the 54 tasks with survivors of that audit (seed 0, standard), against manual
+  verdicts of all 74 unfiltered survivors (16 TP, 41 equivalent, 11 out-of-domain, 6 uncertain):
+  no filter 74 reported (16 TP / 52 FP / 6 uncertain); D-065 14 reported (5 / 4 / 5); D-065 with
+  this fix 17 reported (8 / 4 / 5). No false positive was added; the fix only stops hiding.
+  The remaining 8 hidden TPs differ only on single specific inputs the derivation does not
+  produce (e.g. n = 3, 196, 219, -1, a one-element list); that recall cost is documented in D-065.

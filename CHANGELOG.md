@@ -10,6 +10,7 @@ All notable changes are recorded here. The format follows Keep a Changelog; vers
 
 
 ### Changed
+- C004 equivalence probe (D-087): results without value equality (for example `re.Match`) are compared by `repr`, and a gold that disagrees with itself on at least 1/10 of the probe's inputs makes the verdict inconclusive instead of equivalent. Fixes clearly wrong mutants ("return None") being hidden as equivalent when the gold returns match objects (found in a real-benchmark audit). **Changes C004's output; owner approval requested.**
 - C004 filters equivalent mutants (D-065): each surviving mutant is run side by side with the gold, inside the sandbox, on the inputs the task's tests pass plus inputs derived from them. A survivor that behaves differently is reported with the counterexample input; one that behaves like the gold on at least 20 valid inputs is not reported and is listed in the report's coverage. Mutants with bytecode identical to the gold are never selected (TCE). On the external HumanEval bench: precision 0.4615 -> 0.8158, recall 0.8667 -> 0.80 (same run, filter off vs on). **Changes C004's output; owner approval requested.**
 
 ### Fixed
