@@ -98,6 +98,8 @@ Original tasks under `bench/tasks/` are Apache-2.0. Third-party datasets must be
 | OpenAI HumanEval (github.com/openai/human-eval) | MIT, Copyright (c) OpenAI (https://openai.com) | Yes, including commercially, if you keep the copyright and permission notices. A small sample is committed under `bench/external/sample/tasks/` with those notices in each file. The full dataset is downloaded at run time into the gitignored `bench/external/data/`. |
 | EvalPlus HumanEval+ (huggingface.co/datasets/evalplus/humanevalplus) | Apache-2.0 | Yes, subject to Apache-2.0, including a note that the committed sample is modified (numpy helper replaced). Sample under `bench/external/sample/oracle/`. |
 
+Vendored code: `src/aethens/sandbox/swebench_grading.py` copies the log parsers and grading rules of swebench 5.0.2 (MIT, Copyright (c) 2023 Carlos E Jimenez, John Yang, Alexander Wettig, Shunyu Yao, Kexin Pei, Ofir Press, Karthik R Narasimhan); the full notice is kept in the file and summarised in `NOTICE`. The importers (`aethens import`) commit no benchmark data; their licences are recorded in `bench/LICENSES.md`.
+
 Datasets considered and skipped because the data licence is unclear, or because they need network-built images, are listed in `bench/LICENSES.md`. Do not commit or publish them until that is resolved.
 
 Importers for other public benchmarks (MBPP+, BigCodeBench, SWE-bench Verified, Terminal-Bench, and similar) must follow the same rule: record the licence, prefer gitignored downloads over committing large exports, and do not redistribute a dataset whose card states no licence.

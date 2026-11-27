@@ -62,3 +62,10 @@ class UnsafeLocalNotAllowedError(RunnerError):
 
 class CheckError(AethensError):
     """A check could not run (for example the gold solution has no Python files to mutate)."""
+
+
+# --- importers --------------------------------------------------------------------------------
+
+
+class ImporterError(AethensError):
+    """A benchmark record could not be converted into an aethens-task/v1 directory."""

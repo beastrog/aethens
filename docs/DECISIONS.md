@@ -313,3 +313,42 @@ CI installs uv with `pip install uv==0.13.7` instead of a third-party setup acti
   counterexamples outside the task's precondition (e.g. `factorize(0)`, duplicates in an array
   declared duplicate-free), which the probe cannot know without a spec.
 
+
+## Real-world importers and audits (owner request of 27 Nov 2026: "tested on real open-source benchmarks")
+
+Numbering starts at D-080 to avoid collisions with decisions being written in parallel on other
+branches (D-065 onwards).
+
+- D-080 New package `aethens.importers` and CLI subcommand `aethens import` (MBPP+, HumanEval+,
+  BigCodeBench, SWE-bench). AGENTS.md rule 14 lists "verifiers adapters" as out of scope for v0.1;
+  the owner's request of 27 Nov 2026 to test on real public benchmarks overrides that for these
+  importers (flagged to the owner). No new runtime dependency. Importers never run code and never
+  use the network; every written task is re-validated by the loader.
+- D-081 Verifier fidelity: upstream test code is kept verbatim in a separate file and executed by
+  a small generated wrapper that reproduces how the upstream harness combines solution and tests
+  (one namespace for EvalPlus; a `__test__` module, temp cwd, TZ=UTC and OMP_NUM_THREADS=1 for
+  BigCodeBench). Per-input time limits and memory rlimits of the upstream harnesses are not
+  reproduced (one wall-clock timeout per run). Stated in each importer's docstring.
+- D-082 EvalPlus tests import numpy, so they run on a locally built image
+  `aethens-evalplus:py3.12` (python:3.12-slim pinned by digest + numpy 2.1.3), Dockerfile in
+  bench/real/images/evalplus. Network is used only by `docker build`. Chosen over a numpy shim so
+  the EvalPlus `assertion` helpers run unchanged.
+- D-083 SWE-bench runs inside the unchanged sandbox via `aethens.sandbox.swe_harness` (copy of
+  /testbed into the work dir, official eval script with three printed mechanical changes, grading
+  by swebench 5.0.2's vendored parsers and rules). The Docker isolation settings are NOT changed;
+  default limits (1 GiB, 1 CPU, 256 pids) apply. The SWE-bench org export is used because it
+  carries `image`, `eval_script` and `log_parser`; it differs from princeton-nlp/SWE-bench_Verified
+  only in PASS_TO_PASS for 2 of 500 instances.
+- D-084 (needs owner decision) Terminal-Bench 2 / Harbor: 0 of 89 tasks can run in the current
+  sandbox (network at test time, root paths). Options: (a) a "harbor" runner profile with
+  dependencies baked at image-build time, writable container layer, root inside the container,
+  still --network none; (b) leave Harbor unsupported. (a) changes the isolation settings and needs
+  the owner's approval. Only the static scan is built; merging the scan is not approval of (a).
+  If (a) is approved it ships in its own PR as an opt-in profile, off by default (selected only
+  per run, never by a task file), and the default sandbox stays unchanged.
+- D-085 Prime Intellect `verifiers` environments: no generic importer (each environment's reward
+  code would have to run in the sandbox with its dependencies). Not built; noted in docs/IDEAS.md.
+- D-086 Real-world audit runner `bench/real/run_real.py` calls the public CLI once per task so
+  every finding's repro command is exactly what a user runs. Results go to `audits/public/<bench>/`
+  (committed: our own reports about public data) and manual verification verdicts to
+  `audits/public/<bench>/verification.json`.

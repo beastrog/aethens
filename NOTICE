@@ -19,6 +19,13 @@ bench/external/sample/oracle/ is a modified form of the HumanEval+ tests
 (the numpy comparison helper is replaced by a standard-library equivalent)
 and carries an attribution and modification note in each converted file.
 
+SWE-bench (swebench 5.0.2)
+Copyright (c) 2023 Carlos E Jimenez, John Yang, Alexander Wettig, Shunyu Yao,
+Kexin Pei, Ofir Press, Karthik R Narasimhan
+Licensed under the MIT License. src/aethens/sandbox/swebench_grading.py
+vendors its log parsers and grading rules (import lines changed) and keeps
+the full copyright and permission notice in the file.
+
 The marketing site under website/ bundles IBM Plex Sans, IBM Plex Mono, and
 Newsreader fonts from the Fontsource packages, licensed under the SIL Open
 Font License, Version 1.1.

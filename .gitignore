@@ -12,6 +12,9 @@ audits/private/
 bench/external/data/
 bench/external/full/
 
+# real-world audits: downloaded data and imported tasks (rebuilt by bench/real/fetch_real.py)
+bench/real/data/
+bench/real/tasks/
 # Website (Astro) build and deps. `dist/` above already covers website/dist/.
 node_modules/
 .astro/
