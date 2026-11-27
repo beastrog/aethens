@@ -26,7 +26,7 @@ from aethens.checks.mutation import enumerate_sites, make_mutant
 from aethens.runner import DockerRunner
 from aethens.runner.base import RunSpec
 
-DRIVER = r'''
+DRIVER = r"""
 import ast, copy, importlib.util, json, math, random, signal, sys
 from math import inf
 
@@ -135,7 +135,7 @@ for y in pool[:3000]:
         found = {"input": repr(y)[:400], "gold": repr(g[1])[:300], "mutant": repr(m)[:300]}
         break
 print(json.dumps({"tried": tried, "counterexample": found}))
-'''
+"""
 
 
 def rebuild_mutant(gold: str, subject: str) -> str:

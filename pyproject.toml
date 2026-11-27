@@ -73,6 +73,7 @@ files = [
   "bench/external/render_external.py",
   "bench/real/fetch_real.py",
   "bench/real/run_real.py",
+  "bench/real/verify_c004.py",
 ]
 mypy_path = ["bench/external"]
 exclude = ["tests/fixtures/"]
