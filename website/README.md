@@ -27,9 +27,9 @@ A single page, `src/pages/index.astro`, with these sections:
 4. Published accuracy — internal bench, C007, external HumanEval / HumanEval+ (including C004 precision 0.46)
 5. Comparison — Aethens, rlgate, BenchJack, Assay, dated 18 Nov 2026
 6. Example report — a real C005 run on `bench/tasks/order-alphabetical`
-7. Audits for teams — paid audit enquiry and a hosted-CI waitlist (mailto placeholder)
+7. Work with us — expert audits and a hosted-CI note, with CTAs to GitHub Discussions
 8. Open source — link to the GitHub repo
-9. Footer — Folric (`folric.ai`) as maintainer
+9. Footer — GitHub, Discussions, and the founder LinkedIn
 
 ## Numbers, and how to refresh them
 

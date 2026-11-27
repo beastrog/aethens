@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping. Aethens is small on purpose: Python tasks, Docker isolation, honest numbers.
+Thanks for helping. Aethens is small on purpose: Python tasks, Docker isolation, honest numbers. Documentation index: [docs/README.md](docs/README.md).
 
 Please read the [code of conduct](CODE_OF_CONDUCT.md) before opening an issue or pull request. By contributing you agree that your work is licensed under the [Apache License 2.0](LICENSE), the same licence as the rest of the project. There is no CLA. We do not require a Developer Certificate of Origin or `Signed-off-by` lines.
 
