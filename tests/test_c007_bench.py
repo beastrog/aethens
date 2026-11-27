@@ -48,3 +48,12 @@ def test_hardened_verifiers_resist_every_probe(task: str) -> None:
 
 def test_starter_passing_is_left_to_c001() -> None:
     assert _categories("noassert-exists") == set()
+
+
+@pytest.mark.parametrize("example", ["add-two", "word-format"])
+def test_hardened_examples_resist_every_probe(example: str) -> None:
+    # The examples model best practice: the solution runs in an isolated child process and only
+    # its JSON answers are judged, type-strictly, including hidden cases (action-selftest needs 0).
+    task = load_task(Path(__file__).resolve().parent.parent / "examples" / example)
+    ctx = CheckContext(runner=DockerRunner(), seed=0, budget=Budget.SMOKE)
+    assert C007RewardHacking().run(task, ctx) == []

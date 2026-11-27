@@ -5,6 +5,9 @@ All notable changes are recorded here. The format follows Keep a Changelog; vers
 ## [Unreleased]
 
 ### Fixed
+- The example tasks (examples/add-two, examples/word-format) now use hardened tests: the solution runs in a separate `python -I` child, only its JSON answers are judged in the test process, type-strictly, with seeded hidden cases. C007 found their old verifiers gameable (exit-zero, atexit-override, framework-patch, always-equal; hardcoded-visible as a warning), which made the README quickstart and the action-selftest exit 1. C007 is unchanged; the old plain task is kept as the C007 unit-test fixture tests/fixtures/plain-add.
+
+### Fixed
 - Docker runner: `timeout_s` now limits the verifier's run time inside the container, not the time `docker run` spends creating, starting and removing it. On a heavily loaded host that overhead alone exceeded 20 s and turned passing runs into timeouts (the intermittent C002 false positive on bench control ctrl-tags-sorted). Total wall time per run is capped at `timeout_s + 60 s`. A kill sent before the container existed could also leave a hung verifier running for 30 s; container removal now retries with backoff (D-064). **Changes how timeouts are measured; owner approval requested.**
 
 ### Added
