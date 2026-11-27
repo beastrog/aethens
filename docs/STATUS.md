@@ -104,8 +104,9 @@ anyway, so this does not change task isolation). `docker run --rm hello-world` w
 - Decide the open review items, above all O1 (no size limit on /work writes) and O2 (containers
   outlive a SIGKILLed Aethens); see docs/review-2026-11-27.md.
 - Confirm exit code 3 semantics (D-032) and the agent-chosen limits (D-008, D-013).
-- Terms check, README cold read, PyPI trusted publisher, release (the repository is already
-  public). Enable private vulnerability reporting now if it is not on (SECURITY.md relies on it).
+- Terms check, README cold read. Enable private vulnerability reporting now if it is not on
+  (SECURITY.md relies on it). v0.1.0 is published: PyPI (`pipx`, `uv tool`, and `pip` install
+  `aethens`) and GitHub tag `v0.1.0` (Marketplace action `aethens-audit`).
 
 ## Open risks
 - Exit code 3 semantics are an agent decision (D-032); the owner should confirm.
@@ -115,7 +116,8 @@ anyway, so this does not change task isolation). `docker run --rm hello-world` w
   budget (0.05 at deep), assuming independent runs; rarer flakes can be missed.
 
 ## Not verified
-- release.yml and Trusted Publishing end to end (ci and action-selftest are verified on GitHub).
+- release.yml beyond the v0.1.0 publish the owner already made (PyPI installs of that release work;
+  ci and action-selftest are verified on GitHub).
 - Security contact: SECURITY.md points to GitHub private vulnerability reporting, which the owner must enable.
 - Rootless Docker, Docker Desktop (macOS/Windows), Podman. Local mode's RLIMIT_AS is not enforced on macOS.
 - The build box's dockerd runs with `--iptables=false`; on hosts with iptables the bridge network exists

@@ -10,6 +10,7 @@
 **Audit the tests that score your agents.**
 
 [![CI](https://github.com/beastrog/aethens/actions/workflows/ci.yml/badge.svg)](https://github.com/beastrog/aethens/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/aethens)](https://pypi.org/project/aethens/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-1f6feb.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11%2B-3776ab.svg)](pyproject.toml)
 
@@ -36,11 +37,18 @@ Use it before you train or evaluate on a set of coding tasks, to find tests that
 
 ## Quickstart
 
-Needs Docker and Python 3.11+. Aethens is not on PyPI yet. From a clone of this repository:
+Needs Docker and Python 3.11+.
 
 ```sh
-python -m pip install .
+pipx install aethens
 docker pull python:3.12-slim
+```
+
+`uv tool install aethens` and `pip install aethens` install the same v0.1.0 release. From a clone, `python -m pip install .` installs that checkout instead. The example tasks are in the repository:
+
+```sh
+git clone https://github.com/beastrog/aethens.git
+cd aethens
 aethens audit examples/add-two --format markdown
 ```
 
@@ -56,10 +64,10 @@ Useful options: `--budget smoke|standard|deep`, `--fail-on error|warning`, `--fo
 
 `--unsafe-local` runs task code directly on your machine without container isolation, with a scrubbed environment and timeouts. Only use it on code you trust.
 
-GitHub Action (pin a release tag once one exists; `@main` is pre-release):
+GitHub Action ([Marketplace](https://github.com/marketplace/actions/aethens-audit)), tag `v0.1.0`:
 
 ```yaml
-- uses: beastrog/aethens@main
+- uses: beastrog/aethens@v0.1.0
   with:
     path: path/to/tasks
     budget: standard
@@ -206,7 +214,7 @@ Capabilities below are taken from [docs/COMPETITIVE.md](docs/COMPETITIVE.md), re
 
 Aethens does not claim to have more probe families than these tools. Several already ship reward-hacking probes. The difference we put a number on is published, reproducible accuracy — including C004 precision on public data, with and without the equivalent-mutant filter.
 
-Where Aethens is behind, as of that survey: own task format only; not on PyPI; no leak scanner; no Harbor or SWE-bench adapter yet.
+Where Aethens is behind, as of that survey: own task format only; no leak scanner; no Harbor or SWE-bench adapter yet. v0.1.0 is on PyPI.
 
 <details>
 <summary>Known misses and limits</summary>

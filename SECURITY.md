@@ -57,4 +57,4 @@ vulnerability in Discussions while it is unfixed.
 ## Supported versions
 
 Aethens is at its first release (`0.1.0`). Security fixes land on `main` and in the most recent
-published release, once one exists.
+published release.
