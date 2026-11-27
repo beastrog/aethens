@@ -14,11 +14,12 @@ What Aethens does (src/aethens/runner/docker.py, tested in tests/test_runner_doc
 - The container sees only a disposable copy of the task (starter, then the solution overlay, then the
   tests), mounted at `/work`. The original task directory is never mounted. Symlinks are copied as
   plain files.
-- Containers are always removed and copies always deleted, including after timeouts, errors, Ctrl-C
-  and SIGTERM. If the Aethens process itself is killed with SIGKILL (or by the OOM killer), cleanup
+- Containers are removed and copies deleted after timeouts, errors, Ctrl-C and SIGTERM (the CLI
+  turns SIGTERM into an exception so the runner's cleanup runs, and its message names any container
+  whose removal it could not confirm). If the Aethens process itself is killed with SIGKILL (or by the OOM killer), cleanup
   cannot run: a running container then lives on until its verifier exits, which for a hung verifier
   is never. Every Aethens container carries the label `aethens.run=1`; remove leftovers with
-  `docker rm -f $(docker ps -aq --filter label=aethens.run=1)`.
+  `docker ps -aq --filter label=aethens.run=1 | xargs -r docker rm -f`.
 - Output is capped (the last 64 KiB per stream are kept in memory).
 - The docker CLI is called with argument lists only; no shell. The task loader rejects symlinks that
   leave the task directory, `..` and absolute paths, special files, oversized files, and image names

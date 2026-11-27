@@ -65,6 +65,24 @@ def in_container_seconds(state: Mapping[str, object] | None) -> float | None:
     return end - start
 
 
+class CleanupLedger:
+    """Which containers this process started and whether their removal was confirmed.
+
+    Read by the CLI after SIGTERM or Ctrl-C so its message states what cleanup actually did.
+    """
+
+    def __init__(self) -> None:
+        self.started = 0
+        self.unconfirmed: set[str] = set()
+
+    def reset(self) -> None:
+        self.started = 0
+        self.unconfirmed.clear()
+
+
+LEDGER = CleanupLedger()
+
+
 class DockerRunner:
     mode = "docker"
 
@@ -151,7 +169,7 @@ class DockerRunner:
         state = json.loads(r.stdout)
         return state if isinstance(state, dict) else None
 
-    def _remove(self, name: str) -> None:
+    def _remove(self, name: str) -> bool:
         # Retry with backoff: removal right after a kill, or on a loaded daemon, can race
         # ("removal ... is already in progress"); a container left behind is a cleanup bug.
         for attempt in range(6):
@@ -160,8 +178,9 @@ class DockerRunner:
             except subprocess.TimeoutExpired:
                 continue
             if r.returncode == 0 or "No such container" in r.stderr:
-                return
+                return True
             time.sleep(0.5 * (attempt + 1))
+        return False
 
     # --- run ----------------------------------------------------------------------------------
 
@@ -179,12 +198,15 @@ class DockerRunner:
             argv = self.build_argv(spec, work, name)
             return self._execute(spec, argv, name)
         finally:
-            self._remove(name)
+            if self._remove(name):
+                LEDGER.unconfirmed.discard(name)
             shutil.rmtree(tmp, ignore_errors=True)
 
     def _execute(self, spec: RunSpec, argv: list[str], name: str) -> RunResult:
         limit = spec.limits.max_output_bytes
         start = time.monotonic()
+        LEDGER.started += 1
+        LEDGER.unconfirmed.add(name)  # until run()'s finally confirms the removal
         proc = subprocess.Popen(  # noqa: S603 - argument list, never a shell
             argv, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
