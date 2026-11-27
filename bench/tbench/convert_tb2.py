@@ -172,20 +172,58 @@ class Docker:
         return proc
 
 
+def _is_within(path: Path, root: Path) -> bool:
+    """Return True if *path* is *root* or a descendant of *root*."""
+    try:
+        path.relative_to(root)
+        return True
+    except ValueError:
+        return False
+
+
+def _dest_for_app_member(name: str, dest: Path) -> Path | None:
+    """Map a docker-cp /app tar member name to a path under dest.
+
+    Strips the leading ``app/``. Returns None for the ``app`` directory itself
+    and for members not under ``app/``. Raises Skip for absolute paths, ``..``
+    components, or a resolved path that would land outside dest.
+    """
+    raw = name.replace("\\", "/")
+    if raw.startswith("/") or (len(raw) >= 2 and raw[1] == ":"):
+        raise Skip(f"tar member has an absolute path: {name}")
+    raw_parts = [p for p in raw.split("/") if p and p != "."]
+    if ".." in raw_parts:
+        raise Skip(f"tar member escapes destination: {name}")
+    parts = Path(*raw_parts).parts if raw_parts else ()
+    if not parts or parts[0] != "app":
+        return None
+    if len(parts) == 1:
+        return None
+    rel = Path(*parts[1:])
+    if rel.is_absolute():
+        raise Skip(f"tar member has an absolute path: {name}")
+    root = dest.resolve()
+    target = root / rel
+    if not _is_within(target.resolve(), root):
+        raise Skip(f"tar member escapes destination: {name}")
+    return target
+
+
 def _extract_app(tar_bytes: bytes, dest: Path) -> None:
-    """Extract a `docker cp c:/app -` tar into dest (the leading `app/` is stripped)."""
+    """Extract a `docker cp c:/app -` tar into dest (the leading `app/` is stripped).
+
+    Members with absolute paths, ``..`` components, or a resolved destination
+    outside dest are rejected, as are symlinks, hardlinks, and special files.
+    """
+    dest = dest.resolve()
     dest.mkdir(parents=True, exist_ok=True)
     with tarfile.open(fileobj=io.BytesIO(tar_bytes)) as tf:
         for m in tf.getmembers():
-            parts = Path(m.name).parts
-            if not parts or parts[0] != "app":
-                continue
-            rel = Path(*parts[1:]) if len(parts) > 1 else None
-            if rel is None:
+            target = _dest_for_app_member(m.name, dest)
+            if target is None:
                 continue
             if m.issym() or m.islnk():
                 raise Skip(f"/app contains a link: {m.name}")
-            target = dest / rel
             if m.isdir():
                 target.mkdir(parents=True, exist_ok=True)
             elif m.isfile():

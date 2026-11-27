@@ -33,7 +33,7 @@ run in the unmodified image before it counts.
 bench/tbench/fetch_tb2.sh /path/to/terminal-bench-2          # pinned 2fd12b88
 docker pull alexgshaw/<task>:20251031                        # per task, see task.toml
 python bench/tbench/convert_tb2.py --tb2 /path/to/terminal-bench-2 --out /tmp/tb2 \
-  --only constraints-scheduling,regex-log --docker "sg docker -c"   # --docker only if needed
+  --only example-task-a,example-task-b --docker "sg docker -c"   # --docker only if needed
 python bench/tbench/run_tb2.py /tmp/tb2/tasks /tmp/tb2/out --budget standard
 ```
 
