@@ -46,6 +46,8 @@ extend-exclude = [
   "bench/external/sample",
   "bench/external/full",
   "bench/external/data",
+  "bench/real/data",
+  "bench/real/tasks",
 ]
 
 [tool.ruff.lint]
@@ -54,6 +56,8 @@ ignore = ["S101"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S603", "S607", "S108", "S105"]
+# Runs inside the sandbox on fixed argument lists (git, patch, bash on a generated file).
+"src/aethens/sandbox/swe_harness.py" = ["S603", "S607"]
 
 [tool.mypy]
 strict = true
@@ -67,13 +71,15 @@ files = [
   "bench/external/convert.py",
   "bench/external/run_external.py",
   "bench/external/render_external.py",
+  "bench/real/fetch_real.py",
+  "bench/real/run_real.py",
 ]
 mypy_path = ["bench/external"]
 exclude = ["tests/fixtures/"]
 
 [[tool.mypy.overrides]]
 # jsonschema ships no type stubs; it is only used in tests.
-module = ["jsonschema", "jsonschema.*"]
+module = ["jsonschema", "jsonschema.*", "pyarrow", "pyarrow.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

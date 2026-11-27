@@ -9,7 +9,9 @@ from __future__ import annotations
 
 import argparse
 import sys
+from collections.abc import Callable, Iterable, Iterator, Mapping
 from pathlib import Path
+from typing import Any
 
 from aethens import __version__
 from aethens.adapters import load_tasks
@@ -26,6 +28,11 @@ from aethens.checks import (
     CheckContext,
 )
 from aethens.errors import AethensError
+from aethens.importers import read_jsonl, write_task
+from aethens.importers.bigcodebench import bigcodebench_drafts
+from aethens.importers.common import TaskDraft
+from aethens.importers.evalplus import humanevalplus_drafts, mbppplus_drafts
+from aethens.importers.swebench import swebench_drafts
 from aethens.models import Budget, Report, Severity
 from aethens.report import render_json, render_markdown
 from aethens.runner import DockerRunner, LocalRunner, Runner
@@ -38,6 +45,19 @@ ALL_CHECKS: dict[str, type[Check]] = {
     "C005": C005OrderDependence,
     "C006": C006OverSpecified,
     "C007": C007RewardHacking,
+}
+
+IMPORT_FORMATS: dict[str, Callable[[Iterable[Mapping[str, Any]]], Iterator[TaskDraft]]] = {
+    "mbppplus": mbppplus_drafts,
+    "humanevalplus": humanevalplus_drafts,
+    "bigcodebench": bigcodebench_drafts,
+    "swebench": swebench_drafts,
+}
+IMPORT_ID_FIELDS = {
+    "mbppplus": "task_id",
+    "humanevalplus": "task_id",
+    "bigcodebench": "task_id",
+    "swebench": "instance_id",
 }
 
 EXIT_OK, EXIT_FINDINGS, EXIT_TOOL_ERROR, EXIT_TIMEOUT = 0, 1, 2, 3
@@ -74,6 +94,14 @@ def build_parser() -> argparse.ArgumentParser:
         help="run only this check (repeatable); default: all",
     )
     audit.add_argument("--output", help="write the report to this file instead of stdout")
+    imp = sub.add_parser(
+        "import", help="convert a public benchmark export (JSONL) into aethens-task/v1 directories"
+    )
+    imp.add_argument("format", choices=sorted(IMPORT_FORMATS), help="the benchmark format")
+    imp.add_argument("source", help="a JSONL file, one benchmark record per line")
+    imp.add_argument("out", help="directory to write the task directories into")
+    imp.add_argument("--only", default="", help="comma-separated upstream ids to import")
+    imp.add_argument("--overwrite", action="store_true", help="replace existing task directories")
     audit.add_argument(
         "--unsafe-local",
         action="store_true",
@@ -92,9 +120,29 @@ def exit_code_for(report: Report, fail_on: Severity) -> int:
     return EXIT_OK
 
 
+def run_import(args: argparse.Namespace) -> int:
+    only = {s for s in args.only.split(",") if s}
+    try:
+        rows = read_jsonl(Path(args.source))
+        if only:
+            rows = [r for r in rows if str(r.get(IMPORT_ID_FIELDS[args.format])) in only]
+        out = Path(args.out)
+        out.mkdir(parents=True, exist_ok=True)
+        written = [
+            write_task(d, out, overwrite=args.overwrite) for d in IMPORT_FORMATS[args.format](rows)
+        ]
+    except AethensError as exc:
+        print(f"aethens: error: {type(exc).__name__}: {exc}", file=sys.stderr)
+        return EXIT_TOOL_ERROR
+    print(f"aethens: imported {len(written)} task(s) into {args.out}")
+    return EXIT_OK
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(sys.argv[1:] if argv is None else argv)
+    if args.command == "import":
+        return run_import(args)
     if args.command != "audit":
         parser.print_help()
         return EXIT_OK

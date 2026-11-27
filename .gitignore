@@ -11,3 +11,7 @@ build/
 audits/private/
 bench/external/data/
 bench/external/full/
+
+# real-world audits: downloaded data and imported tasks (rebuilt by bench/real/fetch_real.py)
+bench/real/data/
+bench/real/tasks/

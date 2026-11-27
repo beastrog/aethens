@@ -31,3 +31,10 @@ Ideas that came up during the build. AGENTS.md rule 14: write them here, do not 
 - External bench: add EvalPlus MBPP+ (re-check MBPP CC-BY-4.0 and MBPP+ Apache-2.0 first) and any
   public dataset with labelled flaky, order-dependent or over-specified tests, so C002/C005/C006 get
   real recall numbers, not only false-positive counts.
+
+- (27 Nov 2026) Prime Intellect `verifiers` environment importer: run an environment's reward
+  functions inside the sandbox on gold and on probe completions (D-085).
+- (27 Nov 2026) Harbor / Terminal-Bench runner profile with dependencies baked at image build
+  time (D-084, needs owner approval).
+- (27 Nov 2026) Patch-hunk mutation for SWE-bench: mutate only the lines the gold patch touches
+  (C004 currently needs whole Python files in gold/).

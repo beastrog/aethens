@@ -4,6 +4,9 @@ All notable changes are recorded here. The format follows Keep a Changelog; vers
 
 ## [Unreleased]
 
+### Added
+- `aethens import` and `aethens.importers`: convert MBPP+ and HumanEval+ (EvalPlus), BigCodeBench and SWE-bench (Verified) exports into aethens-task/v1, keeping upstream test code verbatim; SWE-bench runs the official eval script and swebench 5.0.2's grading inside the unchanged sandbox. Harbor / Terminal-Bench 2 compatibility scan. `bench/real/fetch_real.py` (pinned downloads) and `bench/real/run_real.py` (one CLI audit per task). See docs/importers.md (D-080 to D-086).
+
 ### Fixed
 - Docker runner: `timeout_s` now limits the verifier's run time inside the container, not the time `docker run` spends creating, starting and removing it. On a heavily loaded host that overhead alone exceeded 20 s and turned passing runs into timeouts (the intermittent C002 false positive on bench control ctrl-tags-sorted). Total wall time per run is capped at `timeout_s + 60 s`. A kill sent before the container existed could also leave a hung verifier running for 30 s; container removal now retries with backoff (D-064). **Changes how timeouts are measured; owner approval requested.**
 
