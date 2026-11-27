@@ -281,7 +281,11 @@ CI installs uv with `pip install uv==0.13.7` instead of a third-party setup acti
   itself has run `timeout_s` (daemon StartedAt, capped by host time since launch so a skewed daemon
   clock cannot shorten the old limit). Hard cap: `timeout_s + STARTUP_GRACE_S` (60 s, agent-chosen)
   of wall time. After a normal exit, daemon-recorded run time (FinishedAt - StartedAt) above
-  `timeout_s` is still a timeout, so a slow verifier cannot slip through on the grace. Same repro
+  `timeout_s` is still a timeout, so a slow verifier cannot slip through on the grace. That
+  post-exit delta is capped the same way as the in-flight check: `capped_in_container_seconds`
+  takes `min(FinishedAt - StartedAt, host_elapsed)`, where host elapsed is the monotonic time
+  from just before `docker run` until the client exits, so a forward clock jump or a bogus
+  timestamp pair cannot turn a fast run into a timeout. Same repro
   after the fix: 0/300. Thresholds, the default `timeout_s` values and isolation flags are
   unchanged; only what the clock covers changed. `RunResult.duration_s` stays host wall time (it
   feeds C002's time budget, which therefore still counts overhead).
