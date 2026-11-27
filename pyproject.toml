@@ -4,14 +4,25 @@ build-backend = "hatchling.build"
 
 [project]
 name = "aethens"
-version = "0.1.0.dev0"
+version = "0.1.0"
 description = "Validate the verifiers of code tasks by running them: accept correct, reject wrong, same result every run."
 readme = "README.md"
 license = "Apache-2.0"
 license-files = ["LICENSE", "NOTICE"]
 requires-python = ">=3.11"
 authors = [{ name = "Aethens contributors" }]
+keywords = [
+  "benchmarks",
+  "mutation-testing",
+  "reward-hacking",
+  "rl-environments",
+  "testing",
+  "verifiers",
+]
 classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
@@ -20,6 +31,14 @@ classifiers = [
   "Typing :: Typed",
 ]
 dependencies = ["PyYAML>=6.0.3,<7"]
+
+[project.urls]
+Homepage = "https://beastrog.github.io/aethens/"
+Repository = "https://github.com/beastrog/aethens"
+Issues = "https://github.com/beastrog/aethens/issues"
+Discussions = "https://github.com/beastrog/aethens/discussions"
+Changelog = "https://github.com/beastrog/aethens/blob/main/CHANGELOG.md"
+Author = "https://linkedin.com/in/aniruddha-dey-887b26312/"
 
 [project.scripts]
 aethens = "aethens.cli:main"
@@ -35,6 +54,10 @@ dev = [
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/aethens"]
+
+[tool.hatch.build.targets.sdist]
+# Keep the marketing site out of the PyPI sdist (it is built and deployed separately).
+exclude = ["website"]
 
 [tool.ruff]
 line-length = 100
