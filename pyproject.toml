@@ -45,7 +45,7 @@ aethens = "aethens.cli:main"
 
 [dependency-groups]
 dev = [
-  "ruff==0.17.5",
+  "ruff==0.17.6",
   "mypy==2.4.1",
   "pytest==9.2.0",
   "jsonschema==4.26.0",
