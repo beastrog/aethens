@@ -4,6 +4,9 @@ All notable changes are recorded here. The format follows Keep a Changelog; vers
 
 ## [Unreleased]
 
+### Fixed
+- Docker runner: `timeout_s` now limits the verifier's run time inside the container, not the time `docker run` spends creating, starting and removing it. On a heavily loaded host that overhead alone exceeded 20 s and turned passing runs into timeouts (the intermittent C002 false positive on bench control ctrl-tags-sorted). Total wall time per run is capped at `timeout_s + 60 s`. A kill sent before the container existed could also leave a hung verifier running for 30 s; container removal now retries with backoff (D-064). **Changes how timeouts are measured; owner approval requested.**
+
 ### Added
 - D5: check C007 (reward-hacking probes): runs six families of non-solutions (early exit, atexit override, unittest patch, sitecustomize hook, always-equal objects, hardcoded visible answers) through the same sandbox and reports those the verifier accepts. Bench grows to 34 tasks with per-task exploit labels and per-category recall, scored separately from the core metrics; two hardened-harness controls stay silent.
 - D4: C002 is adaptive: it keeps rerunning while the gold agrees until it can state "flake rate below p at 95% confidence" (p = 0.5/0.25/0.05 by budget, time-capped), and reports a 95% Clopper-Pearson interval when it finds flakiness. Report schema bumped to `aethens-report/v2`, which adds a `coverage` list; v1 reports still load.

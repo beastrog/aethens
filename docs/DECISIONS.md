@@ -269,3 +269,20 @@ CI installs uv with `pip install uv==0.13.7` instead of a third-party setup acti
   first-version reward-hack recall was 115/116 (framework-patch 29/30).
 - D-063 (D5) The external bench does not run C007: its verifier is Aethens' own unittest conversion
   of HumanEval's check function, so probe results would describe the converter, not HumanEval.
+- D-064 (fix, owner approval requested) Timeout accounting in the Docker runner. Root cause of the
+  intermittent ctrl-tags-sorted false positive: `timeout_s` was measured on the host around the
+  whole `docker run`, so container create/start/teardown counted as verifier time. Reproduced with
+  300 gold runs of ctrl-tags-sorted at 128-way concurrency plus 24 CPU burners: 38/300 passing runs
+  ("Ran 3 tests ... OK" in stderr) were reported as timeouts (max wall time 24.6 s for a 20 s
+  timeout). In C002 one such run among up to 11 gives the warning "Gold solution run time varies:
+  some runs time out"; in C001 it gives a gold-fails error. Change: when the host wait reaches
+  `timeout_s`, the runner asks the daemon for the container's state; if it has not started yet or
+  has already exited (teardown) it keeps waiting, and if it is running it waits until the container
+  itself has run `timeout_s` (daemon StartedAt, capped by host time since launch so a skewed daemon
+  clock cannot shorten the old limit). Hard cap: `timeout_s + STARTUP_GRACE_S` (60 s, agent-chosen)
+  of wall time. After a normal exit, daemon-recorded run time (FinishedAt - StartedAt) above
+  `timeout_s` is still a timeout, so a slow verifier cannot slip through on the grace. Same repro
+  after the fix: 0/300. Thresholds, the default `timeout_s` values and isolation flags are
+  unchanged; only what the clock covers changed. `RunResult.duration_s` stays host wall time (it
+  feeds C002's time budget, which therefore still counts overhead).
+

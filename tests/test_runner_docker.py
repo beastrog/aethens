@@ -217,3 +217,62 @@ def test_runs_as_non_root_even_when_files_are_read_only(
     assert uid != 0
     if os.getuid() != 0:
         assert uid == os.getuid() and gid == os.getgid()
+
+
+# --- timeout accounting under load (fix for the ctrl-tags-sorted false positive) ---------------
+# Under heavy host load `docker run` can spend many seconds creating, starting or tearing down a
+# container. That overhead is not verifier run time and must not turn a fast, passing verifier into
+# a timeout (it did: 38/300 passing runs of ctrl-tags-sorted timed out with 128 concurrent runs and
+# 24 CPU burners). A wrapper around the real docker CLI injects the delay deterministically.
+
+
+def _slow_docker(tmp_path: Path, before_run: float, after_run: float) -> str:
+    real = subprocess.run(["which", "docker"], capture_output=True, text=True, check=True)
+    script = tmp_path / "slow-docker"
+    script.write_text(
+        "#!/bin/bash\n"
+        'if [ "$1" = run ]; then\n'
+        f"  sleep {before_run}\n"
+        f'  {real.stdout.strip()} "$@"; rc=$?\n'
+        f"  sleep {after_run}\n"
+        "  exit $rc\n"
+        "fi\n"
+        f'exec {real.stdout.strip()} "$@"\n'
+    )
+    script.chmod(0o755)
+    return str(script)
+
+
+def test_slow_container_start_is_not_a_timeout(tmp_path: Path) -> None:
+    (tmp_path / "runs").mkdir()
+    runner = DockerRunner(docker_bin=_slow_docker(tmp_path, 4, 0), tmp_root=tmp_path / "runs")
+    before = _containers()
+    r = runner.run(_spec(tmp_path, "print('fast')", 2))
+    assert r.passed and not r.timed_out and r.exit_code == 0
+    assert "fast" in r.stdout_tail
+    _assert_clean(runner, before)
+
+
+def test_slow_container_teardown_is_not_a_timeout(tmp_path: Path) -> None:
+    (tmp_path / "runs").mkdir()
+    runner = DockerRunner(docker_bin=_slow_docker(tmp_path, 0, 4), tmp_root=tmp_path / "runs")
+    before = _containers()
+    r = runner.run(_spec(tmp_path, "print('fast')", 2))
+    assert r.passed and not r.timed_out and r.exit_code == 0
+    _assert_clean(runner, before)
+
+
+def test_hung_verifier_after_slow_start_still_times_out(tmp_path: Path) -> None:
+    (tmp_path / "runs").mkdir()
+    runner = DockerRunner(docker_bin=_slow_docker(tmp_path, 3, 0), tmp_root=tmp_path / "runs")
+    before = _containers()
+    r = runner.run(_spec(tmp_path, "import time\ntime.sleep(600)", 2))
+    assert r.timed_out and not r.passed and r.exit_code is None
+    assert r.duration_s < 30
+    _assert_clean(runner, before)
+
+
+def test_verifier_slower_than_timeout_is_a_timeout(runner: DockerRunner, tmp_path: Path) -> None:
+    # In-container run time over timeout_s is a timeout even if the process exits by itself.
+    r = runner.run(_spec(tmp_path, "import time\ntime.sleep(4)\nprint('late')", 2))
+    assert r.timed_out and not r.passed

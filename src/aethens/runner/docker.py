@@ -5,17 +5,28 @@ a read-only root filesystem with a size-limited tmpfs on /tmp, --cap-drop ALL,
 --security-opt no-new-privileges, a non-root user, --pull never, and a bind mount of a disposable
 copy of the task as /work. The container is always removed and the copy always deleted, including
 on timeouts and exceptions. The docker CLI is called with argument lists only.
+
+Timeout accounting (D-064): ``timeout_s`` limits the verifier's run time inside the container, not
+the time ``docker run`` spends creating, starting and tearing the container down. Under heavy host
+load that overhead alone reached 20+ seconds and turned fast, passing verifiers into timeouts. When
+the host-side wait reaches ``timeout_s`` the runner asks the daemon whether and when the container
+started and keeps waiting until the container itself has run for ``timeout_s`` (never longer than
+``timeout_s + STARTUP_GRACE_S`` in total). After a normal exit, a container whose daemon-recorded
+run time (FinishedAt - StartedAt) exceeds ``timeout_s`` is still reported as timed out.
 """
 
 from __future__ import annotations
 
 import json
 import os
+import re
 import shutil
 import subprocess
 import tempfile
 import time
 import uuid
+from collections.abc import Mapping
+from datetime import datetime
 from pathlib import Path
 
 from aethens.errors import ContainerStartError, DockerUnavailableError, RunnerError
@@ -23,6 +34,35 @@ from aethens.runner.base import RunResult, RunSpec, TailPump, run_quiet, validat
 from aethens.runner.workdir import build_workdir
 
 NOBODY = "65534:65534"
+# Extra wall time allowed for container creation, start and teardown on a loaded host (D-064).
+STARTUP_GRACE_S = 60.0
+# How often to re-ask the daemon while the container has not started yet or is tearing down.
+POLL_S = 0.5
+_TS = re.compile(r"^(\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d)(?:\.(\d+))?(Z|[+-]\d\d:\d\d)$")
+
+
+def parse_docker_time(value: str) -> float | None:
+    """Parse a Docker RFC 3339 timestamp (nanosecond precision) to epoch seconds; None if unset."""
+    m = _TS.match(value or "")
+    if m is None or m.group(1).startswith("0001-"):
+        return None
+    frac = (m.group(2) or "0")[:6].ljust(6, "0")
+    zone = "+00:00" if m.group(3) == "Z" else m.group(3)
+    try:
+        return datetime.fromisoformat(f"{m.group(1)}.{frac}{zone}").timestamp()
+    except ValueError:
+        return None
+
+
+def in_container_seconds(state: Mapping[str, object] | None) -> float | None:
+    """FinishedAt - StartedAt from a container State, both on the daemon's clock."""
+    if not state:
+        return None
+    start = parse_docker_time(str(state.get("StartedAt", "")))
+    end = parse_docker_time(str(state.get("FinishedAt", "")))
+    if start is None or end is None or end < start:
+        return None
+    return end - start
 
 
 class DockerRunner:
@@ -102,19 +142,26 @@ class DockerRunner:
     # --- helpers ------------------------------------------------------------------------------
 
     def _inspect(self, name: str) -> dict[str, object] | None:
-        r = run_quiet([self.docker_bin, "inspect", "--format", "{{json .State}}", name], 60)
+        try:
+            r = run_quiet([self.docker_bin, "inspect", "--format", "{{json .State}}", name], 60)
+        except subprocess.TimeoutExpired as exc:
+            raise RunnerError(f"docker inspect {name} did not answer within 60 s") from exc
         if r.returncode != 0:
             return None
         state = json.loads(r.stdout)
         return state if isinstance(state, dict) else None
 
     def _remove(self, name: str) -> None:
-        # Retry once: removal right after a kill can race the daemon.
-        for _ in range(2):
-            r = run_quiet([self.docker_bin, "rm", "-f", "-v", name], 60)
+        # Retry with backoff: removal right after a kill, or on a loaded daemon, can race
+        # ("removal ... is already in progress"); a container left behind is a cleanup bug.
+        for attempt in range(6):
+            try:
+                r = run_quiet([self.docker_bin, "rm", "-f", "-v", name], 60)
+            except subprocess.TimeoutExpired:
+                continue
             if r.returncode == 0 or "No such container" in r.stderr:
                 return
-            time.sleep(0.5)
+            time.sleep(0.5 * (attempt + 1))
 
     # --- run ----------------------------------------------------------------------------------
 
@@ -145,10 +192,9 @@ class DockerRunner:
         out, err = TailPump(proc.stdout, limit), TailPump(proc.stderr, limit)
         timed_out = False
         try:
-            proc.wait(timeout=spec.timeout_s)
-        except subprocess.TimeoutExpired:
-            timed_out = True
-            run_quiet([self.docker_bin, "kill", name], 60)
+            if not self._wait(proc, name, spec.timeout_s, start):
+                timed_out = True
+                run_quiet([self.docker_bin, "kill", name], 60)
             try:
                 proc.wait(timeout=30)
             except subprocess.TimeoutExpired:
@@ -171,6 +217,10 @@ class DockerRunner:
                 f"(docker exit {proc.returncode}): {stderr.strip()[-500:]}"
                 + (f" -- try: docker pull {spec.image}" if "No such image" in stderr else "")
             )
+        ran = in_container_seconds(state)
+        if not timed_out and ran is not None and ran > spec.timeout_s:
+            # It exited by itself, but only after running longer than its timeout (D-064).
+            timed_out = True
         oom = bool(state and state.get("OOMKilled"))
         code = None if timed_out else proc.returncode
         return RunResult(
@@ -184,6 +234,40 @@ class DockerRunner:
             mode=self.mode,
             argv=tuple(argv),
         )
+
+    def _wait(self, proc: subprocess.Popen[bytes], name: str, timeout: float, t0: float) -> bool:
+        """Wait for ``docker run`` to exit; False when the verifier exceeded ``timeout`` (D-064).
+
+        Time before the container starts and after it exits does not count. The in-container
+        time is estimated from the daemon's StartedAt and capped by the host time since ``t0``,
+        so a daemon clock that runs ahead or behind can never shorten the timeout below the
+        pre-D-064 behaviour or extend it past ``timeout + STARTUP_GRACE_S``.
+        """
+        hard = t0 + timeout + STARTUP_GRACE_S
+        wait_for = timeout
+        while True:
+            try:
+                proc.wait(timeout=max(wait_for, 0.05))
+                return True
+            except subprocess.TimeoutExpired:
+                pass
+            now = time.monotonic()
+            if now >= hard:
+                return False
+            try:
+                state = self._inspect(name)
+            except RunnerError:
+                state = None  # the daemon is too busy to answer; ask again shortly
+            status = str(state.get("Status", "")) if state else ""
+            started = parse_docker_time(str(state.get("StartedAt", ""))) if state else None
+            if status == "running" and started is not None:
+                ran = min(max(time.time() - started, 0.0), now - t0)
+                if ran >= timeout:
+                    return False
+                wait_for = min(timeout - ran, hard - now)
+            else:
+                # Not created or started yet, or already exited and being torn down.
+                wait_for = min(POLL_S, hard - now)
 
 
 def _open_up(path: Path) -> None:

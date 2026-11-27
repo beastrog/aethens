@@ -117,3 +117,26 @@ def test_tail_text_truncates() -> None:
 def test_limits_defaults() -> None:
     lim = Limits()
     assert (lim.memory_mb, lim.cpus, lim.pids, lim.max_output_bytes) == (1024, 1.0, 256, 65536)
+
+
+def test_parse_docker_timestamp_nanoseconds_and_zero() -> None:
+    from aethens.runner.docker import parse_docker_time
+
+    t = parse_docker_time("2026-11-27T07:13:15.730158011Z")
+    assert t is not None and abs(t - 1795763595.730158) < 1e-3
+    assert parse_docker_time("2026-11-27T07:13:15Z") == pytest.approx(1795763595.0)
+    assert parse_docker_time("0001-01-01T00:00:00Z") is None
+    assert parse_docker_time("") is None
+    assert parse_docker_time("garbage") is None
+
+
+def test_in_container_seconds() -> None:
+    from aethens.runner.docker import in_container_seconds
+
+    state = {
+        "StartedAt": "2026-11-27T07:13:15.000000000Z",
+        "FinishedAt": "2026-11-27T07:13:17.500000000Z",
+    }
+    assert in_container_seconds(state) == pytest.approx(2.5)
+    assert in_container_seconds({"StartedAt": "0001-01-01T00:00:00Z"}) is None
+    assert in_container_seconds(None) is None
