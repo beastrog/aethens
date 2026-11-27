@@ -137,7 +137,13 @@ const transcript = runs
         <div class="term-bar">
           <span class="term-mark" aria-hidden="true"></span>
           <span class="term-title">aethens audit</span>
-          <span class="term-status" data-status>local · Docker</span>
+          <span class="term-status" data-status data-state="idle">
+            <span data-s="idle">local · Docker</span>
+            <span data-s="run1">running · run 1 of 2</span>
+            <span data-s="run2">running · run 2 of 2</span>
+            <span data-s="ok">exit 0</span>
+            <span data-s="err">exit 1</span>
+          </span>
           <button type="button" class="term-replay" data-replay tabindex="-1">Replay</button>
           <span class="term-progress" data-progress></span>
         </div>
@@ -232,19 +238,31 @@ const transcript = runs
   }
   .term-status {
     margin-left: auto;
-    min-width: 18ch;
-    text-align: right;
+    display: grid;
+    justify-items: end;
     white-space: nowrap;
     text-transform: uppercase;
-    transition: color var(--dur-fast) var(--ease-out);
   }
-  .term-status[data-state="run"] {
+  .term-status > span {
+    grid-area: 1 / 1;
+    opacity: 0;
+    transition: opacity var(--dur-fast) var(--ease-out);
+  }
+  .term-status[data-state="idle"] [data-s="idle"],
+  .term-status[data-state="run1"] [data-s="run1"],
+  .term-status[data-state="run2"] [data-s="run2"],
+  .term-status[data-state="ok"] [data-s="ok"],
+  .term-status[data-state="err"] [data-s="err"] {
+    opacity: 1;
+  }
+  [data-s="run1"],
+  [data-s="run2"] {
     color: var(--color-gold-bright);
   }
-  .term-status[data-state="err"] {
+  [data-s="err"] {
     color: var(--color-error);
   }
-  .term-status[data-state="ok"] {
+  [data-s="ok"] {
     color: var(--color-ok);
   }
   .term-replay {
@@ -487,10 +505,7 @@ const transcript = runs
     const steps: Step[] = [];
     let t = 400;
     let runIdx = 0;
-    const setStatus = (txt: string, state: string) => () => {
-      status.textContent = txt;
-      status.dataset.state = state;
-    };
+    const setStatus = (state: string) => () => (status.dataset.state = state);
     lines.forEach((ln, i) => {
       const kind = ln.dataset.kind;
       if (kind === "cmd") {
@@ -528,13 +543,13 @@ const transcript = runs
         const lastChar = chars[chars.length - 1];
         steps.push({ at: t, run: () => lastChar.removeAttribute("data-cur") });
         if (!isEcho) {
-          steps.push({ at: t, run: setStatus(`running · run ${runIdx} of 2`, "run") });
+          steps.push({ at: t, run: setStatus(`run${runIdx}`) });
           t += 1200; // the real run takes ~70 s; this is the compressed wait
         } else t += 160;
       } else if (kind === "exit") {
         const code = ln.textContent?.trim();
         steps.push({ at: t, run: () => (ln.setAttribute("data-on", ""), follow(ln)) });
-        steps.push({ at: t, run: setStatus(`exit ${code}`, code === "0" ? "ok" : "err") });
+        steps.push({ at: t, run: setStatus(code === "0" ? "ok" : "err") });
         t += 1400;
       } else if (kind === "idle") {
         steps.push({ at: t, run: () => (ln.setAttribute("data-on", ""), follow(ln)) });
@@ -584,8 +599,7 @@ const transcript = runs
       term.querySelectorAll("[data-on]").forEach((e) => e.removeAttribute("data-on"));
       term.querySelectorAll("[data-c]").forEach((e) => e.removeAttribute("data-c"));
       term.querySelectorAll("[data-cur]").forEach((e) => e.removeAttribute("data-cur"));
-      status.textContent = "local · Docker";
-      status.dataset.state = "";
+      status.dataset.state = "idle";
       progress.style.setProperty("--p", "0");
     };
 
