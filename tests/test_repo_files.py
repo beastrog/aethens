@@ -34,7 +34,14 @@ def test_required_files_exist() -> None:
         "docs/DISCLOSURE.md",
         "docs/task-format.md",
         "docs/report-schema.json",
-        ".github/ISSUE_TEMPLATE/bug.yml",
+        ".github/ISSUE_TEMPLATE/bug_report.yml",
+        ".github/ISSUE_TEMPLATE/feature_request.yml",
+        ".github/ISSUE_TEMPLATE/false_positive.yml",
+        ".github/ISSUE_TEMPLATE/new_check_proposal.yml",
+        "SUPPORT.md",
+        "GOVERNANCE.md",
+        "NOTICE",
+        "docs/LICENSING.md",
         ".github/ISSUE_TEMPLATE/ran-it.yml",
         ".github/workflows/ci.yml",
         ".github/workflows/release.yml",
@@ -120,3 +127,17 @@ def test_action_audit_step_survives_findings_exit_code() -> None:
     script = audit["run"]
     assert script.index("set +e") < script.index("aethens audit")
     assert 'exit "$code"' in script and "GITHUB_STEP_SUMMARY" in script
+
+
+def test_release_drafter_never_publishes() -> None:
+    path = WORKFLOWS / "release-drafter.yml"
+    text = path.read_text()
+    assert "pull_request_target" not in text
+    wf = _yaml(path)
+    on = wf["on"]
+    assert "push" in on and "main" in on["push"]["branches"]
+    for job in wf["jobs"].values():
+        for step in job.get("steps") or []:
+            inputs = step.get("with") or {}
+            if "publish" in inputs:
+                assert inputs["publish"] is False, step

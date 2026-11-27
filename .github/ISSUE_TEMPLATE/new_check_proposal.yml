@@ -1,0 +1,48 @@
+name: New check proposal
+description: Propose a new verifier check (a new class of planted defect Aethens should catch).
+labels: [check-proposal]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A new check needs a planted-defect bench task, a clean control, a unit test, and updated
+        bench numbers. Read [CONTRIBUTING.md](https://github.com/beastrog/aethens/blob/main/CONTRIBUTING.md)
+        before investing a lot of design work.
+  - type: textarea
+    id: defect
+    attributes:
+      label: The defect class
+      description: What can go wrong in a verifier that existing checks (C001–C007) do not already cover?
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why it matters
+      description: Who gets hurt if this goes undetected? Point to a public incident or paper if you have one.
+    validations:
+      required: true
+  - type: textarea
+    id: probe
+    attributes:
+      label: How the check would work
+      description: What would Aethens run, in the sandbox, to catch this? Keep it concrete.
+    validations:
+      required: true
+  - type: textarea
+    id: tests
+    attributes:
+      label: How you would test it
+      description: Sketch the planted-defect task and the clean control. Tests are written first.
+    validations:
+      required: true
+  - type: textarea
+    id: limits
+    attributes:
+      label: Limits and false-positive risk
+      description: What would it miss? When might it flag a sound verifier?
+  - type: textarea
+    id: extras
+    attributes:
+      label: References
+      description: Related tools, papers, or issue numbers.

@@ -1,1 +1,9 @@
 blank_issues_enabled: false
+contact_links:
+  - name: GitHub Discussions
+    url: https://github.com/beastrog/aethens/discussions
+    about: Ask questions, share ideas, and talk about using Aethens. Not for bugs or security reports.
+  # Discord (Ani: uncomment and paste the invite once the server exists)
+  # - name: Discord
+  #   url: https://discord.gg/YOUR-INVITE
+  #   about: Community chat for Aethens.
