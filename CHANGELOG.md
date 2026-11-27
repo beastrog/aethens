@@ -5,6 +5,7 @@ All notable changes are recorded here. The format follows Keep a Changelog; vers
 ## [Unreleased]
 
 ### Added
+- `docs/REAL_WORLD_RESULTS.md`: first audits of public benchmarks (MBPP+ 378 tasks, HumanEval+ 164 tasks) with every finding checked by hand and per-check TP/FP tallies; third-party findings stay private until disclosure. `bench/real/reproduce_verdicts.py` reproduces each manual true positive in the sandbox.
 - `aethens import` and `aethens.importers`: convert MBPP+ and HumanEval+ (EvalPlus), BigCodeBench and SWE-bench (Verified) exports into aethens-task/v1, keeping upstream test code verbatim; SWE-bench runs the official eval script and swebench 5.0.2's grading inside the unchanged sandbox. Harbor / Terminal-Bench 2 compatibility scan. `bench/real/fetch_real.py` (pinned downloads) and `bench/real/run_real.py` (one CLI audit per task). See docs/importers.md (D-080 to D-086).
 - Community and repository metadata for a public open-source project: Contributor Covenant 2.1, contributing / support / governance guides, issue and pull-request templates, CODEOWNERS, Dependabot, a draft-only Release Drafter workflow, and a GitHub Sponsors button.
 - `NOTICE` and `docs/LICENSING.md`, listing third-party notices and dependency licences. The sdist now ships both `LICENSE` and `NOTICE`.
