@@ -15,6 +15,7 @@ pytestmark = pytest.mark.docker
 
 
 def _containers() -> set[str]:
+    """IDs of containers with label aethens.run currently on the daemon."""
     out = subprocess.run(
         ["docker", "ps", "-aq", "--filter", "label=aethens.run"],
         capture_output=True,
@@ -22,6 +23,33 @@ def _containers() -> set[str]:
         check=True,
     ).stdout
     return set(out.split())
+
+
+def _owned_containers(tmp_root: Path) -> set[str]:
+    """aethens.run containers that bind-mount a path under this test's tmp_root.
+
+    Other processes on a shared daemon may create or remove aethens.run containers
+    during a test; only this runner's mounts are this test's responsibility.
+    """
+    root = tmp_root.resolve()
+    owned: set[str] = set()
+    for cid in _containers():
+        r = subprocess.run(
+            ["docker", "inspect", "--format", "{{range .Mounts}}{{.Source}}\n{{end}}", cid],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if r.returncode != 0:
+            continue  # already gone
+        for src in r.stdout.splitlines():
+            if not src:
+                continue
+            path = Path(src).resolve()
+            if path == root or path.is_relative_to(root):
+                owned.add(cid)
+                break
+    return owned
 
 
 @pytest.fixture
@@ -43,9 +71,14 @@ def _spec(tmp_path: Path, code: str, timeout: float = 20.0, **kw: object) -> Run
     )
 
 
-def _assert_clean(runner: DockerRunner, before: set[str]) -> None:
-    assert _containers() == before
+def _assert_clean(runner: DockerRunner, _before: set[str]) -> None:
+    # `_before` is the pre-run global snapshot kept at call sites for readability.
+    # We do not compare the global aethens.run set for equality: that flakes when
+    # another process creates or removes a container. Instead, any aethens.run
+    # container that still bind-mounts this runner's tmp_root is a leftover.
     assert runner.tmp_root is not None
+    leftover = _owned_containers(runner.tmp_root)
+    assert leftover == set(), leftover
     assert list(runner.tmp_root.iterdir()) == []
 
 
