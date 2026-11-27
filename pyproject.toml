@@ -91,6 +91,8 @@ files = [
   "bench/external/convert.py",
   "bench/external/run_external.py",
   "bench/external/render_external.py",
+  "bench/tbench/convert_tb2.py",
+  "bench/tbench/run_tb2.py",
 ]
 mypy_path = ["bench/external"]
 exclude = ["tests/fixtures/"]
