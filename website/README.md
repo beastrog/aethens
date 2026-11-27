@@ -6,7 +6,6 @@ benchmarks.
 
 This is a static Astro site, deployed to GitHub Pages at
 [https://beastrog.github.io/aethens/](https://beastrog.github.io/aethens/).
-A Pages site is publicly reachable even when this repository is private.
 
 ## Stack
 
@@ -24,7 +23,7 @@ A single page, `src/pages/index.astro`, with these sections:
 1. Hero — pitch, install-from-source, GitHub Action quickstart, internal-bench ribbon
 2. The problem — public citations only (OpenAI SWE-bench Verified retirement, SWE-Bench+, EvalPlus)
 3. The checks — C001–C007, with what each can and cannot catch
-4. Published accuracy — internal bench, C007, external HumanEval / HumanEval+ (including C004 precision 0.46)
+4. Published accuracy — internal bench, C007, external HumanEval / HumanEval+ (C004 precision 0.8158 with the equivalent-mutant filter, 0.4615 without; both from `bench/external/results.json`)
 5. Comparison — Aethens, rlgate, BenchJack, Assay, dated 18 Nov 2026
 6. Example report — a real C005 run on `bench/tasks/order-alphabetical`
 7. Work with us — expert audits and a hosted-CI note, with CTAs to GitHub Discussions
