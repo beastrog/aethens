@@ -22,23 +22,23 @@ const base = import.meta.env.BASE_URL;
 
   <h2 id="install" class="mt-12 font-serif italic text-2xl">Install</h2>
   <p class="mt-4 text-paper/90">
-    Once v0.1.0 is published on PyPI, install the CLI with:
+    v0.1.0 is on PyPI. Install the CLI with:
   </p>
   <pre class="cmd mt-4" tabindex="0"><code>pipx install aethens</code></pre>
-  <p class="mt-4 text-paper/90">or:</p>
-  <pre class="cmd mt-4" tabindex="0"><code>uv tool install aethens</code></pre>
+  <p class="mt-4 text-paper/90">or <code class="text-gold">uv tool install aethens</code>, or <code class="text-gold">pip install aethens</code>.</p>
+  <p class="mt-4 text-paper/90">Pull the default task image, then audit a task directory:</p>
+  <pre class="cmd mt-4" tabindex="0"><code>docker pull python:3.12-slim
+aethens audit path/to/task --format markdown</code></pre>
   <p class="mt-4 text-sm text-muted">
-    Until that release is published, Aethens is not on PyPI. Install from a clone of
-    the repository instead:
+    To install a checkout instead of the PyPI release:
   </p>
   <pre class="cmd mt-4" tabindex="0"><code>git clone https://github.com/beastrog/aethens.git
 cd aethens
-python -m pip install .
-docker pull python:3.12-slim</code></pre>
+python -m pip install .</code></pre>
 
   <h2 id="first-audit" class="mt-12 font-serif italic text-2xl">Your first audit</h2>
   <p class="mt-4 text-paper/90">
-    The example task in the repository is clean, so this prints a report with no error
+    From that clone, the example task is clean, so this prints a report with no error
     or warning findings (C004 may list info-level surviving mutants) and exits 0:
   </p>
   <pre class="cmd mt-4" tabindex="0"><code>aethens audit examples/add-two --format markdown</code></pre>

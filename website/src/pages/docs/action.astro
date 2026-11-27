@@ -24,19 +24,18 @@ const example = `- uses: beastrog/aethens@v0.1.0
     needs no secrets.
   </p>
   <p class="mt-4 text-paper/90">
-    Pin a release tag. The example below uses
-    <code class="text-gold">beastrog/aethens@v0.1.0</code>, which will install
-    that release once the tag exists. The Action installs Aethens from its own
-    checkout, so the ref you pin is the version that runs. The
-    <code class="text-gold">path</code> input is relative to the workspace, so
-    the job must check out your repository first.
+    The example pins <code class="text-gold">beastrog/aethens@v0.1.0</code>, the
+    current release, also listed on the{' '}
+    <a class="prose-link" href="https://github.com/marketplace/actions/aethens-audit">GitHub Marketplace</a>.
+    The Action installs Aethens from its own checkout, so the ref you pin is the
+    version that runs. The <code class="text-gold">path</code> input is relative
+    to the workspace, so the job must check out your repository first.
   </p>
 
   <h2 id="example" class="mt-12 font-serif italic text-2xl">Example</h2>
   <pre class="cmd mt-4" tabindex="0"><code>{example}</code></pre>
   <p class="mt-4 text-sm text-muted">
-    This is the README example, with the pre-release <code>@main</code> pin
-    replaced by <code>@v0.1.0</code>. Optional inputs
+    Same example as the README. Optional inputs
     <code class="text-gold">images</code> and
     <code class="text-gold">python-version</code> can be added as needed.
   </p>

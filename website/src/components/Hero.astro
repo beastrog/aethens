@@ -36,30 +36,34 @@ const m = numbers.internal;
     </p>
 
     <p class="mt-5 max-w-2xl text-sm text-muted">
-      Not on PyPI yet. Install from a clone of{' '}
-      <a class="prose-link" href="https://github.com/beastrog/aethens">the repository</a>.
+      v0.1.0 is on{' '}
+      <a class="prose-link" href="https://pypi.org/project/aethens/">PyPI</a>.
       Needs Docker and Python 3.11+. No LLMs, no network access for task code, no telemetry.
     </p>
 
     <div class="mt-12 grid gap-4 lg:grid-cols-2">
       <div>
         <p class="cmd-label">Install and run</p>
-        <pre class="cmd" tabindex="0"><code>git clone https://github.com/beastrog/aethens.git
-cd aethens
-python -m pip install .
+        <pre class="cmd" tabindex="0"><code>pipx install aethens
 docker pull python:3.12-slim
 aethens audit path/to/task --format markdown</code></pre>
+        <p class="mt-2 text-xs text-muted">
+          <code class="text-gold">uv tool install aethens</code> and{' '}
+          <code class="text-gold">pip install aethens</code> install the same release.
+          From a clone, <code class="text-gold">python -m pip install .</code>
+        </p>
       </div>
       <div>
         <p class="cmd-label">GitHub Action</p>
-        <pre class="cmd" tabindex="0"><code>- uses: beastrog/aethens@main
+        <pre class="cmd" tabindex="0"><code>- uses: beastrog/aethens@v0.1.0
   with:
     path: path/to/tasks
     budget: standard
     fail-on: error
     seed: "0"</code></pre>
         <p class="mt-2 text-xs text-muted">
-          Pin a release tag once one exists. <code class="text-gold">@main</code> is pre-release.
+          <a class="prose-link" href="https://github.com/marketplace/actions/aethens-audit">Marketplace</a>,
+          tag <code class="text-gold">v0.1.0</code>.
         </p>
       </div>
     </div>

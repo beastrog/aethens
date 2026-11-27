@@ -10,6 +10,7 @@ All notable changes are recorded here. The format follows Keep a Changelog; vers
 
 ### Changed
 - Launch copy: the site and package metadata say version 0.1.0 (not on PyPI yet). Bench provenance stays `0.1.0.dev0`, which is the `tool_version` recorded in `bench/results.json`. Public docs no longer list audit prices. The hosted-CI card is labelled "Not available".
+- v0.1.0 is on PyPI and the GitHub Marketplace. Public install text leads with `pipx install aethens` (`uv tool install` and `pip install` too); installing a clone is secondary. Action examples pin `beastrog/aethens@v0.1.0`.
 - Site background: one fixed ground (fine dot grid, edge vignette, a warm spot that drifts a short way with the pointer) sits behind every page, including docs. The hero-only canvas field is removed. Touch and `prefers-reduced-motion` keep the ground still.
 
 ### Fixed
