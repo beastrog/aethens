@@ -196,3 +196,56 @@ def test_capped_in_container_seconds_ignores_inflated_daemon_delta() -> None:
     # A genuinely long run still reports the daemon delta (host elapsed is at least that).
     assert capped_in_container_seconds(state, 30.2) == pytest.approx(30.0)
     assert capped_in_container_seconds(None, 1.0) is None
+
+
+def test_popen_failure_clears_pending_name_even_if_removal_is_unconfirmed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The name is pending before Popen; a failed Popen must clear it itself.
+
+    Here ``docker rm`` cannot confirm anything (daemon unreachable), so only the Popen
+    failure path can tell the ledger that no container was ever created.
+    """
+    from aethens.cli.main import cleanup_summary
+    from aethens.runner import docker as docker_mod
+    from aethens.runner.docker import LEDGER
+
+    LEDGER.reset()
+    (tmp_path / "runs").mkdir()
+    runner = DockerRunner(tmp_root=tmp_path / "runs")
+    monkeypatch.setattr(runner, "ensure_available", lambda: None)
+
+    def boom(*_a: object, **_k: object) -> object:
+        raise FileNotFoundError("docker")
+
+    monkeypatch.setattr(subprocess, "Popen", boom)
+
+    class _DaemonDown:
+        returncode = 1
+        stdout = ""
+        stderr = "Cannot connect to the Docker daemon\n"
+
+    monkeypatch.setattr(docker_mod, "run_quiet", lambda *_a, **_k: _DaemonDown())
+    monkeypatch.setattr("aethens.runner.docker.time.sleep", lambda _s: None)
+
+    try:
+        with pytest.raises(FileNotFoundError):
+            runner.run(spec(tmp_path))
+        assert LEDGER.snapshot() == (0, [])
+        assert cleanup_summary() == "no container had been started"
+    finally:
+        LEDGER.reset()
+
+
+def test_ledger_snapshot_is_a_copy() -> None:
+    from aethens.runner.docker import CleanupLedger
+
+    ledger = CleanupLedger()
+    ledger.pending("aethens-b")
+    ledger.pending("aethens-a")
+    ledger.mark_started()
+    started, left = ledger.snapshot()
+    assert (started, left) == (1, ["aethens-a", "aethens-b"])
+    left.clear()
+    ledger.confirm_absent("aethens-a")
+    assert ledger.snapshot() == (1, ["aethens-b"])

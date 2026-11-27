@@ -114,15 +114,15 @@ def _on_sigterm(signum: int, _frame: object) -> None:
 
 def cleanup_summary() -> str:
     """What container cleanup confirmed after an interruption (never claims more than that)."""
-    left = sorted(LEDGER.unconfirmed)
+    started, left = LEDGER.snapshot()
     if left:
         return (
             f"removal of {len(left)} container(s) was not confirmed: {' '.join(left)}; "
             "check with: docker ps -a --filter label=aethens.run=1"
         )
-    if LEDGER.started == 0:
+    if started == 0:
         return "no container had been started"
-    return f"cleanup ran: removal of all {LEDGER.started} container(s) confirmed"
+    return f"cleanup ran: removal of all {started} container(s) confirmed"
 
 
 def main(argv: list[str] | None = None) -> int:
