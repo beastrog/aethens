@@ -1,0 +1,90 @@
+---
+import Docs from "../../layouts/Docs.astro";
+const base = import.meta.env.BASE_URL;
+---
+
+<Docs
+  current="getting-started"
+  title="Getting started"
+  description="Install Aethens and run your first verifier audit. Needs Docker and Python 3.11+."
+>
+  <p class="kicker mb-5"><span>Docs</span><span class="num" aria-hidden="true">/</span><span>Start here</span></p>
+  <h1 class="font-serif italic font-semibold text-section leading-[1.1]">Getting started</h1>
+  <p class="mt-6 text-paper/90">
+    Aethens is an open-source Python CLI and GitHub Action that audits the verifiers of
+    RL environments and code-task benchmarks by running them in a Docker sandbox. Every
+    finding comes with evidence and a one-line repro command.
+  </p>
+  <p class="mt-4 text-paper/90">
+    You need Docker and Python 3.11+. Task code has no network access, and Aethens
+    collects no telemetry. It audits Python tasks only.
+  </p>
+
+  <h2 id="install" class="mt-12 font-serif italic text-2xl">Install</h2>
+  <p class="mt-4 text-paper/90">
+    Once v0.1.0 is published on PyPI, install the CLI with:
+  </p>
+  <pre class="cmd mt-4" tabindex="0"><code>pipx install aethens</code></pre>
+  <p class="mt-4 text-paper/90">or:</p>
+  <pre class="cmd mt-4" tabindex="0"><code>uv tool install aethens</code></pre>
+  <p class="mt-4 text-sm text-muted">
+    Until that release is published, Aethens is not on PyPI. Install from a clone of
+    the repository instead:
+  </p>
+  <pre class="cmd mt-4" tabindex="0"><code>git clone https://github.com/beastrog/aethens.git
+cd aethens
+python -m pip install .
+docker pull python:3.12-slim</code></pre>
+
+  <h2 id="first-audit" class="mt-12 font-serif italic text-2xl">Your first audit</h2>
+  <p class="mt-4 text-paper/90">
+    The example task in the repository is clean, so this prints a report with no error
+    or warning findings (C004 may list info-level surviving mutants) and exits 0:
+  </p>
+  <pre class="cmd mt-4" tabindex="0"><code>aethens audit examples/add-two --format markdown</code></pre>
+  <p class="mt-4 text-paper/90">
+    To see a planted defect, audit a bench task. This exits 1 and reports that the gold
+    solution fails the verifier, with the verifier's output and a repro command you can
+    paste:
+  </p>
+  <pre class="cmd mt-4" tabindex="0"><code>aethens audit bench/tasks/brokengold-offbyone --check C001 --format markdown</code></pre>
+  <p class="mt-4 text-paper/90">
+    Exit codes are 0 for a pass, 1 when findings reach or exceed
+    <code class="text-gold">--fail-on</code>, 2 for a tool error, and 3 if the gold
+    solution timed out.
+  </p>
+
+  <h2 id="task-format" class="mt-12 font-serif italic text-2xl">Task format</h2>
+  <p class="mt-4 text-paper/90">
+    Tasks use the <code class="text-gold">aethens-task/v1</code> directory format.
+    Aethens never reads anything outside the task directory. The required layout is
+    a <code class="text-gold">task.yaml</code>, a statement file, a
+    <code class="text-gold">starter/</code> directory (the unsolved starting state),
+    a <code class="text-gold">tests/</code> directory, and a
+    <code class="text-gold">gold/</code> directory (the reference solution, overlaid
+    onto starter). Optional labelled candidates live under
+    <code class="text-gold">candidates/valid/</code> and
+    <code class="text-gold">candidates/invalid/</code>. In v0.1 the only language is
+    Python. The default Docker image is <code class="text-gold">python:3.12-slim</code>.
+  </p>
+  <p class="mt-4 text-paper/90">
+    The full field list, validation errors, and how a run is assembled are in
+    <a class="prose-link" href="https://github.com/beastrog/aethens/blob/main/docs/task-format.md">docs/task-format.md</a>.
+    Examples are in <code class="text-gold">examples/add-two</code> and
+    <code class="text-gold">examples/word-format</code>.
+  </p>
+
+  <h2 id="next" class="mt-12 font-serif italic text-2xl">What to read next</h2>
+  <ul class="mt-4 list-disc pl-5 space-y-2 text-paper/90">
+    <li><a class="prose-link" href={`${base}docs/cli/`}>CLI usage</a> — commands, flags, and defaults.</li>
+    <li><a class="prose-link" href={`${base}docs/checks/`}>Checks C001–C007</a> — what each does, its severity, and its limits.</li>
+    <li><a class="prose-link" href={`${base}docs/action/`}>GitHub Action</a> — inputs, outputs, and a workflow example.</li>
+    <li><a class="prose-link" href={`${base}docs/report/`}>Report format</a> — the <code class="text-gold">aethens-report/v2</code> schema.</li>
+    <li><a class="prose-link" href={`${base}docs/faq/`}>FAQ and limits</a> — what Aethens does not do.</li>
+  </ul>
+  <p class="mt-8 text-sm text-muted">
+    Questions: <a class="prose-link" href="https://github.com/beastrog/aethens/discussions">GitHub Discussions</a>.
+    Sources for this page: the repository README, docs/task-format.md, and the CLI
+    exit-code comments in <code>src/aethens/cli/main.py</code>.
+  </p>
+</Docs>

@@ -1,0 +1,99 @@
+---
+import Docs from "../../layouts/Docs.astro";
+const base = import.meta.env.BASE_URL;
+---
+
+<Docs
+  current="faq"
+  title="FAQ and limits"
+  description="What Aethens does and does not do: Python tasks, Docker isolation, no network for task code, and no telemetry."
+>
+  <p class="kicker mb-5"><span>Docs</span><span class="num" aria-hidden="true">/</span><span>FAQ</span></p>
+  <h1 class="font-serif italic font-semibold text-section leading-[1.1]">FAQ and limits</h1>
+  <p class="mt-6 text-paper/90">
+    Status: first release (0.1.0), Python tasks only. Licence: Apache-2.0. No
+    LLMs, no network access for task code, no telemetry, no hosted service yet.
+  </p>
+
+  <h2 id="language" class="mt-12 font-serif italic text-2xl">Which languages and tasks does it support?</h2>
+  <p class="mt-4 text-paper/90">
+    Python tasks only, in the <code class="text-gold">aethens-task/v1</code>
+    directory format. Verifiers must be runnable as a command inside a Docker
+    image with no network. The only language value in v0.1 is
+    <code class="text-gold">python</code>.
+  </p>
+
+  <h2 id="docker" class="mt-12 font-serif italic text-2xl">How does isolation work?</h2>
+  <p class="mt-4 text-paper/90">
+    Aethens is not a sandbox product. By default, task code never runs in the
+    Aethens process. Each run is a Docker container with
+    <code class="text-gold">--network none</code>, memory and memory-swap limits
+    (no swap), a CPU limit, a pids limit, a read-only root filesystem with a
+    size-limited <code class="text-gold">/tmp</code> tmpfs,
+    <code class="text-gold">--cap-drop ALL</code>,
+    <code class="text-gold">--security-opt no-new-privileges</code>, a non-root
+    user, and <code class="text-gold">--pull never</code>. The container sees only
+    a disposable copy of the task, mounted at <code class="text-gold">/work</code>.
+    The host environment is not passed in. That reduces risk but is not a
+    guarantee. For hostile inputs, run Aethens in a disposable VM. The full
+    threat model is in
+    <a class="prose-link" href="https://github.com/beastrog/aethens/blob/main/SECURITY.md">SECURITY.md</a>.
+  </p>
+  <p class="mt-4 text-paper/90">
+    Aethens is tested on Linux with Docker Engine. Rootless Docker, Docker
+    Desktop, and Podman are untested.
+  </p>
+
+  <h2 id="network-telemetry" class="mt-12 font-serif italic text-2xl">Does it use the network, or send telemetry?</h2>
+  <p class="mt-4 text-paper/90">
+    Task code has no network access in the default Docker sandbox. Aethens
+    collects no telemetry. There is no hosted service yet. The tool does not
+    call LLMs.
+  </p>
+
+  <h2 id="not" class="mt-12 font-serif italic text-2xl">What does a clean report mean?</h2>
+  <p class="mt-4 text-paper/90">
+    Aethens does not decide whether a solution is correct. Checks that judge
+    candidates (C003) rely on the labels you provide, and every such finding
+    says so. It also does not prove a verifier is sound. No findings means only
+    that these checks found nothing at the chosen budget and seed.
+  </p>
+
+  <h2 id="limits" class="mt-12 font-serif italic text-2xl">Known limits of the checks</h2>
+  <ul class="mt-4 list-disc pl-5 space-y-2 text-paper/90">
+    <li>C005 reorders tests only for <code class="text-gold">python -m unittest</code> verifiers, and only tries the default order, reversed, a few seeded shuffles, and each test alone.</li>
+    <li>C006 only catches tests coupled to implementation details (source text, line numbers, local names, code shape). Its five rewrites are not machine-proved, and findings need review.</li>
+    <li>C002 is statistical: without a finding it states only that the flake rate is below a bound (0.25 at 95% confidence at the default budget, 0.05 at deep), assuming independent runs. A rarer flake can pass unseen, and the time budget can stop it before the target bound.</li>
+    <li>C007 tries six probe families; resisting them does not prove a verifier cannot be gamed. It does not probe pytest <code class="text-gold">conftest.py</code> hooks. Almost every plain <code class="text-gold">python -m unittest</code> verifier is gameable by its exit-code probes until the harness judges results outside the solution’s process.</li>
+  </ul>
+  <p class="mt-4 text-paper/90">
+    More detail is on the <a class="prose-link" href={`${base}docs/checks/`}>checks</a> page.
+  </p>
+
+  <h2 id="unsafe" class="mt-12 font-serif italic text-2xl">When should I use --unsafe-local?</h2>
+  <p class="mt-4 text-paper/90">
+    Only on code you trust. <code class="text-gold">--unsafe-local</code> runs
+    task code directly on your machine with a scrubbed environment, rlimits, and
+    timeouts. It offers no isolation and can read your files and use your
+    network. See <a class="prose-link" href={`${base}docs/cli/`}>CLI usage</a>.
+  </p>
+
+  <h2 id="help" class="mt-12 font-serif italic text-2xl">How do I get help?</h2>
+  <p class="mt-4 text-paper/90">
+    Questions and audit enquiries go to
+    <a class="prose-link" href="https://github.com/beastrog/aethens/discussions">GitHub Discussions</a>.
+    That is the public contact. Bugs, false positives, and check proposals use
+    the issue templates in the repository. Report vulnerabilities privately
+    through
+    <a class="prose-link" href="https://github.com/beastrog/aethens/security/advisories/new">GitHub’s Security advisory form</a>,
+    not in a public issue; see
+    <a class="prose-link" href="https://github.com/beastrog/aethens/blob/main/SECURITY.md">SECURITY.md</a>.
+    Please do not name defects in other people’s benchmarks in a public thread
+    before their maintainers have been told privately; see
+    <a class="prose-link" href="https://github.com/beastrog/aethens/blob/main/docs/DISCLOSURE.md">docs/DISCLOSURE.md</a>.
+  </p>
+  <p class="mt-8 text-sm text-muted">
+    Sources: the README (“What it is not” and “Known misses and limits”),
+    SECURITY.md, SUPPORT.md, docs/DISCLOSURE.md, and docs/task-format.md.
+  </p>
+</Docs>

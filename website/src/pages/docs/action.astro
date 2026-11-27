@@ -1,0 +1,130 @@
+---
+import Docs from "../../layouts/Docs.astro";
+const base = import.meta.env.BASE_URL;
+const example = `- uses: beastrog/aethens@v0.1.0
+  with:
+    path: path/to/tasks
+    budget: standard
+    fail-on: error
+    seed: "0"`;
+---
+
+<Docs
+  current="action"
+  title="GitHub Action"
+  description="Inputs, outputs, and example workflow YAML for the Aethens GitHub Action, pinned to beastrog/aethens@v0.1.0."
+>
+  <p class="kicker mb-5"><span>Docs</span><span class="num" aria-hidden="true">/</span><span>Action</span></p>
+  <h1 class="font-serif italic font-semibold text-section leading-[1.1]">GitHub Action</h1>
+  <p class="mt-6 text-paper/90">
+    The composite Action in this repository runs the verifiers of code tasks
+    against the gold solution, labelled candidates, and mutants, and reports
+    problems with evidence and repro commands. Use it on
+    <code class="text-gold">pull_request</code> with read-only permissions. It
+    needs no secrets.
+  </p>
+  <p class="mt-4 text-paper/90">
+    Pin a release tag. The example below uses
+    <code class="text-gold">beastrog/aethens@v0.1.0</code>, which will install
+    that release once the tag exists. The Action installs Aethens from its own
+    checkout, so the ref you pin is the version that runs. The
+    <code class="text-gold">path</code> input is relative to the workspace, so
+    the job must check out your repository first.
+  </p>
+
+  <h2 id="example" class="mt-12 font-serif italic text-2xl">Example</h2>
+  <pre class="cmd mt-4" tabindex="0"><code>{example}</code></pre>
+  <p class="mt-4 text-sm text-muted">
+    This is the README example, with the pre-release <code>@main</code> pin
+    replaced by <code>@v0.1.0</code>. Optional inputs
+    <code class="text-gold">images</code> and
+    <code class="text-gold">python-version</code> can be added as needed.
+  </p>
+
+  <h2 id="inputs" class="mt-12 font-serif italic text-2xl">Inputs</h2>
+  <p class="mt-4 text-paper/90">
+    From <code class="text-gold">action.yml</code>:
+  </p>
+  <div class="scroll-x mt-6">
+    <table class="sheet">
+      <thead>
+        <tr>
+          <th>Input</th>
+          <th>Required</th>
+          <th>Default</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>path</code></td>
+          <td>yes</td>
+          <td>—</td>
+          <td>Task directory (with <code>task.yaml</code>) or a directory of tasks, relative to the workspace.</td>
+        </tr>
+        <tr>
+          <td><code>budget</code></td>
+          <td>no</td>
+          <td><code>standard</code></td>
+          <td><code>smoke</code>, <code>standard</code>, or <code>deep</code>.</td>
+        </tr>
+        <tr>
+          <td><code>fail-on</code></td>
+          <td>no</td>
+          <td><code>error</code></td>
+          <td><code>error</code> or <code>warning</code>. Findings at or above this severity fail the step.</td>
+        </tr>
+        <tr>
+          <td><code>seed</code></td>
+          <td>no</td>
+          <td><code>0</code></td>
+          <td>Seed for reproducible runs.</td>
+        </tr>
+        <tr>
+          <td><code>images</code></td>
+          <td>no</td>
+          <td><code>python:3.12-slim</code></td>
+          <td>Space-separated Docker images the tasks use. The Action pulls them before the audit; runs use <code>--pull never</code>.</td>
+        </tr>
+        <tr>
+          <td><code>python-version</code></td>
+          <td>no</td>
+          <td><code>3.12</code></td>
+          <td>Python used to run Aethens itself, not the tasks, which run in Docker.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="outputs" class="mt-12 font-serif italic text-2xl">Outputs</h2>
+  <div class="scroll-x mt-6">
+    <table class="sheet">
+      <thead>
+        <tr>
+          <th>Output</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>exit-code</code></td>
+          <td>The aethens exit code: 0 pass, 1 findings, 2 tool error, 3 timeout.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="mt-6 text-paper/90">
+    The Action always runs <code class="text-gold">aethens audit</code> with
+    <code class="text-gold">--format markdown</code> and
+    <code class="text-gold">--output aethens-report.md</code>. If that report file
+    exists, it is appended to the GitHub Actions step summary. The step then
+    exits with the same code Aethens returned, so findings at or above
+    <code class="text-gold">fail-on</code> fail the job.
+  </p>
+  <p class="mt-8 text-sm text-muted">
+    Sources: <code>action.yml</code>, the README Action example, and
+    <code>.github/workflows/action-selftest.yml</code> (read-only
+    <code>pull_request</code> usage).
+    CLI flags: <a class="prose-link" href={`${base}docs/cli/`}>CLI usage</a>.
+  </p>
+</Docs>

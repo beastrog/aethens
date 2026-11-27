@@ -1,0 +1,168 @@
+---
+import Docs from "../../layouts/Docs.astro";
+const base = import.meta.env.BASE_URL;
+const helpTop = `usage: aethens [-h] [--version] {audit} ...
+
+Validate the verifiers of code tasks by running them.
+
+positional arguments:
+  {audit}
+    audit     audit one task directory or a directory of tasks
+
+options:
+  -h, --help  show this help message and exit
+  --version   show program's version number and exit`;
+const helpAudit = `usage: aethens audit [-h] [--budget {smoke,standard,deep}]
+                     [--fail-on {error,warning}] [--format {json,markdown}]
+                     [--seed SEED]
+                     [--check {C001,C002,C003,C004,C005,C006,C007}]
+                     [--output OUTPUT] [--unsafe-local]
+                     path
+
+positional arguments:
+  path                  a task directory (with task.yaml) or a directory of
+                        tasks
+
+options:
+  -h, --help            show this help message and exit
+  --budget {smoke,standard,deep}
+                        smoke: 3 flaky runs, 5 mutants; standard: 5, 10; deep:
+                        10, 30
+  --fail-on {error,warning}
+  --format {json,markdown}
+  --seed SEED
+  --check {C001,C002,C003,C004,C005,C006,C007}
+                        run only this check (repeatable); default: all
+  --output OUTPUT       write the report to this file instead of stdout
+  --unsafe-local        run task code directly on this machine WITHOUT
+                        container isolation`;
+---
+
+<Docs
+  current="cli"
+  title="CLI usage"
+  description="Commands and flags for the aethens CLI, taken from aethens --help and the audit subcommand."
+>
+  <p class="kicker mb-5"><span>Docs</span><span class="num" aria-hidden="true">/</span><span>CLI</span></p>
+  <h1 class="font-serif italic font-semibold text-section leading-[1.1]">CLI usage</h1>
+  <p class="mt-6 text-paper/90">
+    The CLI has one subcommand, <code class="text-gold">audit</code>. It loads a task
+    (or a directory of tasks), runs the selected checks, and writes a report. The
+    text below matches <code class="text-gold">aethens --help</code> and
+    <code class="text-gold">aethens audit --help</code> from this repository, with
+    defaults taken from the argument parser in
+    <code class="text-gold">src/aethens/cli/main.py</code>.
+  </p>
+
+  <h2 id="top-level" class="mt-12 font-serif italic text-2xl">aethens</h2>
+  <pre class="cmd mt-4" tabindex="0"><code>{helpTop}</code></pre>
+  <p class="mt-4 text-sm text-muted">
+    With no subcommand, Aethens prints this help and exits 0.
+    <code class="text-gold">aethens --version</code> prints
+    <code class="text-gold">aethens 0.1.0</code> on this release.
+  </p>
+
+  <h2 id="audit" class="mt-12 font-serif italic text-2xl">aethens audit</h2>
+  <pre class="cmd mt-4" tabindex="0"><code>{helpAudit}</code></pre>
+
+  <h2 id="defaults" class="mt-12 font-serif italic text-2xl">Defaults and behaviour</h2>
+  <p class="mt-4 text-paper/90">
+    These defaults are set in the argument parser. They are not all printed in the
+    help text.
+  </p>
+  <div class="scroll-x mt-6">
+    <table class="sheet">
+      <thead>
+        <tr>
+          <th>Flag</th>
+          <th>Default</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>--budget</code></td>
+          <td><code>standard</code></td>
+          <td>Choices: <code>smoke</code>, <code>standard</code>, <code>deep</code>. The help text summarises flaky-run and mutant counts; <a class="prose-link" href={`${base}docs/checks/`}>each check</a> has its own budget caps.</td>
+        </tr>
+        <tr>
+          <td><code>--fail-on</code></td>
+          <td><code>error</code></td>
+          <td>Findings at or above this severity produce exit code 1. Info findings never fail the run.</td>
+        </tr>
+        <tr>
+          <td><code>--format</code></td>
+          <td><code>json</code></td>
+          <td>JSON follows <code>aethens-report/v2</code>. Markdown is sized for a pull-request comment. See <a class="prose-link" href={`${base}docs/report/`}>report format</a>.</td>
+        </tr>
+        <tr>
+          <td><code>--seed</code></td>
+          <td><code>0</code></td>
+          <td>Integer seed for reproducible runs.</td>
+        </tr>
+        <tr>
+          <td><code>--check</code></td>
+          <td>all checks</td>
+          <td>Repeatable. Each value is one of C001–C007.</td>
+        </tr>
+        <tr>
+          <td><code>--output</code></td>
+          <td>stdout</td>
+          <td>If the path cannot be written, Aethens exits 2.</td>
+        </tr>
+        <tr>
+          <td><code>--unsafe-local</code></td>
+          <td>off</td>
+          <td>Off by default. When set, task code runs on the host with a scrubbed environment and timeouts, and no container isolation.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="exit-codes" class="mt-12 font-serif italic text-2xl">Exit codes</h2>
+  <div class="scroll-x mt-6">
+    <table class="sheet">
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Meaning</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>0</code></td>
+          <td>Pass: no findings at or above <code>--fail-on</code>.</td>
+        </tr>
+        <tr>
+          <td><code>1</code></td>
+          <td>Findings at or above <code>--fail-on</code>.</td>
+        </tr>
+        <tr>
+          <td><code>2</code></td>
+          <td>Tool error, including Ctrl-C and SIGTERM: a problem loading tasks, writing the report, or an unexpected internal error. Precedence is 2 over the other codes, so a crash is never reported as “findings”.</td>
+        </tr>
+        <tr>
+          <td><code>3</code></td>
+          <td>The gold solution timed out in C001 or C002, so the gold verdict could not be established. Precedence: 2 &gt; 3 &gt; 1 &gt; 0.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="unsafe" class="mt-12 font-serif italic text-2xl">--unsafe-local</h2>
+  <p class="mt-4 text-paper/90">
+    When this flag is set, Aethens prints a warning to stderr and runs task and
+    candidate code directly on your machine. The warning is:
+  </p>
+  <pre class="cmd mt-4" tabindex="0"><code>WARNING: --unsafe-local runs task and candidate code on this machine without container
+isolation. It can read your files and use your network. Only use it on code you trust.</code></pre>
+  <p class="mt-4 text-paper/90">
+    Only use it on code you trust. The default path is Docker isolation; see
+    <a class="prose-link" href={`${base}docs/faq/`}>FAQ and limits</a> and
+    <a class="prose-link" href="https://github.com/beastrog/aethens/blob/main/SECURITY.md">SECURITY.md</a>.
+  </p>
+  <p class="mt-8 text-sm text-muted">
+    Sources: <code>uv run aethens --help</code>, <code>uv run aethens audit --help</code>,
+    and <code>src/aethens/cli/main.py</code>. The README lists the same flags and exit codes.
+  </p>
+</Docs>
