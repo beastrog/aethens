@@ -14,11 +14,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12"]
+        # Only python-version is in the matrix, so GitHub still renders the
+        # required checks as "check (3.11)" and "check (3.12)". 3.13 is added
+        # here but is not a required ruleset check (owner decision).
+        python-version: ["3.11", "3.12", "3.13"]
     env:
       UV_PYTHON: ${{ matrix.python-version }}
-      # Docker tests must run in CI: a missing daemon or image is a failure here, not a skip.
-      AETHENS_REQUIRE_DOCKER: "1"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -31,9 +32,19 @@ jobs:
       - name: Install dependencies
         run: uv sync --locked
       - name: Pull the default task image (network allowed here, never inside tests)
+        if: matrix.python-version == '3.12'
         run: docker pull python:3.12-slim
       - name: make check
+        if: matrix.python-version == '3.12'
+        env:
+          # Docker tests must run in this cell: a missing daemon or image is a failure, not a skip.
+          AETHENS_REQUIRE_DOCKER: "1"
         run: make check
+      - name: lint, type and non-Docker tests
+        if: matrix.python-version != '3.12'
+        run: |
+          make lint type
+          uv run pytest -m "not docker"
       - name: Upload the CI-generated bench report
         if: always() && matrix.python-version == '3.12'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

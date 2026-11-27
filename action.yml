@@ -1,10 +1,11 @@
 name: Aethens audit
+author: Aniruddha Dey
 description: >
   Run the verifiers of code tasks against the gold solution, labeled candidates and mutants, and
   report problems with evidence and repro commands. Use it on `pull_request` with read-only
   permissions; it needs no secrets.
 branding:
-  icon: check-circle
+  icon: crosshair
   color: gray-dark
 inputs:
   path:
