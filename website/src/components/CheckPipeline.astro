@@ -295,13 +295,13 @@ const summaryParts = summary.split(", ").map((text) => ({ text, n: Number(text.s
   /* ---------- motion (html.motion-ok + armed by script) ---------- */
   :global(.motion-ok) .pipe[data-armed] .pipe-fill {
     transform: scaleX(calc(var(--pos, 0) / (var(--n) - 1)));
-    transition: transform var(--dur-slower) var(--ease-in-out);
+    transition: transform var(--dur-slow) var(--ease-in-out);
   }
   :global(.motion-ok) .pipe[data-armed] .pipe-head {
     opacity: 1;
     transform: translateX(calc(var(--pos, 0) / (var(--n) - 1) * 100%));
     transition:
-      transform var(--dur-slower) var(--ease-in-out),
+      transform var(--dur-slow) var(--ease-in-out),
       opacity var(--dur-base) var(--ease-out);
   }
   :global(.motion-ok) .pipe[data-armed][data-done] .pipe-head {
@@ -371,8 +371,8 @@ const summaryParts = summary.split(", ").map((text) => ({ text, n: Number(text.s
   for (const pipe of document.querySelectorAll<HTMLElement>("[data-pipe]")) {
     if (!motionOk()) continue; // final state is the static render
     const steps = [...pipe.querySelectorAll<HTMLElement>("[data-step]")];
-    const STEP = 820; // ms per check
-    const SCAN = 360; // gold scan before the verdict lands
+    const STEP = 900; // ms per check
+    const SCAN = 520; // head arrives (480 ms), then the verdict lands
     const HOLD = 3600; // rest on the finished state before looping
     const total = 500 + steps.length * STEP + HOLD;
 
