@@ -285,8 +285,8 @@ CI installs uv with `pip install uv==0.13.7` instead of a third-party setup acti
   after the fix: 0/300. Thresholds, the default `timeout_s` values and isolation flags are
   unchanged; only what the clock covers changed. `RunResult.duration_s` stays host wall time (it
   feeds C002's time budget, which therefore still counts overhead).
-- D-065 (owner-requested via the parent agent: "add equivalent-mutant filtering"; approval of the
-  final semantics requested) C004 equivalent-mutant filter. Analysis of the 42 unconfirmed
+- D-065 (owner-requested via the parent agent: "add equivalent-mutant filtering"; final semantics
+  ACCEPTED by the owner on 27 Nov 2026, see the end of this entry) C004 equivalent-mutant filter. Analysis of the 42 unconfirmed
   survivors of the previous full external run: nearly all were semantically equivalent mutants
   (running-max `>`/`>=`, loop bounds one step too far, flags set to 2 instead of 1, `(a+b)%2` vs
   `(a-b)%2`, guarded comparisons), none bytecode-identical, so TCE alone removes nothing (0 of 2007
@@ -312,4 +312,8 @@ CI installs uv with `pip install uv==0.13.7` instead of a third-party setup acti
   30 (the earlier run had load-induced timeouts, see D-064). Remaining false positives are mostly
   counterexamples outside the task's precondition (e.g. `factorize(0)`, duplicates in an array
   declared duplicate-free), which the probe cannot know without a spec.
+  Status: ACCEPTED by the owner on 27 Nov 2026, relayed by the lead agent. Accepted as measured:
+  external C004 precision 0.46 -> 0.82 (0.4615 -> 0.8158) and recall 0.87 -> 0.80 (0.8667 -> 0.80),
+  filter off vs on in the same run. Budgets and MIN_VALID=20 stay as above; the CLI switch to turn
+  the filter off is still open (docs/IDEAS.md, review item O6).
 
