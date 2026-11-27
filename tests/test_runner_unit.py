@@ -150,8 +150,35 @@ def test_capped_in_container_seconds_ignores_inflated_daemon_delta() -> None:
         "FinishedAt": "2026-11-27T07:13:45.000000000Z",  # 30 s on the daemon clock
     }
     assert in_container_seconds(state) == pytest.approx(30.0)
-    # Host only waited 0.5 s: a clock jump must not invent a timeout.
+    # The second argument is the observed running window, not total docker-run wall time.
+    # A clock jump must not invent a timeout when that window is short.
     assert capped_in_container_seconds(state, 0.5) == pytest.approx(0.5)
-    # A genuinely long run still reports the daemon delta (host elapsed is at least that).
+    # A genuinely long run still reports the daemon delta (the window is at least that).
     assert capped_in_container_seconds(state, 30.2) == pytest.approx(30.0)
     assert capped_in_container_seconds(None, 1.0) is None
+
+
+def test_observed_run_upper_freezes_at_stop() -> None:
+    from aethens.runner.docker import observed_run_upper_s
+
+    # Teardown after the stop observation must not widen the bound.
+    assert observed_run_upper_s(10.0, 10.4, 40.0) == pytest.approx(0.4)
+    assert observed_run_upper_s(0.0, None, 0.25) == pytest.approx(0.25)
+    assert observed_run_upper_s(5.0, 4.0, 9.0) == 0.0
+
+
+def test_container_phase_from_inspect_state() -> None:
+    from aethens.runner.docker import _container_phase
+
+    running = {
+        "Status": "running",
+        "StartedAt": "2026-11-27T07:13:15.000000000Z",
+        "FinishedAt": "0001-01-01T00:00:00Z",
+    }
+    created = {**running, "Status": "created", "StartedAt": "0001-01-01T00:00:00Z"}
+    assert _container_phase(running) == "running"
+    assert _container_phase({**running, "Status": "exited"}) == "stopped"
+    assert _container_phase(created) == "absent"
+    # A missing state is not a positive "not started": the caller distinguishes
+    # "no such container" from an inspect that failed.
+    assert _container_phase(None) == "unknown"

@@ -8,13 +8,13 @@ on timeouts and exceptions. The docker CLI is called with argument lists only.
 
 Timeout accounting (D-064): ``timeout_s`` limits the verifier's run time inside the container, not
 the time ``docker run`` spends creating, starting and tearing the container down. Under heavy host
-load that overhead alone reached 20+ seconds and turned fast, passing verifiers into timeouts. When
-the host-side wait reaches ``timeout_s`` the runner asks the daemon whether and when the container
-started and keeps waiting until the container itself has run for ``timeout_s`` (never longer than
-``timeout_s + STARTUP_GRACE_S`` in total). After a normal exit, a container whose daemon-recorded
-run time (FinishedAt - StartedAt) exceeds ``timeout_s`` is still reported as timed out,
-but that daemon delta is capped by the host's elapsed wait so a clock that jumps
-forward cannot invent a timeout (D-064).
+load that overhead alone reached 20+ seconds and turned fast, passing verifiers into timeouts. The
+runner polls the daemon until the container is running, then waits ``timeout_s`` of host-monotonic
+time from that observation (never longer than ``timeout_s + STARTUP_GRACE_S`` from launch). After a
+normal exit, a container whose daemon-recorded run time (FinishedAt - StartedAt) exceeds
+``timeout_s`` is still reported as timed out, but that daemon delta is capped by the host-monotonic
+time during which the container was observed running. Create time, teardown time and a forward
+clock jump therefore cannot invent a timeout (D-064).
 """
 
 from __future__ import annotations
@@ -67,20 +67,50 @@ def in_container_seconds(state: Mapping[str, object] | None) -> float | None:
     return end - start
 
 
-def capped_in_container_seconds(
-    state: Mapping[str, object] | None, host_elapsed_s: float
-) -> float | None:
-    """Daemon in-container time, never larger than the host's elapsed wait (D-064).
+def observed_run_upper_s(last_absent: float, stopped_at: float | None, now: float) -> float:
+    """Host-monotonic upper bound on how long the container can have been running.
 
-    ``_wait`` already caps ``time.time() - StartedAt`` by monotonic host elapsed time so a
-    daemon clock that runs ahead cannot shorten ``timeout_s``. The post-exit check must
-    do the same: a forward clock jump (or a bogus FinishedAt/StartedAt pair) would
-    otherwise mark a fast verifier as timed out (exit code ``None``).
+    ``last_absent`` is the last moment it was observed not running (launch, if the first look
+    already saw it running). Once it is observed stopped, ``stopped_at`` freezes the bound so
+    later teardown does not count.
+    """
+    end = now if stopped_at is None else stopped_at
+    return max(0.0, end - last_absent)
+
+
+def _container_phase(state: Mapping[str, object] | None) -> str:
+    """``running``, ``stopped``, ``absent`` or ``unknown`` from a ``docker inspect`` State.
+
+    ``running`` requires Status running and a real StartedAt. ``absent`` means the state object
+    describes a container that has not started (``created`` and anything else that is not
+    running or stopped). A missing state is not ``absent``: the caller has to tell "no such
+    container" apart from an inspect that failed.
+    """
+    if not state:
+        return "unknown"
+    status = str(state.get("Status", ""))
+    if status in ("exited", "dead", "removing"):
+        return "stopped"
+    started = parse_docker_time(str(state.get("StartedAt", "")))
+    if status == "running" and started is not None:
+        return "running"
+    return "absent"
+
+
+def capped_in_container_seconds(
+    state: Mapping[str, object] | None, running_upper_s: float
+) -> float | None:
+    """Daemon in-container time, never larger than ``running_upper_s`` (D-064).
+
+    ``running_upper_s`` must be the host-monotonic time the container could have been running,
+    not the full ``docker run`` wall time. Capping by total wall time still counts create and
+    teardown: a slow start or teardown longer than ``timeout_s``, plus a forward clock jump or a
+    bogus FinishedAt/StartedAt pair, marks a fast verifier as timed out (exit code ``None``).
     """
     ran = in_container_seconds(state)
     if ran is None:
         return None
-    return min(ran, max(host_elapsed_s, 0.0))
+    return min(ran, max(running_upper_s, 0.0))
 
 
 class DockerRunner:
@@ -159,15 +189,36 @@ class DockerRunner:
 
     # --- helpers ------------------------------------------------------------------------------
 
-    def _inspect(self, name: str) -> dict[str, object] | None:
+    def _read_state(self, name: str) -> tuple[dict[str, object] | None, bool]:
+        """Return ``(state, absent)``. ``absent`` is True only for "no such container"."""
         try:
             r = run_quiet([self.docker_bin, "inspect", "--format", "{{json .State}}", name], 60)
         except subprocess.TimeoutExpired as exc:
             raise RunnerError(f"docker inspect {name} did not answer within 60 s") from exc
         if r.returncode != 0:
-            return None
+            # Docker 29 says "no such object"; older engines say "no such container".
+            err = r.stderr.lower()
+            return None, "no such container" in err or "no such object" in err
         state = json.loads(r.stdout)
-        return state if isinstance(state, dict) else None
+        return (state, False) if isinstance(state, dict) else (None, False)
+
+    def _inspect(self, name: str) -> dict[str, object] | None:
+        state, _absent = self._read_state(name)
+        return state
+
+    def _phase(self, name: str) -> str:
+        """``running``, ``stopped``, ``absent`` or ``unknown`` for the named container.
+
+        ``absent`` is only a positive "not running" answer (no such container, or a state that
+        has not started). A daemon error is ``unknown`` and must not move the pre-start mark:
+        doing so would hide a verifier that ran through the inspect failures.
+        """
+        state, absent = self._read_state(name)
+        if absent:
+            return "absent"
+        if state is None:
+            return "unknown"
+        return _container_phase(state)
 
     def _remove(self, name: str) -> None:
         # Retry with backoff: removal right after a kill, or on a loaded daemon, can race
@@ -209,8 +260,10 @@ class DockerRunner:
         assert proc.stdout is not None and proc.stderr is not None
         out, err = TailPump(proc.stdout, limit), TailPump(proc.stderr, limit)
         timed_out = False
+        running_upper = 0.0
         try:
-            if not self._wait(proc, name, spec.timeout_s, start):
+            exited, running_upper = self._wait(proc, name, spec.timeout_s, start)
+            if not exited:
                 timed_out = True
                 run_quiet([self.docker_bin, "kill", name], 60)
             try:
@@ -235,7 +288,7 @@ class DockerRunner:
                 f"(docker exit {proc.returncode}): {stderr.strip()[-500:]}"
                 + (f" -- try: docker pull {spec.image}" if "No such image" in stderr else "")
             )
-        ran = capped_in_container_seconds(state, duration)
+        ran = capped_in_container_seconds(state, running_upper)
         if not timed_out and ran is not None and ran > spec.timeout_s:
             # It exited by itself, but only after running longer than its timeout (D-064).
             timed_out = True
@@ -253,39 +306,70 @@ class DockerRunner:
             argv=tuple(argv),
         )
 
-    def _wait(self, proc: subprocess.Popen[bytes], name: str, timeout: float, t0: float) -> bool:
-        """Wait for ``docker run`` to exit; False when the verifier exceeded ``timeout`` (D-064).
+    def _wait(
+        self, proc: subprocess.Popen[bytes], name: str, timeout: float, t0: float
+    ) -> tuple[bool, float]:
+        """Wait for ``docker run`` to exit.
 
-        Time before the container starts and after it exits does not count. The in-container
-        time is estimated from the daemon's StartedAt and capped by the host time since ``t0``,
-        so a daemon clock that runs ahead or behind can never shorten the timeout below the
-        pre-D-064 behaviour or extend it past ``timeout + STARTUP_GRACE_S``.
+        Returns ``(exited_on_its_own, running_upper_s)``. ``running_upper_s`` is a host-monotonic
+        upper bound on verifier run time: time before the container was observed running and time
+        after it was observed stopped do not count (D-064). The kill clock starts when the
+        container is first observed running and uses the monotonic clock only, so a daemon clock
+        step cannot shorten ``timeout``. The hard cap remains ``timeout + STARTUP_GRACE_S`` from
+        launch. The first observation can be up to ``POLL_S`` late, so a verifier may run that
+        much past ``timeout`` before it is killed; the post-exit check still flags a daemon run
+        time over ``timeout`` when the observed window agrees.
         """
         hard = t0 + timeout + STARTUP_GRACE_S
-        wait_for = timeout
+        # The container cannot be running before launch. The first poll may already see it
+        # running, in which case this stays at ``t0`` and the bound includes that short gap.
+        last_absent = t0
+        running_mark: float | None = None
+        stopped_at: float | None = None
+
+        def upper(now: float) -> float:
+            return observed_run_upper_s(last_absent, stopped_at, now)
+
         while True:
-            try:
-                proc.wait(timeout=max(wait_for, 0.05))
-                return True
-            except subprocess.TimeoutExpired:
-                pass
             now = time.monotonic()
             if now >= hard:
-                return False
+                return False, upper(now)
+            if running_mark is not None and now - running_mark >= timeout:
+                return False, upper(now)
+            if stopped_at is not None:
+                # Verifier already stopped. Wait out teardown until the client exits or the
+                # hard cap, without letting that wait grow the in-container bound.
+                try:
+                    proc.wait(timeout=max(hard - now, 0.05))
+                except subprocess.TimeoutExpired:
+                    return False, upper(time.monotonic())
+                return True, upper(time.monotonic())
+            wait_for = (
+                min(timeout - (now - running_mark), hard - now)
+                if running_mark is not None
+                else min(POLL_S, hard - now)
+            )
             try:
-                state = self._inspect(name)
-            except RunnerError:
-                state = None  # the daemon is too busy to answer; ask again shortly
-            status = str(state.get("Status", "")) if state else ""
-            started = parse_docker_time(str(state.get("StartedAt", ""))) if state else None
-            if status == "running" and started is not None:
-                ran = min(max(time.time() - started, 0.0), now - t0)
-                if ran >= timeout:
-                    return False
-                wait_for = min(timeout - ran, hard - now)
+                proc.wait(timeout=max(wait_for, 0.05))
+            except subprocess.TimeoutExpired:
+                now = time.monotonic()
             else:
-                # Not created or started yet, or already exited and being torn down.
-                wait_for = min(POLL_S, hard - now)
+                return True, upper(time.monotonic())
+            if now >= hard or (running_mark is not None and now - running_mark >= timeout):
+                return False, upper(now)
+            if running_mark is not None:
+                continue
+            try:
+                kind = self._phase(name)
+            except RunnerError:
+                kind = "unknown"  # the daemon is too busy to answer; ask again shortly
+            if kind == "running":
+                running_mark = now
+            elif kind == "stopped":
+                stopped_at = now
+            elif kind == "absent":
+                # Positively not started yet. An unknown inspect must not move this mark.
+                last_absent = now
 
 
 def _open_up(path: Path) -> None:

@@ -288,7 +288,18 @@ CI installs uv with `pip install uv==0.13.7` instead of a third-party setup acti
   timestamp pair cannot turn a fast run into a timeout. Same repro
   after the fix: 0/300. Thresholds, the default `timeout_s` values and isolation flags are
   unchanged; only what the clock covers changed. `RunResult.duration_s` stays host wall time (it
-  feeds C002's time budget, which therefore still counts overhead).
+  feeds C002's time budget, which therefore still counts overhead). Follow-up, same decision:
+  capping the daemon delta by total host elapsed still counts create and teardown. A start or
+  teardown longer than `timeout_s`, plus a forward clock jump (or a bogus FinishedAt/StartedAt),
+  again reports a fast verifier as timed out. Hosted `check (3.12)` run 45989844568 attempt 1
+  showed that symptom on `test_deterministic_under_seed` (`[1, 1, None, 0, 1]` vs
+  `[1, 1, 0, 0, 1]`) after this cap was already on main; the log has no per-run timestamps, so
+  the daemon clock on that job was not inspected. The runner now polls until the container is
+  running, kills from a monotonic clock started at that observation, and caps the post-exit
+  daemon delta by the observed running window (frozen once the container is observed stopped).
+  An inspect that fails does not move the pre-start mark, so a verifier cannot hide behind a
+  busy daemon. The first look can be up to `POLL_S` (0.5 s) late. `timeout_s`, `STARTUP_GRACE_S`,
+  thresholds and isolation flags are unchanged.
 - D-065 (owner-requested via the parent agent: "add equivalent-mutant filtering"; final semantics
   ACCEPTED by the owner on 27 Nov 2026, see the end of this entry) C004 equivalent-mutant filter. Analysis of the 42 unconfirmed
   survivors of the previous full external run: nearly all were semantically equivalent mutants
