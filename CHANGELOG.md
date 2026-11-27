@@ -8,6 +8,9 @@ All notable changes are recorded here. The format follows Keep a Changelog; vers
 - C004 filters equivalent mutants (D-065): each surviving mutant is run side by side with the gold, inside the sandbox, on the inputs the task's tests pass plus inputs derived from them. A survivor that behaves differently is reported with the counterexample input; one that behaves like the gold on at least 20 valid inputs is not reported and is listed in the report's coverage. Mutants with bytecode identical to the gold are never selected (TCE). On the external HumanEval bench: precision 0.4615 -> 0.8158, recall 0.8667 -> 0.80 (same run, filter off vs on). **Changes C004's output; owner approval requested.**
 
 ### Fixed
+- The example tasks (examples/add-two, examples/word-format) now use hardened tests: the solution runs in a separate `python -I` child, only its JSON answers are judged in the test process, type-strictly, with seeded hidden cases. C007 found their old verifiers gameable (exit-zero, atexit-override, framework-patch, always-equal; hardcoded-visible as a warning), which made the README quickstart and the action-selftest exit 1. C007 is unchanged; the old plain task is kept as the C007 unit-test fixture tests/fixtures/plain-add.
+
+### Fixed
 - Docker runner: `timeout_s` now limits the verifier's run time inside the container, not the time `docker run` spends creating, starting and removing it. On a heavily loaded host that overhead alone exceeded 20 s and turned passing runs into timeouts (the intermittent C002 false positive on bench control ctrl-tags-sorted). Total wall time per run is capped at `timeout_s + 60 s`. A kill sent before the container existed could also leave a hung verifier running for 30 s; container removal now retries with backoff (D-064). **Changes how timeouts are measured; owner approval requested.**
 
 ### Added

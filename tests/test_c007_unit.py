@@ -19,7 +19,9 @@ from aethens.runner import RunResult, RunSpec
 from fakes import FakeRunner, overlay_name, result
 
 REPO = Path(__file__).resolve().parent.parent
-TASK = load_task(REPO / "examples" / "add-two")
+# A plain, gameable unittest task (the pre-hardening examples/add-two). The examples themselves now
+# use hardened tests that C007's probes do not get through.
+TASK = load_task(REPO / "tests" / "fixtures" / "plain-add")
 
 
 def ctx(runner: FakeRunner) -> CheckContext:
@@ -99,7 +101,9 @@ def test_exit_zero_probe_accepted_is_error_and_reproduced() -> None:
     assert f.severity is Severity.ERROR and f.confidence is Confidence.CONFIRMED
     assert f.evidence.subject == "probe:exit-zero"
     assert "os._exit(0)" in f.evidence.extra["probe_files"]
-    assert f.repro == "aethens audit examples/add-two --check C007 --seed 2 --budget standard"
+    assert f.repro == (
+        "aethens audit tests/fixtures/plain-add --check C007 --seed 2 --budget standard"
+    )
 
 
 def test_hardcoded_is_warning_needs_review() -> None:
