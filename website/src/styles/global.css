@@ -36,6 +36,7 @@
   html {
     scroll-behavior: smooth;
     color-scheme: dark;
+    scroll-padding-top: 5.75rem;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -76,6 +77,12 @@
   :focus-visible {
     outline: 2px solid var(--color-gold);
     outline-offset: 3px;
+  }
+
+  /* Gold fill would hide the default gold ring. */
+  .bg-gold:focus-visible,
+  .skip-link:focus-visible {
+    outline-color: var(--color-paper);
   }
 
   a {
@@ -177,7 +184,8 @@
 
 /* Code panels */
 code:not(pre code) {
-  white-space: nowrap;
+  white-space: break-spaces;
+  overflow-wrap: anywhere;
 }
 
 .cmd {
@@ -186,11 +194,24 @@ code:not(pre code) {
   border-left: 2px solid var(--color-gold);
   padding: 1rem 1.1rem 1.1rem;
   overflow-x: auto;
-  overflow-wrap: anywhere;
-  white-space: pre-wrap;
+  overflow-wrap: normal;
+  white-space: pre;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   font-size: 0.8rem;
   line-height: 1.6;
   color: #e6e1d6;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-muted) var(--color-code);
+}
+
+/* Keep pre and table min-content from widening the page. */
+.wrap .grid,
+.wrap .grid > *,
+.wrap .scroll-x {
+  min-width: 0;
+  max-width: 100%;
 }
 .cmd-label {
   font-family: var(--font-mono);
@@ -268,6 +289,24 @@ code:not(pre code) {
 .sheet tbody tr:hover td {
   background: rgba(215, 181, 109, 0.04);
 }
+
+/* Keep row labels visible while the table scrolls sideways on small screens. */
+.sheet th:first-child,
+.sheet td:first-child,
+.sheet th[scope="row"] {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--color-ink);
+}
+.sheet thead th:first-child {
+  z-index: 2;
+  background: rgb(16, 17, 19);
+}
+.sheet tbody tr:hover td:first-child,
+.sheet tbody tr:hover th[scope="row"] {
+  background: rgb(16, 14, 11);
+}
 .sheet .yes {
   color: var(--color-ok);
   font-family: var(--font-mono);
@@ -288,10 +327,12 @@ code:not(pre code) {
   font-family: var(--font-serif);
   font-style: italic;
   font-weight: 600;
-  font-size: clamp(3.25rem, 8vw, 5.5rem);
+  /* Min size must fit a six-character figure (0.8158) in a 2-col mobile cell. */
+  font-size: clamp(2.125rem, 8vw, 5.5rem);
   line-height: 0.9;
   letter-spacing: -0.03em;
   color: var(--color-paper);
+  white-space: nowrap;
 }
 .metric-label {
   font-family: var(--font-mono);
@@ -302,38 +343,79 @@ code:not(pre code) {
   margin-bottom: 0.4rem;
 }
 
-/* Mobile nav */
+/* In-page targets clear the sticky header. */
+section[id],
+article[id],
+#main,
+#top {
+  scroll-margin-top: 5.75rem;
+}
+
+/* Header nav */
 .nav-toggle {
   display: none;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  margin: -0.35rem -0.35rem -0.35rem 0;
+  border: 1px solid var(--color-line);
+  background: transparent;
+  color: var(--color-paper);
+  cursor: pointer;
 }
+.nav-toggle-bars {
+  display: block;
+  width: 1.1rem;
+  height: 0.75rem;
+  background:
+    linear-gradient(currentColor, currentColor) top,
+    linear-gradient(currentColor, currentColor) center,
+    linear-gradient(currentColor, currentColor) bottom;
+  background-repeat: no-repeat;
+  background-size: 100% 1.5px;
+}
+.nav-toggle[aria-expanded="true"] .nav-toggle-bars {
+  height: 1.1rem;
+  background:
+    linear-gradient(currentColor, currentColor) center / 100% 1.5px no-repeat,
+    linear-gradient(currentColor, currentColor) center / 1.5px 100% no-repeat;
+  transform: rotate(45deg);
+}
+.nav-panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 1.25rem;
+}
+.nav-panel a {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 0.35rem 0;
+}
+
 @media (max-width: 720px) {
   .nav-toggle {
     display: inline-flex;
   }
-  .nav-links {
-    display: none;
-    width: 100%;
-    flex-direction: column;
-    gap: 0.15rem;
-    padding: 0.5rem 0 0.75rem;
-  }
-  header:has(.nav-toggle[open]) .nav-links,
-  .nav-toggle[open] + .nav-links,
-  header .nav-panel:not(.closed) {
-    display: flex;
-  }
-}
-
-@media (max-width: 720px) {
   .nav-panel {
     display: none;
     width: 100%;
     flex-basis: 100%;
     flex-direction: column;
-    gap: 0.2rem;
-    padding: 0.4rem 0 0.8rem;
+    align-items: stretch;
+    gap: 0;
+    padding: 0.2rem 0 0.35rem;
   }
   .nav-panel.is-open {
     display: flex;
+  }
+  .nav-panel a {
+    display: flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0.65rem 0.15rem;
   }
 }
