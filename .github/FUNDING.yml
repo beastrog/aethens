@@ -2,5 +2,5 @@
 # listing to resolve; hasSponsorsListing is currently false for @beastrog.
 github: [beastrog]
 # Placeholders; uncomment and add the account name once the account exists.
-# buy_me_a_coffee: # Buy Me a Coffee username
+buy_me_a_coffee: beastrog
 # ko_fi: # Ko-fi username
