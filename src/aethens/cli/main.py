@@ -4,9 +4,10 @@ Exit codes: 0 pass, 1 findings at or above --fail-on, 2 tool error, 3 timeout (a
 in C001 or C002 hit the task's timeout, so the gold verdict could not be established).
 Precedence: 2 > 3 > 1 > 0.
 
-An unexpected internal error, a report that cannot be written, and SIGTERM are tool errors (2):
-an uncaught exception would make Python exit 1, which CI reads as "findings". SIGTERM is turned
-into an exception so every runner's cleanup (container removal, temp directories) still runs.
+An unexpected internal error, a report that cannot be written, SIGTERM and Ctrl-C (SIGINT) are
+tool errors (2): an uncaught exception would make Python exit 1, which CI reads as "findings".
+SIGTERM is turned into an exception so every runner's cleanup (container removal, temp
+directories) still runs; the message then says what that cleanup confirmed.
 """
 
 from __future__ import annotations
@@ -35,6 +36,7 @@ from aethens.errors import AethensError
 from aethens.models import Budget, Report, Severity
 from aethens.report import render_json, render_markdown
 from aethens.runner import DockerRunner, LocalRunner, Runner
+from aethens.runner.docker import LEDGER
 
 ALL_CHECKS: dict[str, type[Check]] = {
     "C001": C001GoldSanity,
@@ -103,15 +105,36 @@ class Terminated(BaseException):  # not Exception: generic handlers must not swa
 
 
 def _on_sigterm(signum: int, _frame: object) -> None:
+    # Python runs this in the main thread between bytecode instructions. A wait in
+    # subprocess.Popen.wait (DockerRunner._wait) is interrupted, so the runner's finally removes
+    # the container. A future wait inside C code that ignores signals would delay this until it
+    # returns.
     raise Terminated(f"terminated by signal {signum}")
 
 
+def cleanup_summary() -> str:
+    """What container cleanup confirmed after an interruption (never claims more than that)."""
+    started, left = LEDGER.snapshot()
+    if left:
+        return (
+            f"removal of {len(left)} container(s) was not confirmed: {' '.join(left)}; "
+            "check with: docker ps -a --filter label=aethens.run=1"
+        )
+    if started == 0:
+        return "no container had been started"
+    return f"cleanup ran: removal of all {started} container(s) confirmed"
+
+
 def main(argv: list[str] | None = None) -> int:
+    LEDGER.reset()
     previous = signal.signal(signal.SIGTERM, _on_sigterm)
     try:
         return _main(argv)
     except Terminated as exc:
-        print(f"aethens: error: {exc}; running containers were removed", file=sys.stderr)
+        print(f"aethens: error: {exc}; {cleanup_summary()}", file=sys.stderr)
+        return EXIT_TOOL_ERROR
+    except KeyboardInterrupt:
+        print(f"aethens: error: interrupted (Ctrl-C); {cleanup_summary()}", file=sys.stderr)
         return EXIT_TOOL_ERROR
     except Exception as exc:  # a crash must never look like "findings" (exit 1)
         traceback.print_exc(file=sys.stderr)
