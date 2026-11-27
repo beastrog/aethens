@@ -118,8 +118,10 @@ Overall: recall 1.0 (116/116), precision 1.0, false positives 0.
 <!-- bench:end -->
 
 These numbers come from a local run on the build machine (Docker Engine 29.10.0, Linux). The GitHub
-CI workflow regenerates `bench/results.json` and uploads it as the `bench-results` artifact; it has
-not run yet.
+CI workflow regenerates `bench/results.json` and uploads it as the `bench-results` artifact. The
+first hosted run (on main at commit 8af4d39, 27 Nov 2026) produced an artifact identical to the
+committed `bench/results.json`; the external HumanEval bench is not run in CI (it needs a download
+and about 20 minutes).
 
 ## Accuracy on public data Aethens did not write
 
