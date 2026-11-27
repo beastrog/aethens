@@ -2,6 +2,7 @@
 import Base from "../layouts/Base.astro";
 import Header from "../components/Header.astro";
 import Hero from "../components/Hero.astro";
+import HeroField from "../components/HeroField.astro";
 import Problem from "../components/Problem.astro";
 import Checks from "../components/Checks.astro";
 import Accuracy from "../components/Accuracy.astro";
@@ -18,7 +19,10 @@ import Footer from "../components/Footer.astro";
 >
   <Header />
   <main id="main">
-    <Hero />
+    <div class="relative isolate">
+      <HeroField />
+      <Hero />
+    </div>
     <Problem />
     <Checks />
     <Accuracy />
