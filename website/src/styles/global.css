@@ -32,11 +32,25 @@
   --text-section: clamp(1.85rem, 3.6vw, 3rem);
 }
 
+/* The ground is one fixed layer (see .site-ground). These custom properties
+   are registered so the warm spot can ease; the script only writes a target. */
+@property --spot-x {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: 32%;
+}
+@property --spot-y {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: 18%;
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;
     color-scheme: dark;
     scroll-padding-top: 5.75rem;
+    background-color: var(--color-ink);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -54,19 +68,39 @@
   }
 
   body {
-    background-color: var(--color-ink);
+    background: transparent;
     color: var(--color-paper);
     font-family: var(--font-sans);
     font-size: 1.0625rem;
     line-height: 1.65;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+  }
+
+  /* One ground for every page. Fixed, so it does not scroll with the copy.
+     Dot grid, a quiet edge vignette, and one warm spot. The spot only drifts
+     a short way from its rest point; see the script in Base.astro. */
+  .site-ground {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-color: var(--color-ink);
     background-image:
-      linear-gradient(rgba(243, 239, 230, 0.028) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(243, 239, 230, 0.028) 1px, transparent 1px);
-    background-size: 56px 56px;
-    background-position: -1px -1px;
-    background-attachment: fixed;
+      radial-gradient(ellipse 46rem 34rem at var(--spot-x) var(--spot-y), rgba(215, 181, 109, 0.07), transparent 72%),
+      radial-gradient(ellipse at 50% 30%, transparent 58%, rgba(0, 0, 0, 0.38) 100%),
+      radial-gradient(circle, rgba(243, 239, 230, 0.2) 0.55px, transparent 0.7px);
+    background-size: auto, auto, 16px 16px;
+    background-repeat: no-repeat, no-repeat, repeat;
+    transition:
+      --spot-x 1.6s cubic-bezier(0.22, 1, 0.36, 1),
+      --spot-y 1.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-ground {
+      transition: none;
+    }
   }
 
   ::selection {
