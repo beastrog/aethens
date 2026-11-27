@@ -4,6 +4,8 @@ All notable changes are recorded here. The format follows Keep a Changelog; vers
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-27
+
 ### Added
 - Community and repository metadata for a public open-source project: Contributor Covenant 2.1, contributing / support / governance guides, issue and pull-request templates, CODEOWNERS, Dependabot, a draft-only Release Drafter workflow, and a GitHub Sponsors button.
 - `NOTICE` and `docs/LICENSING.md`, listing third-party notices and dependency licences. The sdist now ships both `LICENSE` and `NOTICE`.

@@ -5,7 +5,7 @@ description: >
   report problems with evidence and repro commands. Use it on `pull_request` with read-only
   permissions; it needs no secrets.
 branding:
-  icon: check-circle
+  icon: crosshair
   color: gray-dark
 inputs:
   path:
