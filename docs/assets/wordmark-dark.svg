@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 200" role="img" aria-label="Aethens">
+  <title>Aethens</title>
+  <rect width="720" height="200" fill="none"/>
+  <rect x="10" y="40" width="120" height="120" fill="none" stroke="#d7b56d" stroke-width="3"/>
+  <text x="70" y="132" text-anchor="middle" font-family="Georgia, 'Times New Roman', Times, serif" font-style="italic" font-size="92" fill="#f3efe6">A</text>
+  <text x="156" y="126" font-family="Georgia, 'Times New Roman', Times, serif" font-style="italic" font-size="82" fill="#f3efe6">Aethens</text>
+  <line x1="156" y1="146" x2="690" y2="146" stroke="#d7b56d" stroke-width="1.5"/>
+</svg>

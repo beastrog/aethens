@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 520" role="img" aria-label="Aethens report for order-alphabetical: one C005 error">
+  <title>Aethens report — order-alphabetical, C005, seed 0, budget smoke</title>
+  <rect width="920" height="520" fill="#0c0d11"/>
+  <rect x="24" y="24" width="872" height="472" fill="#12141a" stroke="rgba(243,239,230,0.16)" stroke-width="1.25"/>
+  <circle cx="52" cy="52" r="6" fill="#e07058" opacity="0.85"/>
+  <circle cx="74" cy="52" r="6" fill="#d7b56d" opacity="0.7"/>
+  <circle cx="96" cy="52" r="6" fill="#a9a396" opacity="0.55"/>
+  <text x="124" y="57" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#a9a396">aethens 0.1.0.dev0 · budget smoke · seed 0</text>
+  <line x1="24" y1="76" x2="896" y2="76" stroke="rgba(243,239,230,0.16)" stroke-width="1"/>
+  <text x="48" y="110" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#d7b56d">$</text>
+  <text x="68" y="110" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#f3efe6">aethens audit bench/tasks/order-alphabetical --check C005 --seed 0 --budget smoke</text>
+  <text x="48" y="150" font-family="Georgia, 'Times New Roman', Times, serif" font-style="italic" font-size="22" fill="#f3efe6">Aethens report</text>
+  <text x="48" y="178" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#e07058">1 error, 0 warning, 0 info</text>
+  <line x1="48" y1="196" x2="872" y2="196" stroke="rgba(243,239,230,0.16)" stroke-width="1"/>
+  <text x="48" y="222" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#a9a396">SEVERITY</text>
+  <text x="160" y="222" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#a9a396">CHECK</text>
+  <text x="250" y="222" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#a9a396">TASK</text>
+  <text x="480" y="222" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#a9a396">TITLE</text>
+  <text x="48" y="246" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#e07058">error</text>
+  <text x="160" y="246" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#f3efe6">C005</text>
+  <text x="250" y="246" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#f3efe6">order-alphabetical</text>
+  <text x="480" y="246" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#f3efe6">Test verdict depends on test order or isolation</text>
+  <text x="48" y="286" font-family="ui-sans-serif, system-ui, sans-serif" font-size="15" fill="#f3efe6">test_reg.TestRegistry.test_b_lookup gives 'pass' in the default order</text>
+  <text x="48" y="308" font-family="ui-sans-serif, system-ui, sans-serif" font-size="15" fill="#f3efe6">but error when reversed, shuffled, or run alone in a fresh process.</text>
+  <text x="48" y="340" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#a9a396">Observed: default order: pass; in reversed order: error</text>
+  <text x="48" y="360" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#a9a396">Confidence: confirmed · Seed: 0</text>
+  <text x="48" y="400" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#d7b56d">REPRODUCE</text>
+  <rect x="48" y="412" width="824" height="56" fill="#0c0d11" stroke="rgba(243,239,230,0.16)" stroke-width="1"/>
+  <rect x="48" y="412" width="4" height="56" fill="#d7b56d"/>
+  <text x="68" y="446" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#f3efe6">aethens audit bench/tasks/order-alphabetical --check C005 --seed 0 --budget smoke</text>
+</svg>
