@@ -276,3 +276,86 @@ def test_verifier_slower_than_timeout_is_a_timeout(runner: DockerRunner, tmp_pat
     # In-container run time over timeout_s is a timeout even if the process exits by itself.
     r = runner.run(_spec(tmp_path, "import time\ntime.sleep(4)\nprint('late')", 2))
     assert r.timed_out and not r.passed
+
+
+_INFLATE_INSPECT = """\
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import json
+import os
+import subprocess
+import sys
+from datetime import datetime, timedelta, timezone
+
+REAL = __REAL__
+EXTRA = __EXTRA__
+
+
+def _bump(ts: str, extra: float) -> str:
+    raw = ts.replace("Z", "+00:00")
+    if "." in raw:
+        head, rest = raw.split(".", 1)
+        frac, off = rest, "+00:00"
+        for i, ch in enumerate(rest):
+            if ch in "+-":
+                frac, off = rest[:i], rest[i:]
+                break
+        raw = f"{head}.{frac[:6].ljust(6, '0')}{off}"
+    t = datetime.fromisoformat(raw)
+    if t.tzinfo is None:
+        t = t.replace(tzinfo=timezone.utc)
+    t = t + timedelta(seconds=extra)
+    return t.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f") + "000Z"
+
+
+args = sys.argv[1:]
+if args and args[0] == "inspect":
+    r = subprocess.run([REAL, *args], capture_output=True)
+    sys.stderr.buffer.write(r.stderr)
+    if r.returncode != 0:
+        sys.stdout.buffer.write(r.stdout)
+        raise SystemExit(r.returncode)
+    state = json.loads(r.stdout.decode())
+    finished = str(state.get("FinishedAt") or "")
+    if finished and not finished.startswith("0001-"):
+        state["FinishedAt"] = _bump(finished, EXTRA)
+    sys.stdout.write(json.dumps(state))
+    raise SystemExit(0)
+os.execvp(REAL, [REAL, *args])
+"""
+
+
+def _inflate_inspect_docker(tmp_path: Path, extra_s: float) -> str:
+    """A docker CLI wrapper that adds extra_s to inspect's FinishedAt (a clock jump)."""
+    real = subprocess.run(["which", "docker"], capture_output=True, text=True, check=True)
+    wrapper = tmp_path / "inflate_inspect.py"
+    wrapper.write_text(
+        _INFLATE_INSPECT.replace("__REAL__", repr(real.stdout.strip())).replace(
+            "__EXTRA__", repr(extra_s)
+        )
+    )
+    wrapper.chmod(0o755)
+    return str(wrapper)
+
+
+def test_inflated_daemon_runtime_does_not_timeout_a_fast_verifier(tmp_path: Path) -> None:
+    # Post-exit D-064 check must cap FinishedAt-StartedAt by host elapsed time, otherwise a
+    # daemon clock jump turns a fast run into exit_code None (test_deterministic_under_seed).
+    (tmp_path / "runs").mkdir()
+    runner = DockerRunner(
+        docker_bin=_inflate_inspect_docker(tmp_path, 30), tmp_root=tmp_path / "runs"
+    )
+    r = runner.run(_spec(tmp_path, "print('fast')", 2))
+    assert r.passed and not r.timed_out and r.exit_code == 0, (
+        r.timed_out,
+        r.exit_code,
+        r.duration_s,
+        r.stderr_tail,
+    )
+    assert r.duration_s < 10
+    assert "fast" in r.stdout_tail
+    # Assert only this runner's workdir; do not compare the global aethens.run
+    # container set (shared-daemon flake; fixed separately).
+    assert runner.tmp_root is not None
+    assert list(runner.tmp_root.iterdir()) == []
