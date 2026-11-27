@@ -25,6 +25,7 @@ import re
 import shutil
 import subprocess
 import tempfile
+import threading
 import time
 import uuid
 from collections.abc import Mapping
@@ -81,6 +82,50 @@ def capped_in_container_seconds(
     if ran is None:
         return None
     return min(ran, max(host_elapsed_s, 0.0))
+
+
+class CleanupLedger:
+    """Which containers this process started and whether their removal was confirmed.
+
+    Read by the CLI after SIGTERM or Ctrl-C so its message states what cleanup actually did.
+    Every update and the summary read go through ``_lock`` so a reader never sees ``started``
+    and ``unconfirmed`` from different moments. It is re-entrant because the SIGTERM handler
+    raises in the main thread: if that ever unwinds while the main thread holds the lock, the
+    CLI's own summary read on the same thread must not deadlock.
+    """
+
+    def __init__(self) -> None:
+        self._lock = threading.RLock()
+        self.started = 0
+        self.unconfirmed: set[str] = set()
+
+    def reset(self) -> None:
+        with self._lock:
+            self.started = 0
+            self.unconfirmed.clear()
+
+    def pending(self, name: str) -> None:
+        """``name`` may exist from now on until a removal is confirmed."""
+        with self._lock:
+            self.unconfirmed.add(name)
+
+    def mark_started(self) -> None:
+        """The ``docker run`` process exists (Popen succeeded)."""
+        with self._lock:
+            self.started += 1
+
+    def confirm_absent(self, name: str) -> None:
+        """``name`` is known not to exist: removed, or never created."""
+        with self._lock:
+            self.unconfirmed.discard(name)
+
+    def snapshot(self) -> tuple[int, list[str]]:
+        """``(started, sorted unconfirmed names)`` read together under the lock."""
+        with self._lock:
+            return self.started, sorted(self.unconfirmed)
+
+
+LEDGER = CleanupLedger()
 
 
 class DockerRunner:
@@ -169,7 +214,7 @@ class DockerRunner:
         state = json.loads(r.stdout)
         return state if isinstance(state, dict) else None
 
-    def _remove(self, name: str) -> None:
+    def _remove(self, name: str) -> bool:
         # Retry with backoff: removal right after a kill, or on a loaded daemon, can race
         # ("removal ... is already in progress"); a container left behind is a cleanup bug.
         for attempt in range(6):
@@ -178,8 +223,9 @@ class DockerRunner:
             except subprocess.TimeoutExpired:
                 continue
             if r.returncode == 0 or "No such container" in r.stderr:
-                return
+                return True
             time.sleep(0.5 * (attempt + 1))
+        return False
 
     # --- run ----------------------------------------------------------------------------------
 
@@ -197,15 +243,26 @@ class DockerRunner:
             argv = self.build_argv(spec, work, name)
             return self._execute(spec, argv, name)
         finally:
-            self._remove(name)
+            if self._remove(name):
+                LEDGER.confirm_absent(name)
             shutil.rmtree(tmp, ignore_errors=True)
 
     def _execute(self, spec: RunSpec, argv: list[str], name: str) -> RunResult:
         limit = spec.limits.max_output_bytes
         start = time.monotonic()
-        proc = subprocess.Popen(  # noqa: S603 - argument list, never a shell
-            argv, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-        )
+        # Pending before Popen, so a signal that lands once the docker CLI runs can never
+        # leave a live container unlisted. Counted as started only after Popen succeeds: a
+        # docker CLI that never ran created nothing, and _remove treats "No such container"
+        # as success, so counting it would report "removal of all N container(s) confirmed".
+        LEDGER.pending(name)  # until run()'s finally confirms the removal
+        try:
+            proc = subprocess.Popen(  # noqa: S603 - argument list, never a shell
+                argv, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            )
+        except OSError:
+            LEDGER.confirm_absent(name)  # the docker CLI never ran, so no container exists
+            raise
+        LEDGER.mark_started()
         assert proc.stdout is not None and proc.stderr is not None
         out, err = TailPump(proc.stdout, limit), TailPump(proc.stderr, limit)
         timed_out = False

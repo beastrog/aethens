@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -167,30 +168,47 @@ def test_sigterm_removes_running_containers(tmp_path: Path) -> None:
     import signal
     import time
 
+    # Only this audit's containers count: its disposable copies live under its own TMPDIR, so a
+    # container is ours when its /work bind mount comes from there. Other Aethens runs on a
+    # shared daemon cannot affect the result.
+    runs = tmp_path / "runs"
+    runs.mkdir()
+    seen: set[str] = set()
+
     def ours() -> set[str]:
-        out = subprocess.run(
-            ["docker", "ps", "-aq", "--filter", "label=aethens.run"],
+        ids = subprocess.run(
+            ["docker", "ps", "-aq", "--filter", "label=aethens.run=1"],
             capture_output=True,
             text=True,
             check=True,
-        ).stdout
-        return set(out.split())
+        ).stdout.split()
+        mine: set[str] = set()
+        for cid in ids:
+            r = subprocess.run(
+                ["docker", "inspect", "--format", "{{range .Mounts}}{{.Source}} {{end}}", cid],
+                capture_output=True,
+                text=True,
+            )
+            if r.returncode == 0 and str(runs) in r.stdout:
+                mine.add(cid)
+        seen.update(mine)
+        return mine
 
     task = tmp_path / "hung"
     shutil.copytree(REPO / "tests" / "fixtures" / "hung-gold", task)
-    before = ours()
     proc = subprocess.Popen(
         [sys.executable, "-m", "aethens", "audit", str(task), "--check", "C001"],
         cwd=REPO,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
+        env={**os.environ, "TMPDIR": str(runs)},
     )
     try:
         deadline = time.monotonic() + 60
-        while not (ours() - before) and time.monotonic() < deadline:
+        while not ours() and time.monotonic() < deadline:
             time.sleep(0.2)
-        assert ours() - before, "the audit never started a container"
+        assert seen, "the audit never started a container"
         os.kill(proc.pid, signal.SIGTERM)
         _out, err = proc.communicate(timeout=90)
     finally:
@@ -198,4 +216,76 @@ def test_sigterm_removes_running_containers(tmp_path: Path) -> None:
             proc.kill()
     assert proc.returncode == 2, err
     assert "terminated" in err.lower()
-    assert ours() == before
+    assert re.search(r"cleanup ran: removal of all [1-9][0-9]* container\(s\) confirmed", err), err
+    assert ours() == set()
+
+
+_SLEEPING_AUDIT = """
+import importlib, time
+cli = importlib.import_module("aethens.cli.main")
+def stall(*_a, **_k):
+    print("ready", flush=True)
+    time.sleep(60)
+cli.load_tasks = stall
+raise SystemExit(cli.main(["audit", "examples/add-two"]))
+"""
+
+
+def test_sigterm_before_any_container_is_exit_2_without_cleanup_claim() -> None:
+    import os
+    import signal
+
+    proc = subprocess.Popen(
+        [sys.executable, "-c", _SLEEPING_AUDIT],
+        cwd=REPO,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    try:
+        assert proc.stdout is not None and proc.stdout.readline().strip() == "ready"
+        os.kill(proc.pid, signal.SIGTERM)
+        _out, err = proc.communicate(timeout=30)
+    finally:
+        if proc.poll() is None:
+            proc.kill()
+    assert proc.returncode == 2, err
+    assert "terminated by signal" in err
+    assert "no container had been started" in err
+    assert "removed" not in err and "Traceback" not in err
+
+
+def test_ctrl_c_is_exit_2(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # README and the CLI docstring: interruptions are tool errors (2), never "findings" (1).
+    cli = importlib.import_module("aethens.cli.main")
+
+    def interrupted(*_a: object, **_k: object) -> object:
+        raise KeyboardInterrupt
+
+    monkeypatch.setattr(cli, "run_audit", interrupted)
+    monkeypatch.setattr(cli.DockerRunner, "ensure_available", lambda self: None)
+    assert cli.main(["audit", "examples/add-two", "--check", "C001"]) == 2
+    err = capsys.readouterr().err
+    assert "interrupted (Ctrl-C); no container had been started" in err
+    assert "Traceback" not in err
+
+
+def test_interruption_message_names_unconfirmed_containers(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    cli = importlib.import_module("aethens.cli.main")
+    from aethens.runner.docker import LEDGER
+
+    def interrupted(*_a: object, **_k: object) -> object:
+        LEDGER.started += 2
+        LEDGER.unconfirmed.add("aethens-0123456789abcdef")  # removal failed or was cut short
+        raise KeyboardInterrupt
+
+    monkeypatch.setattr(cli, "run_audit", interrupted)
+    monkeypatch.setattr(cli.DockerRunner, "ensure_available", lambda self: None)
+    assert cli.main(["audit", "examples/add-two", "--check", "C001"]) == 2
+    err = capsys.readouterr().err
+    assert "removal of 1 container(s) was not confirmed: aethens-0123456789abcdef" in err
+    assert "cleanup ran" not in err
