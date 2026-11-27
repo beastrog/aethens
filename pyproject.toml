@@ -8,7 +8,7 @@ version = "0.1.0.dev0"
 description = "Validate the verifiers of code tasks by running them: accept correct, reject wrong, same result every run."
 readme = "README.md"
 license = "Apache-2.0"
-license-files = ["LICENSE"]
+license-files = ["LICENSE", "NOTICE"]
 requires-python = ">=3.11"
 authors = [{ name = "Aethens contributors" }]
 classifiers = [

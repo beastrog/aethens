@@ -190,11 +190,14 @@ const cats = Object.entries(m.reward_hack.per_category) as [
         </div>
       </div>
       <p class="mt-5 max-w-2xl text-sm text-paper/90">
-        Precision of {fmtScore(x.c004.precision)} is the weakest published figure. Of{' '}
-        {x.c004.survivors_judged_by_oracle} mutants that HumanEval’s own tests accepted,
-        HumanEval+ rejected only {x.c004.confirmed}. The other {x.c004.unconfirmed} may be
-        equivalent mutants, or behaviour that even HumanEval+ does not check. A surviving mutant is
-        therefore not, by itself, evidence of a weak test. We publish the number anyway.
+        C004 precision is {fmtScore(x.c004.precision)} with the equivalent-mutant filter:
+        {x.c004.confirmed} of {x.c004.survivors_judged_by_oracle} mutants that HumanEval’s own
+        tests accepted are rejected by HumanEval+. The other {x.c004.unconfirmed} were not
+        confirmed by the oracle. Without the filter, on the same run, precision is{" "}
+        {fmtScore(x.c004.precision_without_filter)} and recall is{" "}
+        {fmtScore(x.c004.recall_without_filter)}: the filter hid {x.c004.filtered_as_equivalent}{" "}
+        survivors, {x.c004.filtered_rejected_by_oracle} of which HumanEval+ rejects. A surviving
+        mutant is not, by itself, evidence of a weak test. We publish both figures.
       </p>
       <p class="mt-4 max-w-2xl text-sm text-muted">
         Checks without labels in this data are treated as presumed clean; no precision is claimed
