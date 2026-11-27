@@ -1,17 +1,21 @@
 name: website
 
-# Builds the Astro site on PRs and pushes to main that touch website/.
+# Builds the Astro site on PRs and pushes to main that touch website/ or the bench JSON the build reads.
 # Intentionally not a required ruleset check, and it does not deploy.
 # Deployment stays in pages.yml (push to main / workflow_dispatch only).
 on:
   pull_request:
     paths:
       - "website/**"
+      - "bench/results.json"
+      - "bench/external/results.json"
       - ".github/workflows/website.yml"
   push:
     branches: [main]
     paths:
       - "website/**"
+      - "bench/results.json"
+      - "bench/external/results.json"
       - ".github/workflows/website.yml"
 
 permissions:

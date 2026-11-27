@@ -83,7 +83,12 @@ def test_website_workflow_is_read_only_sha_pinned_and_does_not_deploy() -> None:
     on = wf["on"]
     assert set(on) == {"pull_request", "push"}
     assert "main" in on["push"]["branches"]
-    expected_paths = ["website/**", ".github/workflows/website.yml"]
+    expected_paths = [
+        "website/**",
+        "bench/results.json",
+        "bench/external/results.json",
+        ".github/workflows/website.yml",
+    ]
     assert on["pull_request"]["paths"] == expected_paths
     assert on["push"]["paths"] == expected_paths
     assert "pull_request_target" not in text
