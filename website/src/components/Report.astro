@@ -1,0 +1,117 @@
+---
+import numbers from "../data/numbers.json";
+const meta = numbers.report_snippet;
+---
+
+<section id="report" class="border-t border-line py-20 sm:py-28" aria-labelledby="report-heading">
+  <div class="wrap">
+    <p class="kicker mb-5"><span class="num">05</span> An example report</p>
+    <h2 id="report-heading" class="font-serif italic font-semibold text-section leading-[1.1] max-w-3xl">
+      Every finding carries evidence and a command you can paste.
+    </h2>
+    <p class="mt-6 max-w-2xl text-paper/90">
+      This is a real report, not a mock-up. It was produced by running Aethens on a planted
+      test-order defect in the self-authored bench. {meta.label}. Tool aethens {meta.tool_version},
+      budget {meta.budget}, seed {meta.seed}. Duration on that machine was 32.1 seconds and will
+      vary.
+    </p>
+    <p class="cmd-label mt-8">Reproduce this report</p>
+    <pre class="cmd max-w-3xl" tabindex="0"><code>{meta.command}</code></pre>
+
+    <article class="report mt-10 max-w-4xl" aria-label="Aethens report for order-alphabetical">
+      <header class="report-head">
+        <div>
+          <p class="font-mono text-[0.68rem] uppercase tracking-[0.14em] text-gold">Aethens report</p>
+          <p class="mt-2 font-mono text-xs text-muted">
+            Tool aethens {meta.tool_version} · Budget: {meta.budget} · Seed: {meta.seed} · Checks run: C005 · Tasks: 1 · Duration: 32.1s
+          </p>
+        </div>
+        <p class="sev-error"><span class="sev-dot" aria-hidden="true"></span>1 error, 0 warning, 0 info</p>
+      </header>
+
+      <div class="scroll-x border-0 border-b border-line">
+        <table class="sheet">
+          <caption class="sr-only">Findings summary</caption>
+          <thead>
+            <tr>
+              <th scope="col">Severity</th>
+              <th scope="col">Check</th>
+              <th scope="col">Task</th>
+              <th scope="col">Title</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="sev-error">error</td>
+              <td class="font-mono text-sm">C005</td>
+              <td class="font-mono text-sm">order-alphabetical</td>
+              <td>Test verdict depends on test order or isolation: test_reg.TestRegistry.test_b_lookup</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="p-5 sm:p-6 space-y-4">
+        <h3 class="font-serif italic text-xl">
+          <span class="sev-error not-italic">error</span>
+          <span class="font-mono not-italic text-sm text-muted mx-2">C005</span>
+          order-alphabetical
+        </h3>
+        <p class="text-paper/90">
+          test_reg.TestRegistry.test_b_lookup gives 'pass' in the verifier's default order but a
+          different verdict in reversed order: error; in shuffled order (driver seed 4228934073):
+          error; alone in a fresh process: error. It passes only because of state left behind by
+          tests that run before it in the default order (or it is broken by tests that run before it
+          in another order). Solutions are judged by an accident of test order. Both the baseline
+          and the changed order were run twice with the same PYTHONHASHSEED and gave the same
+          verdicts.
+        </p>
+        <ul class="text-sm space-y-1 text-paper/85 font-mono text-[0.8rem] leading-relaxed">
+          <li>Observed: default order: pass; in reversed order: error</li>
+          <li>Subject: <code>test:test_reg.TestRegistry.test_b_lookup</code>; confidence: <code>confirmed</code>; seed: <code>0</code></li>
+          <li>Command: <code>python .aethens/order_driver.py reverse -- discover -s tests</code></li>
+          <li class="text-muted whitespace-normal font-sans text-sm">
+            Limits: Orders tried: default, reversed, 1 seeded shuffle(s) and up to 10 tests alone
+            (budget smoke). Dependence that only shows in an order not tried is missed, and so is a
+            run that crashes before reporting per-test verdicts. The driver adds .aethens/ to the
+            work directory; tests that list the work directory could notice it.
+          </li>
+        </ul>
+        <div>
+          <p class="cmd-label">Reproduce</p>
+          <pre class="cmd" tabindex="0"><code>aethens audit bench/tasks/order-alphabetical --check C005 --seed 0 --budget smoke</code></pre>
+        </div>
+        <div>
+          <p class="cmd-label">stderr (tail)</p>
+          <pre class="cmd" tabindex="0"><code>test_b_lookup (test_reg.TestRegistry.test_b_lookup) ... ERROR
+test_a_register (test_reg.TestRegistry.test_a_register) ... ok
+
+======================================================================
+ERROR: test_b_lookup (test_reg.TestRegistry.test_b_lookup)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/work/tests/test_reg.py", line 14, in test_b_lookup
+    self.assertEqual(lookup("x"), 1)
+                     ^^^^^^^^^^^
+  File "/work/reg.py", line 9, in lookup
+    return _REGISTRY[name]
+           ~~~~~~~~~^^^^^^
+KeyError: 'x'
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.001s
+
+FAILED (errors=1)</code></pre>
+        </div>
+      </div>
+    </article>
+
+    <p class="mt-5 max-w-2xl text-sm text-muted">
+      The full markdown, exactly as the CLI printed it, is checked into{' '}
+      <code class="text-gold">data/report-order-alphabetical.md</code>
+      {' '}in this website repository. A shorter C001 example on{' '}
+      <code class="text-gold">brokengold-offbyone</code> is in{' '}
+      <code class="text-gold">data/report-brokengold-offbyone.md</code>.
+    </p>
+  </div>
+</section>

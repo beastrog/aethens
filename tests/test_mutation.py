@@ -84,3 +84,18 @@ def test_selection_is_seeded_and_capped() -> None:
 
 def test_syntax_error_file_is_skipped() -> None:
     assert select_mutants({"bad.py": "def (:\n"}, seed=0, salt="t", cap=5) == []
+
+
+def test_bytecode_equivalence_detects_constant_folding() -> None:
+    from aethens.checks.mutation import bytecode_equivalent
+
+    assert bytecode_equivalent("x = 2 ** 1\n", "x = 2 * 1\n")  # both fold to the constant 2
+    assert not bytecode_equivalent("x = a ** 1\n", "x = a * 1\n")
+    assert not bytecode_equivalent("x = 2 ** 1\n", "x = 2 ** 2\n")
+    assert not bytecode_equivalent("x = (\n", "x = 1\n")
+
+
+def test_select_mutants_skips_trivially_equivalent_mutants() -> None:
+    chosen = select_mutants({"m.py": "x = 2 ** 1\n"}, seed=0, salt="t", cap=100)
+    assert {m.site.operator for m in chosen} == {"constant-plus-one"}
+    assert all(m.source.strip() != "x = 2 * 1" for m in chosen)

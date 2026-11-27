@@ -14,7 +14,7 @@
     },
     "C004": {
       "loud_findings": 0,
-      "precision": 0.5556,
+      "precision": 0.8333,
       "recall": null
     },
     "C005": {

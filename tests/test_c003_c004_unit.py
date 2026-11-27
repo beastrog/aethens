@@ -74,7 +74,11 @@ def test_c004_survivors_are_info_only_and_capped() -> None:
     task = load_task(BENCH / "weak-leap")
     runner = FakeRunner(lambda s, i: result(0))  # every mutant "survives"
     findings = C004MutationProbes().run(task, ctx(runner, Budget.SMOKE))
-    assert len(runner.specs) == 5 and len(findings) == 5
+    mutant_runs = [s for s in runner.specs if s.command == task.verifier]
+    probe_runs = [s for s in runner.specs if s.command != task.verifier]
+    # 5 mutants (the smoke cap), and one equivalence probe per survivor (D-065), which printed
+    # nothing here, so it is inconclusive and every survivor is still reported.
+    assert len(mutant_runs) == 5 and len(probe_runs) == 5 and len(findings) == 5
     for f in findings:
         assert f.severity is Severity.INFO
         assert f.confidence is Confidence.NEEDS_REVIEW
@@ -122,3 +126,45 @@ def test_c004_no_python_in_gold_gives_info(tmp_path: Path) -> None:
     assert len(findings) == 1 and findings[0].severity is Severity.INFO
     assert "no mutants" in findings[0].title.lower()
     assert runner.specs == []
+
+
+def _probe_says(payload: str) -> FakeRunner:
+    def decide(spec: RunSpec, _i: int) -> RunResult:
+        if "equiv_driver.py" in " ".join(spec.command):
+            return result(0, out=f"AETHENS-EQUIV-RESULT {payload}\n")
+        return result(0)  # every mutant survives
+
+    return FakeRunner(decide)
+
+
+def test_c004_equivalent_survivors_go_to_coverage_not_findings() -> None:
+    task = load_task(BENCH / "weak-leap")
+    runner = _probe_says('{"functions": ["is_leap"], "valid": 300, "difference": null}')
+    findings, coverage = C004MutationProbes().run_with_coverage(task, ctx(runner, Budget.SMOKE))
+    assert findings == []
+    (cov,) = coverage
+    assert cov.stats["mutants_filtered_as_equivalent"] == "5"
+    assert len(cov.stats["likely_equivalent_mutants"].split(",")) == 5
+    assert "not a proof" in cov.statement
+
+
+def test_c004_distinguished_survivor_carries_the_counterexample() -> None:
+    task = load_task(BENCH / "weak-leap")
+    diff = '{"function": "is_leap", "args": "(1900,)", "gold": "False", "mutant": "True"'
+    runner = _probe_says(
+        '{"functions": ["is_leap"], "valid": 4, "difference": ' + diff + ', "from_tests": false}}'
+    )
+    findings, coverage = C004MutationProbes().run_with_coverage(task, ctx(runner, Budget.SMOKE))
+    assert len(findings) == 5 and coverage == []
+    extra = findings[0].evidence.extra
+    assert extra["equivalence_probe"] == "distinguished"
+    assert extra["counterexample_input"] == "(1900,)"
+    assert extra["counterexample_from_tests"] == "no"
+    assert "is_leap(1900,) returns False for the gold but True" in findings[0].detail
+
+
+def test_c004_filter_can_be_turned_off() -> None:
+    task = load_task(BENCH / "weak-leap")
+    runner = _probe_says('{"functions": ["is_leap"], "valid": 300, "difference": null}')
+    findings = C004MutationProbes(filter_equivalent=False).run(task, ctx(runner, Budget.SMOKE))
+    assert len(findings) == 5 and len(runner.specs) == 5

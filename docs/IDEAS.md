@@ -38,3 +38,7 @@ Ideas that came up during the build. AGENTS.md rule 14: write them here, do not 
   time (D-084, needs owner approval).
 - (27 Nov 2026) Patch-hunk mutation for SWE-bench: mutate only the lines the gold patch touches
   (C004 currently needs whole Python files in gold/).
+- C004: a CLI switch to turn the equivalent-mutant filter off (`--no-equivalence-filter`), and a
+  deeper probe budget that also reuses inputs across survivors of the same task (D-065).
+- C004: precondition inference for the equivalence probe (skip derived inputs the gold's own guards
+  or docstring examples suggest are outside the domain) to cut the remaining false positives.
