@@ -11,6 +11,7 @@ All notable changes are recorded here. The format follows Keep a Changelog; vers
 - C004 filters equivalent mutants (D-065): each surviving mutant is run side by side with the gold, inside the sandbox, on the inputs the task's tests pass plus inputs derived from them. A survivor that behaves differently is reported with the counterexample input; one that behaves like the gold on at least 20 valid inputs is not reported and is listed in the report's coverage. Mutants with bytecode identical to the gold are never selected (TCE). On the external HumanEval bench: precision 0.4615 -> 0.8158, recall 0.8667 -> 0.80 (same run, filter off vs on). **Changes C004's output; owner approval requested.**
 
 ### Fixed
+- CLI: an unexpected internal error, an unwritable `--output` path and SIGTERM now exit 2 (tool error) instead of 1 ("findings") or a raw signal death; on SIGTERM every running container is removed first (hardening review F4-F6).
 - The example tasks (examples/add-two, examples/word-format) now use hardened tests: the solution runs in a separate `python -I` child, only its JSON answers are judged in the test process, type-strictly, with seeded hidden cases. C007 found their old verifiers gameable (exit-zero, atexit-override, framework-patch, always-equal; hardcoded-visible as a warning), which made the README quickstart and the action-selftest exit 1. C007 is unchanged; the old plain task is kept as the C007 unit-test fixture tests/fixtures/plain-add.
 
 ### Fixed

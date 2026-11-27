@@ -1,12 +1,17 @@
 # Status
 
-Last updated: 2026-11-18 (Asia/Calcutta), during the owner-approved differentiators D1-D5 (local-only).
+Last updated: 2026-11-27 (Asia/Calcutta), after the pre-launch fixes and the hardening review.
 
 ## Mode
 
-Local-only build approved by the owner: no GitHub remote, `gh` not authenticated, so no pushes, no PRs,
-and **the hosted CI has never run**. Each milestone is a local branch `feat/<id>-<slug>`, `make check`
-green, CI commands run locally (Python 3.11, 3.12, 3.13), then `git merge --squash` into `main`.
+GitHub remote connected on 27 Nov 2026: origin = github.com/beastrog/aethens (private). Work goes
+through PRs (`gh pr create`, `gh pr checks --watch`, squash-merge). Hosted CI (`ci` on Python 3.11
+and 3.12, `action-selftest`) has run and is green on main; the first `bench-results` artifact (main
+at 8af4d39) is identical to the committed bench/results.json. Before that (B1-D5) everything was
+local-only.
+
+The build box's shell `make` is a shim from another project at /home/box/bin/make; run
+`sg docker -c "/usr/bin/make check"` (GNU make was installed with apt on 27 Nov).
 
 Docker: not preinstalled on the build box. apt was unusable (mirror errors), so Docker Engine 29.10.0
 static binaries from download.docker.com were installed and `dockerd` started manually with
@@ -77,23 +82,33 @@ anyway, so this does not change task isolation). `docker run --rm hello-world` w
   positives; reward hacking recall 1.0 (116/116 labelled task-category pairs), precision 1.0,
   both hardened controls silent. pytest conftest probes not built.
 
-## Next (owner actions; the agent stops after B7)
-- Fresh-session hardening review (Prompt 3 in docs/BUILD_PROMPTS.md). NOT done: B7's acceptance
-  criterion "fresh-session hardening review done" is therefore open, and B7 is marked PARTIAL.
-- Create the GitHub repo (private), push, let CI and action-selftest run on a PR, confirm the
-  bench-results artifact matches bench/results.json.
+## Pre-launch fixes (27 Nov 2026)
+- D-064: Docker runner timeouts count only in-container time (root cause of the intermittent C002
+  false positive on ctrl-tags-sorted under load; 38/300 -> 0/300 in the stress repro). On main.
+- D-065 (PR #1): C004 equivalent-mutant filter. External precision 0.4615 -> 0.8158, recall
+  0.8667 -> 0.80 (same run, filter off vs on).
+- PR #2: hardened example verifiers; README quickstart and action-selftest exit 0 again.
+- PR #5: CLI exit 2 on internal errors, unwritable --output, SIGTERM (with container cleanup).
+- Hardening review written to docs/review-2026-11-27.md (run by the build agent, so not truly
+  independent; an outside read is still advised).
+
+## Next (owner actions)
+- Approve or revert the semantics changes D-064 (what timeout_s measures, 60 s grace) and D-065
+  (C004 hides likely-equivalent survivors; budgets and MIN_VALID=20 are agent-chosen).
+- Decide the open review items, above all O1 (no size limit on /work writes) and O2 (containers
+  outlive a SIGKILLed Aethens); see docs/review-2026-11-27.md.
 - Confirm exit code 3 semantics (D-032) and the agent-chosen limits (D-008, D-013).
 - Terms check, README cold read, PyPI trusted publisher, release, flip public.
 
 ## Open risks
 - Exit code 3 semantics are an agent decision (D-032); the owner should confirm.
-- Bench numbers are from local runs; the hosted CI artifact does not exist yet.
+- The external HumanEval bench is local only (not run in CI).
+- /work writes are not size-limited (review O1); a SIGKILLed Aethens leaves running containers (O2).
 - C002 is statistical: a clean result means "flake rate below 0.25 at 95% confidence" at the default
   budget (0.05 at deep), assuming independent runs; rarer flakes can be missed.
-- Hosted CI has never run; the workflow file is only checked by running its commands locally.
 
 ## Not verified
-- The Action and both workflows on GitHub-hosted runners; release.yml and Trusted Publishing end to end.
+- release.yml and Trusted Publishing end to end (ci and action-selftest are verified on GitHub).
 - Security contact: SECURITY.md points to GitHub private vulnerability reporting, which the owner must enable.
 - Rootless Docker, Docker Desktop (macOS/Windows), Podman. Local mode's RLIMIT_AS is not enforced on macOS.
 - The build box's dockerd runs with `--iptables=false`; on hosts with iptables the bridge network exists
@@ -101,4 +116,3 @@ anyway, so this does not change task isolation). `docker run --rm hello-world` w
 - Running the test suite needs access to the Docker socket; on this box that is the `docker` group
   (`sg docker -c "make check"`).
 - Loader behaviour on case-insensitive filesystems (macOS, Windows); tested on Linux only.
-- GitHub Actions behaviour (no remote).

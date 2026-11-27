@@ -14,7 +14,11 @@ What Aethens does (src/aethens/runner/docker.py, tested in tests/test_runner_doc
 - The container sees only a disposable copy of the task (starter, then the solution overlay, then the
   tests), mounted at `/work`. The original task directory is never mounted. Symlinks are copied as
   plain files.
-- Containers are always removed and copies always deleted, including after timeouts and errors.
+- Containers are always removed and copies always deleted, including after timeouts, errors, Ctrl-C
+  and SIGTERM. If the Aethens process itself is killed with SIGKILL (or by the OOM killer), cleanup
+  cannot run: a running container then lives on until its verifier exits, which for a hung verifier
+  is never. Every Aethens container carries the label `aethens.run=1`; remove leftovers with
+  `docker rm -f $(docker ps -aq --filter label=aethens.run=1)`.
 - Output is capped (the last 64 KiB per stream are kept in memory).
 - The docker CLI is called with argument lists only; no shell. The task loader rejects symlinks that
   leave the task directory, `..` and absolute paths, special files, oversized files, and image names
@@ -26,6 +30,10 @@ What it does not protect against:
 - Container escapes through kernel or Docker vulnerabilities. Docker is not a perfect boundary. For
   hostile inputs, run Aethens in a disposable VM.
 - Resource use within the limits (for example a task that burns its full CPU and time budget).
+- Disk use in `/work`. The disposable copy is a bind mount of a host directory, so writes there are
+  not limited by the read-only root filesystem or the `/tmp` size limit: a task can fill the disk
+  that holds your temporary directory for as long as its timeout allows. Point `TMPDIR` at a
+  dedicated, size-limited filesystem when auditing untrusted tasks.
 - `--unsafe-local` mode, which runs code directly on your machine with only a scrubbed environment,
   rlimits and timeouts. It offers no isolation and is for trusted code only.
 - Malicious Docker images named in `task.yaml`. Aethens never pulls images during a run, but whatever
