@@ -3,12 +3,18 @@
 Exit codes: 0 pass, 1 findings at or above --fail-on, 2 tool error, 3 timeout (a gold-solution run
 in C001 or C002 hit the task's timeout, so the gold verdict could not be established).
 Precedence: 2 > 3 > 1 > 0.
+
+An unexpected internal error, a report that cannot be written, and SIGTERM are tool errors (2):
+an uncaught exception would make Python exit 1, which CI reads as "findings". SIGTERM is turned
+into an exception so every runner's cleanup (container removal, temp directories) still runs.
 """
 
 from __future__ import annotations
 
 import argparse
+import signal
 import sys
+import traceback
 from collections.abc import Callable
 from pathlib import Path
 
@@ -111,7 +117,30 @@ def exit_code_for(report: Report, fail_on: Severity) -> int:
     return EXIT_OK
 
 
+class Terminated(BaseException):  # not Exception: generic handlers must not swallow it
+    """SIGTERM arrived; raised in the main thread so cleanup code runs."""
+
+
+def _on_sigterm(signum: int, _frame: object) -> None:
+    raise Terminated(f"terminated by signal {signum}")
+
+
 def main(argv: list[str] | None = None) -> int:
+    previous = signal.signal(signal.SIGTERM, _on_sigterm)
+    try:
+        return _main(argv)
+    except Terminated as exc:
+        print(f"aethens: error: {exc}; running containers were removed", file=sys.stderr)
+        return EXIT_TOOL_ERROR
+    except Exception as exc:  # a crash must never look like "findings" (exit 1)
+        traceback.print_exc(file=sys.stderr)
+        print(f"aethens: internal error: {type(exc).__name__}: {exc}", file=sys.stderr)
+        return EXIT_TOOL_ERROR
+    finally:
+        signal.signal(signal.SIGTERM, previous)
+
+
+def _main(argv: list[str] | None) -> int:
     parser = build_parser()
     args = parser.parse_args(sys.argv[1:] if argv is None else argv)
     if args.command != "audit":
@@ -164,7 +193,11 @@ def main(argv: list[str] | None = None) -> int:
         return EXIT_TOOL_ERROR
     text = render_json(report) if args.format == "json" else render_markdown(report)
     if args.output:
-        Path(args.output).write_text(text + "\n", encoding="utf-8")
+        try:
+            Path(args.output).write_text(text + "\n", encoding="utf-8")
+        except OSError as exc:
+            print(f"aethens: error: cannot write {args.output}: {exc}", file=sys.stderr)
+            return EXIT_TOOL_ERROR
     else:
         print(text)
     return exit_code_for(report, Severity(args.fail_on))

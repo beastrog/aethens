@@ -22,6 +22,8 @@ import uuid
 from collections.abc import Callable, Sequence
 from pathlib import Path
 
+import yaml
+
 from aethens import __version__
 from aethens.checks.base import Check, CheckContext
 from aethens.errors import (
@@ -252,6 +254,18 @@ def task_environment(
     return f"{ctx.runner.mode}:{sys.platform}:{platform.machine()}:{version}"
 
 
+def _host_python() -> str:
+    """Host interpreter. AST checks and the loader use it even when Docker runs the verifier."""
+    return sys.version.replace("\n", " ")
+
+
+def _pyyaml_version() -> str:
+    version = getattr(yaml, "__version__", None)
+    if not isinstance(version, str) or not version:
+        raise CacheError("PyYAML has no __version__; cannot build a cache key")
+    return version
+
+
 def cache_key(
     task: Task,
     checks: Sequence[Check],
@@ -280,6 +294,8 @@ def cache_key(
         "runner_mode": ctx.runner.mode,
         "checks": described,
         "environment": environment,
+        "host_python": _host_python(),
+        "pyyaml": _pyyaml_version(),
         "task_files": hash_task_files(task.root),
     }
     blob = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode()
@@ -292,9 +308,10 @@ class ResultCache:
     def __init__(self, root: Path) -> None:
         self.root = Path(root)
         try:
-            self.root.mkdir(parents=True, exist_ok=True)
+            self.root.mkdir(parents=True, exist_ok=True, mode=0o700)
         except OSError as exc:
             raise CacheError(f"cannot create cache directory {self.root}: {exc}") from exc
+        self._require_private()
         self.hits = 0
         self.misses = 0
         self._lock = threading.Lock()
@@ -346,15 +363,32 @@ class ResultCache:
         tmp = path.parent / f".{path.name}.tmp-{uuid.uuid4().hex}"
         try:
             path.parent.mkdir(parents=True, exist_ok=True)
-            with tmp.open("w", encoding="utf-8") as handle:
+            fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+            with os.fdopen(fd, "w", encoding="utf-8") as handle:
                 handle.write(text)
                 handle.flush()
                 os.fsync(handle.fileno())
+            os.chmod(tmp, 0o600)  # os.open applies the umask; the entry must not be world-readable
             os.replace(tmp, path)
         except OSError as exc:
             if tmp.exists():
                 tmp.unlink(missing_ok=True)
             raise CacheError(f"cannot write cache entry {path}: {exc}") from exc
+
+    def _require_private(self) -> None:
+        """Refuse a cache another local user could plant an entry in."""
+        try:
+            st = self.root.stat()
+        except OSError as exc:
+            raise CacheError(f"cannot stat cache directory {self.root}: {exc}") from exc
+        if st.st_uid != os.getuid():
+            raise CacheError(f"cache directory {self.root} is not owned by this user")
+        mode = stat.S_IMODE(st.st_mode)
+        if mode & 0o077:
+            raise CacheError(
+                f"cache directory {self.root} is group or world accessible ({oct(mode)}); "
+                "refusing it"
+            )
 
     def _count(self, *, hit: bool) -> None:
         with self._lock:

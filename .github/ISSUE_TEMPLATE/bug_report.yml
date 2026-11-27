@@ -2,6 +2,12 @@ name: Bug report
 description: Aethens crashed, gave a wrong exit code, or reported something it should not have.
 labels: [bug]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Please do not paste secrets. Vulnerabilities go through
+        [private advisory reporting](https://github.com/beastrog/aethens/security/advisories/new),
+        not this form. If Aethens flagged something incorrectly, use the false-positive template.
   - type: textarea
     id: what
     attributes:
@@ -19,6 +25,7 @@ body:
     id: version
     attributes:
       label: aethens --version
+      description: Or the git commit you installed from.
     validations:
       required: true
   - type: input
@@ -28,4 +35,5 @@ body:
   - type: textarea
     id: repro
     attributes:
-      label: Smallest task directory that reproduces it (if you can share one)
+      label: Smallest task directory that reproduces it
+      description: Paste a minimal task, or a link, if you can share one.

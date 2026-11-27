@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import contextlib
 import os
+import signal
+import threading
 import time
-from collections.abc import Callable, Sequence
+import types
+from collections.abc import Callable, Iterator, Sequence
 from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import replace
 from datetime import UTC, datetime
@@ -78,27 +82,68 @@ def _run_tasks(
     cache: ResultCache | None,
     image_fingerprint: Callable[[str], str] | None,
 ) -> list[_TaskPart]:
-    if jobs == 1 or len(tasks) <= 1:
-        return [_audit_one(task, checks, ctx, cache, image_fingerprint) for task in tasks]
-    # Threads: a task spends its time waiting on the runner. Each run already has its own
-    # work directory and container name (DockerRunner) or process group (LocalRunner).
-    pool = ThreadPoolExecutor(max_workers=min(jobs, len(tasks)), thread_name_prefix="aethens")
-    futures: list[Future[_TaskPart]] = []
+    # Set on SIGINT and on any exception out of the pool. A task still inside _execute when this
+    # is set must not be cached: a terminal SIGINT is delivered to the whole process group, so a
+    # verifier can die with KeyboardInterrupt and look like an ordinary failure (false C002).
+    cancel = threading.Event()
+    with _note_interrupts(cancel):
+        if jobs == 1 or len(tasks) <= 1:
+            try:
+                return [
+                    _audit_one(task, checks, ctx, cache, image_fingerprint, cancel)
+                    for task in tasks
+                ]
+            except BaseException as exc:
+                # KeyboardInterrupt and SIGTERM's Terminated are not Exception. A check or
+                # runner error is: the sibling that already finished may still be cached.
+                if not isinstance(exc, Exception):
+                    cancel.set()
+                raise
+        # Threads: a task spends its time waiting on the runner. Each run already has its own
+        # work directory and container name (DockerRunner) or process group (LocalRunner).
+        pool = ThreadPoolExecutor(max_workers=min(jobs, len(tasks)), thread_name_prefix="aethens")
+        futures: list[Future[_TaskPart]] = []
+        try:
+            futures = [
+                pool.submit(_audit_one, task, checks, ctx, cache, image_fingerprint, cancel)
+                for task in tasks
+            ]
+            # result() in submission order, so completion order cannot change the report.
+            return [fut.result() for fut in futures]
+        except BaseException as exc:
+            # Same rule as the sequential path: only an interrupt drops in-flight results.
+            if not isinstance(exc, Exception):
+                cancel.set()
+            for fut in futures:
+                fut.cancel()
+            raise
+        finally:
+            # Wait for tasks already in the pool so each runner's finally still removes its
+            # container. That wait is the rest of those tasks, not only the current verifier run.
+            # Not-yet-started tasks were cancelled. Their results are not cached (D-068).
+            pool.shutdown(wait=True, cancel_futures=True)
+
+
+@contextlib.contextmanager
+def _note_interrupts(cancel: threading.Event) -> Iterator[None]:
+    """Set ``cancel`` as soon as the main thread sees SIGINT, then keep the previous handler."""
+    if threading.current_thread() is not threading.main_thread():
+        yield
+        return
+    previous = signal.getsignal(signal.SIGINT)
+
+    def handler(signum: int, frame: types.FrameType | None) -> None:
+        cancel.set()
+        if callable(previous):
+            previous(signum, frame)
+            return
+        raise KeyboardInterrupt
+
+    signal.signal(signal.SIGINT, handler)
     try:
-        futures = [
-            pool.submit(_audit_one, task, checks, ctx, cache, image_fingerprint) for task in tasks
-        ]
-        # result() in submission order, so the report does not depend on which task finished first.
-        return [fut.result() for fut in futures]
-    except BaseException:
-        for fut in futures:
-            fut.cancel()
-        raise
+        yield
     finally:
-        # Wait for in-flight tasks so the runner's cleanup runs and a finished task is cached.
-        # Not-yet-started tasks were cancelled above. There is no separate cancel channel into
-        # a container that has already started (D-068).
-        pool.shutdown(wait=True, cancel_futures=True)
+        signal.signal(signal.SIGINT, previous)
 
 
 def _audit_one(
@@ -107,6 +152,7 @@ def _audit_one(
     ctx: CheckContext,
     cache: ResultCache | None,
     image_fingerprint: Callable[[str], str] | None,
+    cancel: threading.Event,
 ) -> _TaskPart:
     if cache is None:
         return _execute(task, checks, ctx)
@@ -117,6 +163,9 @@ def _audit_one(
         found, covered = hit
         return _refresh_repro(found, task, ctx), covered
     found, covered = _execute(task, checks, ctx)
+    # Checked after the runs return: an interrupt during them must not be stored.
+    if cancel.is_set():
+        return found, covered
     cache.put(key, task.id, found, covered)
     return found, covered
 

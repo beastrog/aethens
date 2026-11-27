@@ -1,0 +1,43 @@
+# Drafts the next GitHub release from merged pull requests.
+# Publishing a release is the maintainer's job and is what triggers PyPI publish.
+name-template: "v$RESOLVED_VERSION"
+tag-template: "v$RESOLVED_VERSION"
+categories:
+  - title: "Breaking changes"
+    labels:
+      - breaking-change
+  - title: "Added"
+    labels:
+      - enhancement
+      - check-proposal
+  - title: "Fixed"
+    labels:
+      - bug
+      - false-positive
+  - title: "Documentation"
+    labels:
+      - documentation
+  - title: "Maintenance"
+    labels:
+      - dependencies
+      - ci
+change-template: "- $TITLE (@$AUTHOR, #$NUMBER)"
+change-title-escapes: '\:*'
+version-resolver:
+  major:
+    labels:
+      - breaking-change
+  minor:
+    labels:
+      - enhancement
+  patch:
+    labels:
+      - bug
+      - documentation
+      - dependencies
+      - ci
+  default: patch
+template: |
+  ## What's changed
+
+  $CHANGES

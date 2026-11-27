@@ -1,13 +1,18 @@
 # Status
 
-Last updated: 2026-11-27, after task parallelism, the result cache and resume (D-066 to D-068).
-Hosted CI has still not run. The 2026-11-18 local-only note below is the previous session.
+Last updated: 2026-11-27, after task parallelism and the result cache (D-066 to D-068), on top of
+the pre-launch fixes and the hardening review.
 
 ## Mode
 
-Local-only build approved by the owner: no GitHub remote, `gh` not authenticated, so no pushes, no PRs,
-and **the hosted CI has never run**. Each milestone is a local branch `feat/<id>-<slug>`, `make check`
-green, CI commands run locally (Python 3.11, 3.12, 3.13), then `git merge --squash` into `main`.
+GitHub remote connected on 27 Nov 2026: origin = github.com/beastrog/aethens (private). Work goes
+through PRs (`gh pr create`, `gh pr checks --watch`, squash-merge). Hosted CI (`ci` on Python 3.11
+and 3.12, `action-selftest`) has run and is green on main; the first `bench-results` artifact (main
+at 8af4d39) is identical to the committed bench/results.json. Before that (B1-D5) everything was
+local-only.
+
+The build box's shell `make` is a shim from another project at /home/box/bin/make; run
+`sg docker -c "/usr/bin/make check"` (GNU make was installed with apt on 27 Nov).
 
 Docker: not preinstalled on the build box. apt was unusable (mirror errors), so Docker Engine 29.10.0
 static binaries from download.docker.com were installed and `dockerd` started manually with
@@ -78,32 +83,37 @@ anyway, so this does not change task isolation). `docker run --rm hello-world` w
   positives; reward hacking recall 1.0 (116/116 labelled task-category pairs), precision 1.0,
   both hardened controls silent. pytest conftest probes not built.
 
+## Pre-launch fixes (27 Nov 2026)
+- D-064: Docker runner timeouts count only in-container time (root cause of the intermittent C002
+  false positive on ctrl-tags-sorted under load; 38/300 -> 0/300 in the stress repro). On main.
+- D-065 (PR #1): C004 equivalent-mutant filter. External precision 0.4615 -> 0.8158, recall
+  0.8667 -> 0.80 (same run, filter off vs on).
+- PR #2: hardened example verifiers; README quickstart and action-selftest exit 0 again.
+- PR #5: CLI exit 2 on internal errors, unwritable --output, SIGTERM (with container cleanup).
+- Hardening review written to docs/review-2026-11-27.md (run by the build agent, so not truly
+  independent; an outside read is still advised).
+
 ## Parallelism, cache, resume (owner-requested 2026-11-27; not a ROADMAP milestone)
 - D-066 to D-068. `aethens audit --jobs` (default min(CPU count, 4); library default remains 1 so
-  the bench pool is unchanged). Content-addressed per-task cache (`--cache-dir`, `--no-cache`)
-  keyed by task bytes, check config, package version and sources, and the image fingerprint.
-  Resume is "run the same command again": finished tasks are already in the cache. Report schema
-  stays aethens-report/v2. Docker flags, severities and thresholds were not changed.
-  Design: docs/cache.md.
+  the bench pool is unchanged). Content-addressed per-task cache (`--cache-dir`, `--no-cache`).
+  The key includes task bytes, check config, package sources, host Python, PyYAML, and the image
+  fingerprint. A task that had already finished is reused; a task still running at Ctrl-C or
+  SIGTERM is not stored. Report schema stays aethens-report/v2. Docker flags, severities and
+  thresholds were not changed. Design: docs/cache.md.
 - Timings on this machine (4 CPUs, Docker Engine 28.5.2), 34 bench tasks, budget smoke, all
-  checks. `jobs=1` is the old sequential loop. An earlier 23.9 s figure was discarded: `python`
-  was missing from PATH, so every local verifier died in the limiter.
-  - `--unsafe-local --jobs 1 --no-cache`: wall 80.0 s (report 79.9 s), 162 findings
-  - `--unsafe-local --jobs 4 --no-cache`: wall 21.1 s (report 21.0 s); same finding ids
-  - `--unsafe-local` cache hit, jobs 4: wall 0.17 s (report 0.057 s), 34 from cache, 0 ran
-  - Docker `--jobs 1 --no-cache`: wall 319.2 s (report 319.0 s), 162 findings
-  - Docker `--jobs 4 --no-cache`: wall 89.6 s (report 89.5 s), 162 findings
-  - Docker cache hit, jobs 4: wall 0.17 s (report 0.052 s), 34 from cache, 0 ran
-  - Docker C001 only: jobs 1 wall 20.6 s, jobs 4 wall 6.1 s, cache hit 0.14 s
-  Finding ids, severities and exit codes matched between jobs 1 and 4. C002 coverage differed
-  only in `run_seconds` (host wall time, already what the time budget uses); the bound
-  statements matched. `make check` was green afterwards, including the bench gate.
+  checks. `jobs=1` is the old sequential loop.
+  - `--unsafe-local --jobs 1 --no-cache`: wall 80.0 s; `--jobs 4`: wall 21.1 s; cache hit: 0.17 s
+  - Docker `--jobs 1 --no-cache`: wall 319.2 s; `--jobs 4`: wall 89.6 s; cache hit: 0.17 s
+  Finding ids, severities and exit codes matched. C002 coverage differed only in `run_seconds`.
 
-## Next (owner actions; the agent stops after B7)
-- Fresh-session hardening review (Prompt 3 in docs/BUILD_PROMPTS.md). NOT done: B7's acceptance
-  criterion "fresh-session hardening review done" is therefore open, and B7 is marked PARTIAL.
-- Create the GitHub repo (private), push, let CI and action-selftest run on a PR, confirm the
-  bench-results artifact matches bench/results.json.
+## Next (owner actions)
+- Approve or revert the semantics changes D-064 (what timeout_s measures, 60 s grace) and D-065
+  (C004 hides likely-equivalent survivors; budgets and MIN_VALID=20 are agent-chosen).
+- Decide the open review items, above all O1 (no size limit on /work writes) and O2 (containers
+  outlive a SIGKILLed Aethens); see docs/review-2026-11-27.md.
+- Decide whether the CLI default of `--jobs` (min(CPU count, 4), previously 1) should stay.
+  Under load, C002's host-wall-time budget can stop sooner. That default was not changed in the
+  review follow-up; it is flagged for the owner.
 - Confirm exit code 3 semantics (D-032) and the agent-chosen limits (D-008, D-013).
 - Terms check, README cold read, PyPI trusted publisher, release, flip public.
 
@@ -116,24 +126,24 @@ anyway, so this does not change task isolation). `docker run --rm hello-world` w
   something outside the package tree, would not invalidate. `--no-cache` is the escape hatch.
 - `--jobs` above 4 is unlimited on purpose. It can bring back the load-induced timeout problem
   D-064 fixed the measurement of; the grace and the isolation flags were not retuned.
-- Ctrl+C does not kill a container that has already started. The process waits for that verifier
-  run so cleanup still happens. SIGKILL can still leak a container (true before this change too).
+- Ctrl-C and SIGTERM cancel tasks that have not started. Tasks already in the pool finish their
+  remaining checks (so containers are still removed) and are not cached. That wait is the rest of
+  the task, not only the verifier run in progress. SIGKILL can still leak a container.
 - Exit code 3 semantics are an agent decision (D-032); the owner should confirm.
-- Bench numbers are from local runs; the hosted CI artifact does not exist yet.
+- The external HumanEval bench is local only (not run in CI).
+- /work writes are not size-limited (review O1); a SIGKILLed Aethens leaves running containers (O2).
 - C002 is statistical: a clean result means "flake rate below 0.25 at 95% confidence" at the default
   budget (0.05 at deep), assuming independent runs; rarer flakes can be missed.
-- Hosted CI has never run; the workflow file is only checked by running its commands locally.
 
 ## Not verified
 - Image fingerprint on Podman and Docker Desktop. On Docker Engine 28.5.2, `Id` and `RepoDigests`
-  differ for a pulled `python:3.12-slim`; both are in the cache key. A `docker load` image with
-  an empty `RepoDigests` is keyed by `Id` only (code path tested with a fake docker binary, not
-  with a loaded tarball).
+  differed for a pulled `python:3.12-slim`; the containerd image store can report them equal.
+  Both are in the cache key either way. A `docker load` image with an empty `RepoDigests` is
+  keyed by `Id` only.
 - Cache hit/miss behaviour when two `aethens` processes write the same key at once (last replace
   wins; the runs are deterministic for a seed, so the bytes should match).
-- Whether `os.replace` plus file `fsync` without a directory `fsync` survives a power loss. It
-  does survive a process kill after `os.replace` returns. Not crash-tested.
-- The Action and both workflows on GitHub-hosted runners; release.yml and Trusted Publishing end to end.
+- Whether `os.replace` plus file `fsync` without a directory `fsync` survives a power loss.
+- release.yml and Trusted Publishing end to end (ci and action-selftest are verified on GitHub).
 - Security contact: SECURITY.md points to GitHub private vulnerability reporting, which the owner must enable.
 - Rootless Docker, Docker Desktop (macOS/Windows), Podman. Local mode's RLIMIT_AS is not enforced on macOS.
 - The build box's dockerd runs with `--iptables=false`; on hosts with iptables the bridge network exists
@@ -142,4 +152,3 @@ anyway, so this does not change task isolation). `docker run --rm hello-world` w
 - Running the test suite needs access to the Docker socket; on this box that is the `docker` group
   (`sg docker -c "make check"`).
 - Loader behaviour on case-insensitive filesystems (macOS, Windows); tested on Linux only.
-- GitHub Actions behaviour (no remote).

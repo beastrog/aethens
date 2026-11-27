@@ -10,6 +10,7 @@ import inspect
 import json
 import os
 import shutil
+import signal
 import stat
 import threading
 import time
@@ -539,13 +540,18 @@ def test_fake_docker_missing_image_and_bad_id(tmp_path: Path) -> None:
 
 
 @pytest.mark.docker
-def test_pulled_image_fingerprint_has_id_and_repo_digest() -> None:
+@pytest.mark.docker
+def test_pulled_image_fingerprint_format() -> None:
+    # Format only. Docker 28.5.2's classic store reports Id != RepoDigest; the containerd image
+    # store can report them equal. Both are valid fingerprints.
     fingerprint = DockerImageDigest()("python:3.12-slim")
-    assert fingerprint.startswith("id=sha256:")
-    image_id, _, repos = fingerprint.partition(";repo=")
-    assert len(image_id.removeprefix("id=")) == len("sha256:") + 64
-    assert repos
-    assert image_id.removeprefix("id=") not in repos.split(",")
+    image_id, sep, repos = fingerprint.partition(";repo=")
+    assert sep == ";repo="
+    body = image_id.removeprefix("id=")
+    assert body.startswith("sha256:") and len(body) == len("sha256:") + 64
+    if repos:
+        for piece in repos.split(","):
+            assert piece.startswith("sha256:") and len(piece) == len("sha256:") + 64
     assert DockerImageDigest()("python:3.12-slim") == fingerprint
 
 
@@ -570,6 +576,69 @@ def test_local_runner_jobs_match_and_cache(tmp_path: Path) -> None:
     again = run_audit(tasks, checks, ctx, jobs=2, cache=cache)
     assert cache.hits == 2
     assert [f.to_dict() for f in cached.findings] == [f.to_dict() for f in again.findings]
+
+
+def test_interrupt_does_not_cache_the_task_in_flight(tmp_path: Path) -> None:
+    sent = False
+
+    def decide(spec: RunSpec, _i: int) -> RunResult:
+        nonlocal sent
+        if spec.layers[0][0].parent.name == "word-format":
+            if not sent:
+                sent = True
+                os.kill(os.getpid(), signal.SIGINT)
+            time.sleep(0.5)
+        return result(1)
+
+    runner = RecordingRunner(decide=decide)
+    cache = ResultCache(tmp_path / "cache")
+    with pytest.raises(KeyboardInterrupt):
+        run_audit(
+            [ADD, WORD],
+            [C001GoldSanity()],
+            _ctx(runner),
+            jobs=2,
+            cache=cache,
+            image_fingerprint=fp,
+        )
+    stored = [
+        json.loads(path.read_text(encoding="utf-8"))["task_id"]
+        for path in cache.root.rglob("*.json")
+    ]
+    assert "word-format" not in stored
+
+
+def test_host_python_and_pyyaml_bust_the_cache(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    runner = RecordingRunner()
+    cache = ResultCache(tmp_path / "cache")
+    checks = [C001GoldSanity()]
+    run_audit([PLAIN], checks, _ctx(runner), cache=cache, image_fingerprint=fp)
+    assert len(runner.specs) == 2
+    monkeypatch.setattr("aethens.cache._host_python", lambda: "python-under-test")
+    run_audit([PLAIN], checks, _ctx(runner), cache=cache, image_fingerprint=fp)
+    assert len(runner.specs) == 4
+    monkeypatch.setattr("aethens.cache._pyyaml_version", lambda: "0.0.test")
+    run_audit([PLAIN], checks, _ctx(runner), cache=cache, image_fingerprint=fp)
+    assert len(runner.specs) == 6
+
+
+def test_cache_dir_must_be_private(tmp_path: Path) -> None:
+    root = tmp_path / "cache"
+    cache = ResultCache(root)
+    assert stat.S_IMODE(root.stat().st_mode) & 0o077 == 0
+    run_audit(
+        [PLAIN], [C001GoldSanity()], _ctx(RecordingRunner()), cache=cache, image_fingerprint=fp
+    )
+    files = list(root.rglob("*.json"))
+    assert files
+    assert stat.S_IMODE(files[0].stat().st_mode) & 0o077 == 0
+    opened = tmp_path / "opened"
+    opened.mkdir()
+    opened.chmod(0o777)
+    with pytest.raises(CacheError):
+        ResultCache(opened)
 
 
 def test_format_fingerprint_sorts_and_rejects_garbage() -> None:

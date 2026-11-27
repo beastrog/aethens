@@ -1,0 +1,70 @@
+# Canonical labels for this repository. Applied with `gh label create` / `gh label edit`.
+# Keep colours and descriptions in sync when adding a label.
+
+- name: bug
+  color: "d73a4a"
+  description: Something isn't working
+
+- name: enhancement
+  color: "a2eeef"
+  description: New feature or request
+
+- name: documentation
+  color: "0075ca"
+  description: Improvements or additions to documentation
+
+- name: good first issue
+  color: "7057ff"
+  description: Good for newcomers
+
+- name: help wanted
+  color: "008672"
+  description: Extra attention is needed
+
+- name: question
+  color: "d876e3"
+  description: Further information is requested
+
+- name: duplicate
+  color: "cfd3d7"
+  description: This issue or pull request already exists
+
+- name: invalid
+  color: "e4e669"
+  description: This doesn't seem right
+
+- name: wontfix
+  color: "ffffff"
+  description: This will not be worked on
+
+- name: accessibility
+  color: "f143ab"
+  description: Barrier affecting people with disabilities
+
+- name: feedback
+  color: "d7b56d"
+  description: Results from running Aethens on real tasks
+
+- name: false-positive
+  color: "d4a574"
+  description: A finding Aethens got wrong
+
+- name: check-proposal
+  color: "5319e7"
+  description: Proposal for a new verifier check
+
+- name: security
+  color: "b60205"
+  description: Security-related work (not a public vuln report)
+
+- name: ci
+  color: "1b1f23"
+  description: GitHub Actions, workflows, or release drafting
+
+- name: dependencies
+  color: "0366d6"
+  description: Dependency updates
+
+- name: breaking-change
+  color: "b60205"
+  description: Breaks a public interface, schema, or check contract

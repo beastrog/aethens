@@ -339,12 +339,19 @@ CI installs uv with `pip install uv==0.13.7` instead of a third-party setup acti
   No new dependency. `make bench` does not use the cache, so the gate always re-executes.
 - D-068 (performance, owner-requested) Resume is the cache, not a second format. An entry is
   written only after every selected check for that task finishes, via a temp file, `fsync` and
-  `os.replace`. A kill mid-task leaves no entry; the next identical command reruns that task and
-  skips finished ones. On failure, not-yet-started tasks are cancelled and in-flight tasks are
-  allowed to finish so runner cleanup still runs. There is no cancel channel into a container
-  that has already started, so Ctrl+C waits for those verifier runs. The directory inode is not
-  fsynced: a power loss could drop the last rename; a process kill after `os.replace` returns
-  does not. Report `started_at` and `duration_s` are this command's wall clock. The report does
-  not list cache hits, because that would change `aethens-report/v2`. The CLI prints hit and miss
-  counts on stderr.
+  `os.replace`, mode `0600`. The cache directory must be owned by the current user and not group
+  or world accessible (`0700` when this process creates it); otherwise the cache is refused, so
+  another local user cannot plant an entry. A task that finished before an interrupt stays
+  cached. A task still running when SIGINT or SIGTERM arrives is not cached: a terminal SIGINT
+  goes to the whole process group, `docker run` forwards it, and the verifier's
+  `KeyboardInterrupt` otherwise looks like a real C002 failure and would be served on the next
+  run. Tasks not yet started are cancelled. Tasks already in the pool are allowed to finish
+  their remaining checks, not only the verifier run in progress, so each runner's `finally`
+  still removes its container. There is no cancel channel into a container that has already
+  started, and Docker argv is unchanged. The directory inode is not fsynced: a power loss could
+  drop the last rename; a process kill after `os.replace` returns does not. Report `started_at`
+  and `duration_s` are this command's wall clock. The report does not list cache hits, because
+  that would change `aethens-report/v2`. The CLI prints hit and miss counts on stderr.
+  The key also includes the host Python version and the PyYAML version (D-067), because the
+  loader and the AST checks run on the host even when verifiers run in Docker.
 

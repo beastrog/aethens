@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import importlib
 import json
 import subprocess
 import sys
@@ -188,7 +189,7 @@ def test_jobs_keeps_task_order(tmp_path: Path) -> None:
     assert "2 tasks (0 from cache, 2 ran) jobs=2" in r.stderr
 
 
-def test_interrupted_run_resumes_from_the_cache(tmp_path: Path) -> None:
+def test_second_run_reuses_a_finished_task(tmp_path: Path) -> None:
     cache = tmp_path / "cache"
     args = (
         "audit",
@@ -217,3 +218,140 @@ def test_interrupted_run_resumes_from_the_cache(tmp_path: Path) -> None:
         left.pop(key)
         right.pop(key)
     assert left == right
+
+
+def test_sigint_during_parallel_audit_does_not_cache_inflight_tasks(tmp_path: Path) -> None:
+    import os
+    import shutil
+    import signal
+
+    suite = tmp_path / "suite"
+    for name in ("slow-a", "slow-b"):
+        root = suite / name
+        shutil.copytree(REPO / "tests" / "fixtures" / "plain-add", root)
+        yaml_path = root / "task.yaml"
+        text = yaml_path.read_text(encoding="utf-8")
+        text = text.replace("id: plain-add", f"id: {name}")
+        text = text.replace("timeout_s: 30", "timeout_s: 2")
+        yaml_path.write_text(text, encoding="utf-8")
+        (root / "tests" / "test_add.py").write_text(
+            "import time\nimport unittest\n\n"
+            "class T(unittest.TestCase):\n"
+            "    def test_sleep(self) -> None:\n"
+            "        time.sleep(30)\n",
+            encoding="utf-8",
+        )
+    cache = tmp_path / "cache"
+    proc = subprocess.Popen(
+        [
+            sys.executable,
+            "-m",
+            "aethens",
+            "audit",
+            str(suite),
+            "--unsafe-local",
+            "--check",
+            "C001",
+            "--budget",
+            "smoke",
+            "--jobs",
+            "2",
+            "--cache-dir",
+            str(cache),
+        ],
+        cwd=REPO,
+        start_new_session=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    time.sleep(0.8)
+    os.killpg(proc.pid, signal.SIGINT)
+    try:
+        _out, err = proc.communicate(timeout=20)
+    finally:
+        if proc.poll() is None:
+            os.killpg(proc.pid, signal.SIGKILL)
+            proc.wait(timeout=10)
+    assert proc.returncode != 0, err
+    blobs = [path.read_text(encoding="utf-8") for path in cache.rglob("*.json")]
+    assert blobs == []
+    assert all("KeyboardInterrupt" not in blob for blob in blobs)
+
+
+# --- hardening review 2026-11-27 -----------------------------------------------------------------
+
+
+def test_unexpected_internal_error_is_exit_2_not_1(monkeypatch: pytest.MonkeyPatch) -> None:
+    # An uncaught exception made Python exit 1, which CI reads as "findings": a crash must be a
+    # tool error (2).
+    cli = importlib.import_module("aethens.cli.main")
+
+    def boom(*_a: object, **_k: object) -> object:
+        raise RuntimeError("injected internal failure")
+
+    monkeypatch.setattr(cli, "run_audit", boom)
+    monkeypatch.setattr(cli.DockerRunner, "ensure_available", lambda self: None)
+    assert cli.main(["audit", "examples/add-two", "--check", "C001"]) == 2
+
+
+def test_unwritable_output_is_exit_2(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    cli = importlib.import_module("aethens.cli.main")
+    from aethens.models import Budget, Report
+
+    empty = Report(
+        tool_version="x",
+        task_ids=("t",),
+        checks_run=("C001",),
+        budget=Budget.SMOKE,
+        seed=0,
+        findings=(),
+        coverage=(),
+        started_at="2026-01-01T00:00:00+00:00",
+        duration_s=0.0,
+    )
+    monkeypatch.setattr(cli, "run_audit", lambda *_a, **_k: empty)
+    monkeypatch.setattr(cli.DockerRunner, "ensure_available", lambda self: None)
+    out = tmp_path / "missing-dir" / "report.json"
+    assert cli.main(["audit", "examples/add-two", "--output", str(out)]) == 2
+
+
+@pytest.mark.docker
+def test_sigterm_removes_running_containers(tmp_path: Path) -> None:
+    import os
+    import shutil
+    import signal
+    import time
+
+    def ours() -> set[str]:
+        out = subprocess.run(
+            ["docker", "ps", "-aq", "--filter", "label=aethens.run"],
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout
+        return set(out.split())
+
+    task = tmp_path / "hung"
+    shutil.copytree(REPO / "tests" / "fixtures" / "hung-gold", task)
+    before = ours()
+    proc = subprocess.Popen(
+        [sys.executable, "-m", "aethens", "audit", str(task), "--check", "C001"],
+        cwd=REPO,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    try:
+        deadline = time.monotonic() + 60
+        while not (ours() - before) and time.monotonic() < deadline:
+            time.sleep(0.2)
+        assert ours() - before, "the audit never started a container"
+        os.kill(proc.pid, signal.SIGTERM)
+        _out, err = proc.communicate(timeout=90)
+    finally:
+        if proc.poll() is None:
+            proc.kill()
+    assert proc.returncode == 2, err
+    assert "terminated" in err.lower()
+    assert ours() == before

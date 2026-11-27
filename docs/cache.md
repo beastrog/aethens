@@ -28,6 +28,8 @@ pool and does not pass `jobs`, so it stays one task per bench worker.
 The cache stores one result per finished task. The key is the sha256 of a canonical JSON document:
 
 - Aethens `__version__`
+- the host Python version (`sys.version`) and the PyYAML version (the loader and the AST checks
+  run on the host even when the verifier runs in Docker)
 - a sha256 of the installed package's `.py` files (the version string is still `0.1.0.dev0`
   across behaviour changes, so the source hash is what actually invalidates a dev build)
 - budget, seed, whether the run is `--unsafe-local`, runner mode (`docker` or `local`)
@@ -52,8 +54,10 @@ The environment fingerprint:
   never reused for a local run.
 
 `--cache-dir DIR` chooses the directory. The default is `$XDG_CACHE_HOME/aethens`, or
-`~/.cache/aethens` when that variable is unset or empty. `--no-cache` does not read or write the
-cache. The two flags cannot be combined.
+`~/.cache/aethens` when that variable is unset or empty. The directory must be owned by the
+current user and not group or world accessible; a directory this process creates is mode `0700`,
+and entries are mode `0600`. `--no-cache` does not read or write the cache. The two flags cannot
+be combined.
 
 Entries are JSON files in an internal `aethens-cache/v1` layout. That layout is not the report.
 A corrupt or mismatched entry is ignored and the task is run again; the new result overwrites it.
@@ -63,16 +67,18 @@ Repro commands are rebuilt on a hit so they match the current working directory.
 
 ## Resume
 
-A task is written to the cache only after every selected check for that task has finished. The
-write is a temp file, `fsync`, then `os.replace`. Killing the process in the middle of a task
-leaves no entry for that task. Tasks that already finished are reused when you run the same
-command again.
+A task is written to the cache only after every selected check for that task has finished, and
+only if the run was not interrupted while that task was still going. The write is a temp file,
+`fsync`, then `os.replace`. Tasks that had already finished are reused when you run the same
+command again. A task that was still running at Ctrl-C or SIGTERM is not stored: a terminal
+interrupt is delivered to the whole process group, so a verifier can die with `KeyboardInterrupt`
+and look like a real failure. The next command runs that task again.
 
-On a failure, tasks that have not started are cancelled. Tasks that have already entered the
-runner are allowed to finish, so the container or process is cleaned up and a completed task can
-be stored. There is no cancel channel into a running container: an interrupt waits for those
-in-flight verifier runs. A `SIGKILL` of the whole process can still leak a container, which was
-already true.
+Tasks that have not started are cancelled. Tasks already in the pool are allowed to finish every
+remaining check, not only the verifier run that was in progress, so the runner can still remove
+each container. With `--budget deep` that wait can be as long as the rest of the task. There is
+no cancel channel into a container that has already started, and the Docker flags are unchanged.
+A `SIGKILL` of the whole process can still leak a container, which was already true.
 
 `started_at` and `duration_s` in the report are the wall clock of this command. A fully cached
 run is short even though the evidence was collected earlier. The report does not list cache hits;
