@@ -29,7 +29,40 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : un
     <title>{title}</title>
   </head>
   <body class="min-h-screen">
+    <div class="site-ground" aria-hidden="true"></div>
     <a class="skip-link" href="#main">Skip to content</a>
     <slot />
+    <script>
+      const root = document.documentElement;
+      const fine = window.matchMedia("(pointer: fine)");
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+      const restX = 32;
+      const restY = 18;
+      const reach = 8;
+      let frame = 0;
+      let px = restX;
+      let py = restY;
+      const paint = () => {
+        frame = 0;
+        root.style.setProperty("--spot-x", px.toFixed(2) + "%");
+        root.style.setProperty("--spot-y", py.toFixed(2) + "%");
+      };
+      const onMove = (event: PointerEvent) => {
+        if (event.pointerType !== "mouse" || reduce.matches) return;
+        const nx = event.clientX / window.innerWidth - 0.5;
+        const ny = event.clientY / window.innerHeight - 0.5;
+        px = restX + nx * reach * 2;
+        py = restY + ny * reach * 2;
+        if (!frame) frame = requestAnimationFrame(paint);
+      };
+      if (fine.matches && !reduce.matches) {
+        window.addEventListener("pointermove", onMove, { passive: true });
+      }
+      reduce.addEventListener("change", () => {
+        if (!reduce.matches) return;
+        root.style.removeProperty("--spot-x");
+        root.style.removeProperty("--spot-y");
+      });
+    </script>
   </body>
 </html>

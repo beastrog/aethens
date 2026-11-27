@@ -10,6 +10,7 @@ All notable changes are recorded here. The format follows Keep a Changelog; vers
 
 ### Changed
 - Launch copy: the site and package metadata say version 0.1.0 (not on PyPI yet). Bench provenance stays `0.1.0.dev0`, which is the `tool_version` recorded in `bench/results.json`. Public docs no longer list audit prices. The hosted-CI card is labelled "Not available".
+- Site background: one fixed ground (fine dot grid, edge vignette, a warm spot that drifts a short way with the pointer) sits behind every page, including docs. The hero-only canvas field is removed. Touch and `prefers-reduced-motion` keep the ground still.
 
 ### Fixed
 - Docker runner: the post-exit timeout cap now uses the host-monotonic time the container was observed running, not the full `docker run` wall time. The previous cap (total elapsed) still counted create and teardown, so a start or teardown longer than `timeout_s` combined with an inflated `FinishedAt - StartedAt` reported a fast verifier as timed out (`exit_code` `None`). That is the same symptom as `test_deterministic_under_seed` on hosted `check (3.12)` (run 45989844568, attempt 1): `[1, 1, None, 0, 1]` versus `[1, 1, 0, 0, 1]`. `timeout_s` still means in-container time; a genuinely slow run is still a timeout. Isolation settings are unchanged.
