@@ -32,6 +32,15 @@ class Check(ABC):
     @abstractmethod
     def run(self, task: Task, ctx: CheckContext) -> list[Finding]: ...
 
+    def cache_config(self) -> dict[str, str]:
+        """Settings that change this check's results, included in the result-cache key.
+
+        The default is empty. A check that stores result-changing state on ``self`` must
+        override this (C004's equivalent-mutant filter does). Values are strings so the key
+        is canonical. ``run`` must not mutate ``self``: one instance is shared by worker threads.
+        """
+        return {}
+
     def run_with_coverage(
         self, task: Task, ctx: CheckContext
     ) -> tuple[list[Finding], list[Coverage]]:

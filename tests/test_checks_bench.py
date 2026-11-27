@@ -75,7 +75,9 @@ def test_repro_command_reproduces(task: str) -> None:
     for f in report.findings:
         argv = shlex.split(f.repro)
         assert argv[0] == "aethens"
-        cmd = [sys.executable, "-m", "aethens", *argv[1:]]
+        # --no-cache: the repro string itself is unchanged, but the default cache would
+        # otherwise return the stored finding without running the verifier again.
+        cmd = [sys.executable, "-m", "aethens", *argv[1:], "--no-cache"]
         proc = subprocess.run(
             cmd, cwd=REPO, capture_output=True, text=True, timeout=300, env=dict(os.environ)
         )

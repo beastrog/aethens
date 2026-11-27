@@ -132,8 +132,10 @@ def test_action_audit_step_survives_findings_exit_code() -> None:
     action = _yaml(REPO / "action.yml")
     audit = next(s for s in action["runs"]["steps"] if s.get("id") == "audit")
     script = audit["run"]
-    assert script.index("set +e") < script.index("aethens audit")
+    assert script.index("set +e") < script.index('aethens "${args[@]}"')
     assert 'exit "$code"' in script and "GITHUB_STEP_SUMMARY" in script
+    assert "AETHENS_JOBS" in script and "AETHENS_CACHE_DIR" in script
+    assert "AETHENS_NO_CACHE" in script
 
 
 def test_release_drafter_never_publishes() -> None:

@@ -7,10 +7,10 @@ All notable changes are recorded here. The format follows Keep a Changelog; vers
 ## [0.1.0] - 2026-11-27
 
 ### Added
+- `aethens audit` runs tasks in a pool (`--jobs N`, default min(CPU count, 4)) and writes a content-addressed result cache (`--cache-dir`, `--no-cache`) so unchanged tasks are skipped and an interrupted run resumes. A task still running when the process is interrupted is not cached. Report schema stays `aethens-report/v2`. Check semantics, severities, thresholds and Docker isolation flags are unchanged (D-066 to D-068).
 - Community and repository metadata for a public open-source project: Contributor Covenant 2.1, contributing / support / governance guides, issue and pull-request templates, CODEOWNERS, Dependabot, a draft-only Release Drafter workflow, and a GitHub Sponsors button.
 - `NOTICE` and `docs/LICENSING.md`, listing third-party notices and dependency licences. The sdist now ships both `LICENSE` and `NOTICE`.
 - Documentation landing page at `docs/README.md`, and a redesigned root README with an in-repo wordmark, a real C005 report SVG, mermaid architecture, and generated bench tables.
-
 
 ### Changed
 - CI: the `check` job matrix now includes Python 3.13. Docker-marked tests and the bench (`make check`) run only on 3.12; 3.11 and 3.13 run lint, mypy, and `pytest -m "not docker"`. Required-check names `check (3.11)` and `check (3.12)` are unchanged. Making `check (3.13)` a required ruleset check is an owner decision and is not done in this change.

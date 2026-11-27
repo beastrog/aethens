@@ -36,6 +36,9 @@ class C004MutationProbes(Check):
     def __init__(self, filter_equivalent: bool = True) -> None:
         self.filter_equivalent = filter_equivalent
 
+    def cache_config(self) -> dict[str, str]:
+        return {"filter_equivalent": "true" if self.filter_equivalent else "false"}
+
     def run(self, task: Task, ctx: CheckContext) -> list[Finding]:
         return self.run_with_coverage(task, ctx)[0]
 

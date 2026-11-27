@@ -230,6 +230,8 @@ def _audit_one(task: Task, seed: int, budget: Budget, runner: DockerRunner) -> l
         C006OverSpecified(),
         C007RewardHacking(),
     ]
+    # jobs stays 1: this file already runs one task per worker. The result cache stays off
+    # so the regression gate always re-executes (D-067).
     report = run_audit([task], checks, CheckContext(runner=runner, seed=seed, budget=budget))
     out: list[dict[str, Any]] = []
     for f in report.findings:

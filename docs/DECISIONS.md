@@ -312,4 +312,46 @@ CI installs uv with `pip install uv==0.13.7` instead of a third-party setup acti
   30 (the earlier run had load-induced timeouts, see D-064). Remaining false positives are mostly
   counterexamples outside the task's precondition (e.g. `factorize(0)`, duplicates in an array
   declared duplicate-free), which the probe cannot know without a spec.
+- D-066 (performance, owner-requested) Task-level parallelism. `aethens audit --jobs N` runs N
+  tasks at once in a thread pool. The CLI default is `min(os.cpu_count() or 1, 4)`, the same cap
+  the bench uses (D-035): each task may start a 1 GiB container, so the default stays small.
+  `run_audit`'s default stays `jobs=1` so the bench's own pool does not become a second pool.
+  Findings, coverage and `task_ids` stay in input order (load order is path order), then check
+  order. Threads, not processes: the wait is on the runner, and each `run` already has its own
+  work directory and container name or process group. Check instances are shared; `run` must not
+  mutate `self` (true of C001–C007). Docker argv, limits, severities, thresholds and the report
+  schema are not touched.
+- D-067 (performance, owner-requested) Content-addressed per-task result cache. The key is
+  sha256 of canonical JSON: `__version__`, a sha256 of the installed `aethens/**/*.py` (because
+  `__version__` is still `0.1.0.dev0` across behaviour changes), budget, seed, `unsafe_local`,
+  runner mode, the checks in order with `Check.cache_config()` (C004 records `filter_equivalent`),
+  an environment fingerprint, and a hash of the task tree (sorted relative path, kind, mode,
+  contents; symlink link text; not mtime). Docker fingerprint is
+  `id=<docker image inspect Id>;repo=<sorted RepoDigests>`. Verified on Docker 28.5.2 that these
+  differ for a pulled `python:3.12-slim` (id `sha256:d497f3e5689c…`, repo digest
+  `sha256:191083cdf6c7…`). Both are stored: a local build has no repo digest, and a republish
+  changes the repo digest. Not verified on Podman or Docker Desktop. `--unsafe-local` does not
+  execute the image; its fingerprint is runner mode, platform, machine and `sys.version`, so a
+  Docker entry is never reused. `--cache-dir` overrides `$XDG_CACHE_HOME/aethens` or
+  `~/.cache/aethens`. `--no-cache` neither reads nor writes, and cannot be combined with
+  `--cache-dir`. The on-disk schema `aethens-cache/v1` is internal. A corrupt entry is a miss and
+  is overwritten. Repro strings are recomputed on a hit (they contain the cwd-relative path).
+  No new dependency. `make bench` does not use the cache, so the gate always re-executes.
+- D-068 (performance, owner-requested) Resume is the cache, not a second format. An entry is
+  written only after every selected check for that task finishes, via a temp file, `fsync` and
+  `os.replace`, mode `0600`. The cache directory must be owned by the current user and not group
+  or world accessible (`0700` when this process creates it); otherwise the cache is refused, so
+  another local user cannot plant an entry. A task that finished before an interrupt stays
+  cached. A task still running when SIGINT or SIGTERM arrives is not cached: a terminal SIGINT
+  goes to the whole process group, `docker run` forwards it, and the verifier's
+  `KeyboardInterrupt` otherwise looks like a real C002 failure and would be served on the next
+  run. Tasks not yet started are cancelled. Tasks already in the pool are allowed to finish
+  their remaining checks, not only the verifier run in progress, so each runner's `finally`
+  still removes its container. There is no cancel channel into a container that has already
+  started, and Docker argv is unchanged. The directory inode is not fsynced: a power loss could
+  drop the last rename; a process kill after `os.replace` returns does not. Report `started_at`
+  and `duration_s` are this command's wall clock. The report does not list cache hits, because
+  that would change `aethens-report/v2`. The CLI prints hit and miss counts on stderr.
+  The key also includes the host Python version and the PyYAML version (D-067), because the
+  loader and the AST checks run on the host even when verifiers run in Docker.
 

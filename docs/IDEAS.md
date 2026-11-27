@@ -35,3 +35,8 @@ Ideas that came up during the build. AGENTS.md rule 14: write them here, do not 
   deeper probe budget that also reuses inputs across survivors of the same task (D-065).
 - C004: precondition inference for the equivalence probe (skip derived inputs the gold's own guards
   or docstring examples suggest are outside the domain) to cut the remaining false positives.
+- Split the result cache per check, so adding a check does not rerun the checks that are already
+  cached for that task. Today the key covers the whole check list (D-067).
+- A future report schema could say which tasks were cache hits. v2 has no such field, on purpose.
+- Cooperative cancel of a container that has already started, so Ctrl+C does not wait out
+  `timeout_s`. The runner has no cancel channel today (D-068); isolation flags would stay as they are.

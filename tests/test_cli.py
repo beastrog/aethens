@@ -6,6 +6,7 @@ import importlib
 import json
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 import pytest
@@ -14,8 +15,20 @@ REPO = Path(__file__).resolve().parent.parent
 
 
 def aethens(*args: str) -> subprocess.CompletedProcess[str]:
+    # Default cache is on. These tests check a real execution, so they opt out unless the
+    # caller already chose a cache directory or passed --no-cache (a cache hit would not re-run).
+    argv = list(args)
+    if (
+        argv
+        and argv[0] == "audit"
+        and "--help" not in argv
+        and "-h" not in argv
+        and "--no-cache" not in argv
+        and "--cache-dir" not in argv
+    ):
+        argv.append("--no-cache")
     return subprocess.run(
-        [sys.executable, "-m", "aethens", *args],
+        [sys.executable, "-m", "aethens", *argv],
         cwd=REPO,
         capture_output=True,
         text=True,
@@ -121,6 +134,149 @@ def test_every_finding_in_a_sample_report_reproduces() -> None:
         match = [g for g in json.loads(again.stdout)["findings"] if g["id"] == f["id"]]
         assert len(match) == 1, f["repro"]
         assert match[0]["evidence"]["exit_codes"] == f["evidence"]["exit_codes"]
+
+
+def test_audit_help_lists_jobs_and_cache() -> None:
+    r = aethens("audit", "--help")
+    assert r.returncode == 0
+    for flag in ("--jobs", "--no-cache", "--cache-dir"):
+        assert flag in r.stdout
+
+
+def test_jobs_must_be_at_least_one() -> None:
+    r = aethens(
+        "audit",
+        "examples/add-two",
+        "--unsafe-local",
+        "--check",
+        "C001",
+        "--budget",
+        "smoke",
+        "--jobs",
+        "0",
+    )
+    assert r.returncode == 2
+    assert "AuditConfigError" in r.stderr
+    assert "from cache" not in r.stderr
+
+
+def test_no_cache_and_cache_dir_are_mutually_exclusive(tmp_path: Path) -> None:
+    r = aethens(
+        "audit", "examples/add-two", "--no-cache", "--cache-dir", str(tmp_path), "--unsafe-local"
+    )
+    assert r.returncode == 2
+    assert "not allowed with" in r.stderr
+
+
+def test_jobs_keeps_task_order(tmp_path: Path) -> None:
+    r = aethens(
+        "audit",
+        "examples",
+        "--unsafe-local",
+        "--check",
+        "C001",
+        "--budget",
+        "smoke",
+        "--jobs",
+        "2",
+        "--cache-dir",
+        str(tmp_path / "cache"),
+    )
+    assert r.returncode == 0, r.stderr
+    data = json.loads(r.stdout)
+    assert data["schema"] == "aethens-report/v2"
+    assert data["task_ids"] == ["add-two", "word-format"]
+    assert "2 tasks (0 from cache, 2 ran) jobs=2" in r.stderr
+
+
+def test_second_run_reuses_a_finished_task(tmp_path: Path) -> None:
+    cache = tmp_path / "cache"
+    args = (
+        "audit",
+        "tests/fixtures/hung-gold",
+        "--check",
+        "C001",
+        "--unsafe-local",
+        "--cache-dir",
+        str(cache),
+    )
+    started = time.perf_counter()
+    first = aethens(*args)
+    first_s = time.perf_counter() - started
+    assert first.returncode == 3, first.stderr
+    assert "1 task (0 from cache, 1 ran)" in first.stderr
+    started = time.perf_counter()
+    second = aethens(*args)
+    second_s = time.perf_counter() - started
+    assert second.returncode == 3, second.stderr
+    assert "1 task (1 from cache, 0 ran)" in second.stderr
+    # The fixture's verifier sleeps until timeout_s (2). A hit must not do that again.
+    assert first_s > 1.5
+    assert second_s < 1.0
+    left, right = json.loads(first.stdout), json.loads(second.stdout)
+    for key in ("started_at", "duration_s"):
+        left.pop(key)
+        right.pop(key)
+    assert left == right
+
+
+def test_sigint_during_parallel_audit_does_not_cache_inflight_tasks(tmp_path: Path) -> None:
+    import os
+    import shutil
+    import signal
+
+    suite = tmp_path / "suite"
+    for name in ("slow-a", "slow-b"):
+        root = suite / name
+        shutil.copytree(REPO / "tests" / "fixtures" / "plain-add", root)
+        yaml_path = root / "task.yaml"
+        text = yaml_path.read_text(encoding="utf-8")
+        text = text.replace("id: plain-add", f"id: {name}")
+        text = text.replace("timeout_s: 30", "timeout_s: 2")
+        yaml_path.write_text(text, encoding="utf-8")
+        (root / "tests" / "test_add.py").write_text(
+            "import time\nimport unittest\n\n"
+            "class T(unittest.TestCase):\n"
+            "    def test_sleep(self) -> None:\n"
+            "        time.sleep(30)\n",
+            encoding="utf-8",
+        )
+    cache = tmp_path / "cache"
+    proc = subprocess.Popen(
+        [
+            sys.executable,
+            "-m",
+            "aethens",
+            "audit",
+            str(suite),
+            "--unsafe-local",
+            "--check",
+            "C001",
+            "--budget",
+            "smoke",
+            "--jobs",
+            "2",
+            "--cache-dir",
+            str(cache),
+        ],
+        cwd=REPO,
+        start_new_session=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    time.sleep(0.8)
+    os.killpg(proc.pid, signal.SIGINT)
+    try:
+        _out, err = proc.communicate(timeout=20)
+    finally:
+        if proc.poll() is None:
+            os.killpg(proc.pid, signal.SIGKILL)
+            proc.wait(timeout=10)
+    assert proc.returncode != 0, err
+    blobs = [path.read_text(encoding="utf-8") for path in cache.rglob("*.json")]
+    assert blobs == []
+    assert all("KeyboardInterrupt" not in blob for blob in blobs)
 
 
 # --- hardening review 2026-11-27 -----------------------------------------------------------------
