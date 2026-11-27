@@ -393,3 +393,50 @@ def test_inflated_daemon_runtime_does_not_timeout_a_fast_verifier(tmp_path: Path
     # container set (shared-daemon flake; fixed separately).
     assert runner.tmp_root is not None
     assert list(runner.tmp_root.iterdir()) == []
+
+
+def _delay_inflate_docker(tmp_path: Path, before: float, after: float, extra: float) -> str:
+    """Sleep around ``docker run`` and add ``extra`` seconds to inspect's FinishedAt."""
+    inflate = _inflate_inspect_docker(tmp_path, extra)
+    script = tmp_path / "delay-inflate-docker"
+    script.write_text(
+        "#!/bin/bash\n"
+        'if [ "$1" = run ]; then\n'
+        f"  sleep {before}\n"
+        f'  {inflate} "$@"; rc=$?\n'
+        f"  sleep {after}\n"
+        "  exit $rc\n"
+        "fi\n"
+        f'exec {inflate} "$@"\n'
+    )
+    script.chmod(0o755)
+    return str(script)
+
+
+@pytest.mark.parametrize(("before", "after"), [(3.0, 0.0), (0.0, 3.0)])
+def test_overhead_plus_clock_jump_is_not_a_timeout(
+    tmp_path: Path, before: float, after: float
+) -> None:
+    # Create or teardown longer than timeout_s, plus a FinishedAt jump. Capping the daemon
+    # delta by the full host wait still exceeds timeout_s and reports exit_code None.
+    # That hole matches test_deterministic_under_seed on hosted check (3.12): one seeded
+    # run of flaky-setorder came back [1, 1, None, 0, 1] and the repeat [1, 1, 0, 0, 1]
+    # (actions/runs/45989844568, attempt 1), after the total-elapsed cap was already on main.
+    # The job log has no per-run timestamps, so this test locks the code path that produces
+    # that symptom; it does not replay that runner's daemon clock.
+    (tmp_path / "runs").mkdir()
+    runner = DockerRunner(
+        docker_bin=_delay_inflate_docker(tmp_path, before, after, 30),
+        tmp_root=tmp_path / "runs",
+    )
+    r = runner.run(_spec(tmp_path, "print('fast')", 2))
+    assert r.passed and not r.timed_out and r.exit_code == 0, (
+        r.timed_out,
+        r.exit_code,
+        r.duration_s,
+        r.stderr_tail,
+    )
+    assert r.duration_s >= before + after
+    assert "fast" in r.stdout_tail
+    assert runner.tmp_root is not None
+    assert list(runner.tmp_root.iterdir()) == []

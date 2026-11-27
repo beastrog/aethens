@@ -85,6 +85,10 @@ anyway, so this does not change task isolation). `docker run --rm hello-world` w
 ## Pre-launch fixes (27 Nov 2026)
 - D-064: Docker runner timeouts count only in-container time (root cause of the intermittent C002
   false positive on ctrl-tags-sorted under load; 38/300 -> 0/300 in the stress repro). On main.
+  Follow-up: the post-exit cap used total host elapsed, so create/teardown longer than `timeout_s`
+  plus an inflated FinishedAt-StartedAt still timed out a fast verifier (the
+  `test_deterministic_under_seed` flake on run 45989844568). The cap is now the observed running
+  window. `timeout_s` and isolation flags are unchanged.
 - D-065 (PR #1): C004 equivalent-mutant filter. External precision 0.4615 -> 0.8158, recall
   0.8667 -> 0.80 (same run, filter off vs on).
 - PR #2: hardened example verifiers; README quickstart and action-selftest exit 0 again.
