@@ -26,6 +26,14 @@ def docker_problem() -> str | None:
 
 
 @pytest.fixture(autouse=True)
+def _isolate_aethens_cache(
+    monkeypatch: pytest.MonkeyPatch, tmp_path_factory: pytest.TempPathFactory
+) -> None:
+    """Point the default result cache at a throwaway directory, not the real home."""
+    monkeypatch.setenv("XDG_CACHE_HOME", str(tmp_path_factory.mktemp("xdg-cache")))
+
+
+@pytest.fixture(autouse=True)
 def _require_docker(request: pytest.FixtureRequest) -> None:
     if request.node.get_closest_marker("docker") is None:
         return

@@ -9,11 +9,13 @@ from __future__ import annotations
 
 import argparse
 import sys
+from collections.abc import Callable
 from pathlib import Path
 
 from aethens import __version__
 from aethens.adapters import load_tasks
-from aethens.audit import run_audit
+from aethens.audit import default_jobs, run_audit
+from aethens.cache import DockerImageDigest, ResultCache, default_cache_dir
 from aethens.checks import (
     C001GoldSanity,
     C002Flakiness,
@@ -75,6 +77,23 @@ def build_parser() -> argparse.ArgumentParser:
     )
     audit.add_argument("--output", help="write the report to this file instead of stdout")
     audit.add_argument(
+        "--jobs",
+        type=int,
+        default=None,
+        help="tasks to audit at once (default: min(cpu count, 4)); report order stays fixed",
+    )
+    cache = audit.add_mutually_exclusive_group()
+    cache.add_argument(
+        "--no-cache",
+        action="store_true",
+        help="recompute every task and do not read or write the result cache",
+    )
+    cache.add_argument(
+        "--cache-dir",
+        type=Path,
+        help="result cache directory (default: $XDG_CACHE_HOME/aethens or ~/.cache/aethens)",
+    )
+    audit.add_argument(
         "--unsafe-local",
         action="store_true",
         help="run task code directly on this machine WITHOUT container isolation",
@@ -101,12 +120,14 @@ def main(argv: list[str] | None = None) -> int:
     try:
         runner: Runner
         tasks = load_tasks(args.path)
+        docker_bin = "docker"
         if args.unsafe_local:
             print(UNSAFE_WARNING, file=sys.stderr)
             runner = LocalRunner(allow_unsafe_local=True)
         else:
             docker = DockerRunner()
             docker.ensure_available()
+            docker_bin = docker.docker_bin
             runner = docker
         ids = sorted(set(args.checks or ALL_CHECKS))
         ctx = CheckContext(
@@ -115,7 +136,29 @@ def main(argv: list[str] | None = None) -> int:
             budget=Budget(args.budget),
             unsafe_local=args.unsafe_local,
         )
-        report = run_audit(tasks, [ALL_CHECKS[i]() for i in ids], ctx)
+        jobs = default_jobs() if args.jobs is None else args.jobs
+        cache: ResultCache | None = None
+        fingerprint: Callable[[str], str] | None = None
+        if not args.no_cache:
+            cache_dir = args.cache_dir if args.cache_dir is not None else default_cache_dir()
+            cache = ResultCache(cache_dir)
+            if not args.unsafe_local:
+                fingerprint = DockerImageDigest(docker_bin)
+        report = run_audit(
+            tasks,
+            [ALL_CHECKS[i]() for i in ids],
+            ctx,
+            jobs=jobs,
+            cache=cache,
+            image_fingerprint=fingerprint,
+        )
+        if cache is not None:
+            noun = "task" if len(tasks) == 1 else "tasks"
+            print(
+                f"aethens: {len(tasks)} {noun} ({cache.hits} from cache, {cache.misses} ran) "
+                f"jobs={jobs}",
+                file=sys.stderr,
+            )
     except AethensError as exc:
         print(f"aethens: error: {type(exc).__name__}: {exc}", file=sys.stderr)
         return EXIT_TOOL_ERROR

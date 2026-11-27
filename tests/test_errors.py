@@ -19,6 +19,8 @@ def test_all_errors_derive_from_base() -> None:
         "ContainerStartError",
         "UnsafeLocalNotAllowedError",
         "CheckError",
+        "AuditConfigError",
+        "CacheError",
     ):
         cls = getattr(errors, name)
         assert issubclass(cls, errors.AethensError), name

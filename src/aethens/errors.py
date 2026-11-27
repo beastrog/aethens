@@ -62,3 +62,11 @@ class UnsafeLocalNotAllowedError(RunnerError):
 
 class CheckError(AethensError):
     """A check could not run (for example the gold solution has no Python files to mutate)."""
+
+
+class AuditConfigError(AethensError):
+    """Audit settings are invalid (for example ``jobs`` < 1, or a docker cache with no image id)."""
+
+
+class CacheError(AethensError):
+    """The result cache could not be read or written, or an image fingerprint was unusable."""

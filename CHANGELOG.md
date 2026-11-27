@@ -4,6 +4,9 @@ All notable changes are recorded here. The format follows Keep a Changelog; vers
 
 ## [Unreleased]
 
+### Added
+- `aethens audit` runs tasks in a pool (`--jobs N`, default min(CPU count, 4)) and writes a content-addressed result cache (`--cache-dir`, `--no-cache`) so unchanged tasks are skipped and an interrupted run resumes. Report schema stays `aethens-report/v2`. Check semantics, severities, thresholds and Docker isolation flags are unchanged (D-066 to D-068).
+
 ### Changed
 - C004 filters equivalent mutants (D-065): each surviving mutant is run side by side with the gold, inside the sandbox, on the inputs the task's tests pass plus inputs derived from them. A survivor that behaves differently is reported with the counterexample input; one that behaves like the gold on at least 20 valid inputs is not reported and is listed in the report's coverage. Mutants with bytecode identical to the gold are never selected (TCE). On the external HumanEval bench: precision 0.4615 -> 0.8158, recall 0.8667 -> 0.80 (same run, filter off vs on). **Changes C004's output; owner approval requested.**
 

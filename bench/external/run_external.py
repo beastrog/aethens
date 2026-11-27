@@ -128,6 +128,7 @@ def audit_task(
     hs = str(hash_seed(seed, task.id, "external", "oracle-gold"))
     gold_run = runner.run(oracle_spec(task, oracle_tests, task.root / task.gold, hs))
     gold_ok = gold_run.passed
+    # jobs stays 1: the caller already runs one task per worker. No result cache (D-067).
     report = run_audit([task], checks, CheckContext(runner=runner, seed=seed, budget=budget))
     findings: list[Finding] = list(report.findings)
     out: dict[str, Any] = {

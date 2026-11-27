@@ -22,6 +22,21 @@ inputs:
   images:
     description: Space-separated Docker images the tasks use; pulled before the audit (runs use --pull never).
     default: python:3.12-slim
+  jobs:
+    description: >
+      How many tasks to audit at once. Empty uses the CLI default (minimum of the CPU count and 4).
+    required: false
+    default: ""
+  cache-dir:
+    description: >
+      Result cache directory. Empty uses the CLI default. GitHub-hosted runners do not keep this
+      directory between workflow runs. Ignored when no-cache is true.
+    required: false
+    default: ""
+  no-cache:
+    description: If true, recompute every task and do not read or write the result cache.
+    required: false
+    default: "false"
   python-version:
     description: Python used to run Aethens itself (not the tasks, which run in Docker).
     default: "3.12"
@@ -57,12 +72,30 @@ runs:
         AETHENS_BUDGET: ${{ inputs.budget }}
         AETHENS_FAIL_ON: ${{ inputs.fail-on }}
         AETHENS_SEED: ${{ inputs.seed }}
+        AETHENS_JOBS: ${{ inputs.jobs }}
+        AETHENS_CACHE_DIR: ${{ inputs.cache-dir }}
+        AETHENS_NO_CACHE: ${{ inputs.no-cache }}
       run: |
         # GitHub runs bash with -e; keep going on findings so the summary and output are written.
         set +e
         set -uo pipefail
-        aethens audit "$AETHENS_PATH" --budget "$AETHENS_BUDGET" --fail-on "$AETHENS_FAIL_ON" \
-          --seed "$AETHENS_SEED" --format markdown --output aethens-report.md
+        args=(
+          audit "$AETHENS_PATH"
+          --budget "$AETHENS_BUDGET"
+          --fail-on "$AETHENS_FAIL_ON"
+          --seed "$AETHENS_SEED"
+          --format markdown
+          --output aethens-report.md
+        )
+        if [ -n "$AETHENS_JOBS" ]; then
+          args+=(--jobs "$AETHENS_JOBS")
+        fi
+        if [ "$AETHENS_NO_CACHE" = "true" ]; then
+          args+=(--no-cache)
+        elif [ -n "$AETHENS_CACHE_DIR" ]; then
+          args+=(--cache-dir "$AETHENS_CACHE_DIR")
+        fi
+        aethens "${args[@]}"
         code=$?
         echo "exit-code=$code" >> "$GITHUB_OUTPUT"
         if [ -f aethens-report.md ]; then

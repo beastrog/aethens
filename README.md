@@ -41,8 +41,16 @@ This exits 1 and reports "Gold solution fails the verifier", with the verifier's
 command you can paste.
 
 Useful options: `--budget smoke|standard|deep`, `--fail-on error|warning`, `--format json|markdown`,
-`--seed N`, `--check C00X` (repeatable), `--output FILE`. Exit codes: 0 pass, 1 findings at or above
-`--fail-on`, 2 tool error, 3 the gold solution timed out.
+`--seed N`, `--check C00X` (repeatable), `--output FILE`, `--jobs N`, `--cache-dir DIR`,
+`--no-cache`. Exit codes: 0 pass, 1 findings at or above `--fail-on`, 2 tool error, 3 the gold
+solution timed out.
+
+For a directory of tasks, `--jobs` runs that many tasks at once (default: the minimum of the CPU
+count and 4). The report stays in path order. Each task still gets its own disposable copy and
+its own container; the Docker flags are unchanged. Finished tasks are stored in a
+content-addressed cache, so a second run skips tasks whose files, checks, seed, budget, Aethens
+build and image fingerprint are unchanged, and an interrupted run continues when you repeat the
+command. `--no-cache` recomputes everything. Details: [docs/cache.md](docs/cache.md).
 
 `--unsafe-local` runs task code directly on your machine without container isolation, with a
 scrubbed environment and timeouts. Only use it on code you trust.
