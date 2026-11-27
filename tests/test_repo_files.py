@@ -77,7 +77,7 @@ def test_ci_and_selftest_are_read_only() -> None:
 def test_release_uses_trusted_publishing_only_in_publish_job() -> None:
     wf = _yaml(WORKFLOWS / "release.yml")
     assert wf["on"]["release"] == {"types": ["published"]}
-    assert "workflow_dispatch" in wf["on"]
+    assert set(wf["on"]) == {"release", "workflow_dispatch"}
     assert wf["permissions"] == {"contents": "read"}
     jobs = wf["jobs"]
     with_id_token = [n for n, j in jobs.items() if j.get("permissions", {}).get("id-token")]
