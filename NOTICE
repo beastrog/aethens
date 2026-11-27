@@ -1,0 +1,24 @@
+Aethens
+Copyright 2026 Aethens contributors
+
+This product is licensed under the Apache License, Version 2.0. See the
+LICENSE file in the same directory.
+
+This product includes software and data developed by third parties.
+
+OpenAI HumanEval
+Copyright (c) OpenAI (https://openai.com)
+Licensed under the MIT License. The vendored sample under
+bench/external/sample/tasks/ retains the copyright notice and permission
+notice in each converted file. The full MIT text is reproduced in
+bench/LICENSES.md and docs/LICENSING.md.
+
+EvalPlus HumanEval+
+Licensed under the Apache License, Version 2.0. The vendored sample under
+bench/external/sample/oracle/ is a modified form of the HumanEval+ tests
+(the numpy comparison helper is replaced by a standard-library equivalent)
+and carries an attribution and modification note in each converted file.
+
+The marketing site under website/ bundles IBM Plex Sans, IBM Plex Mono, and
+Newsreader fonts from the Fontsource packages, licensed under the SIL Open
+Font License, Version 1.1.

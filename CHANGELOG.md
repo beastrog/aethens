@@ -4,6 +4,11 @@ All notable changes are recorded here. The format follows Keep a Changelog; vers
 
 ## [Unreleased]
 
+### Added
+- Community and repository metadata for a public open-source project: Contributor Covenant 2.1, contributing / support / governance guides, issue and pull-request templates, CODEOWNERS, Dependabot, a draft-only Release Drafter workflow, and a GitHub Sponsors button.
+- `NOTICE` and `docs/LICENSING.md`, listing third-party notices and dependency licences. The sdist now ships both `LICENSE` and `NOTICE`.
+
+
 ### Changed
 - C004 filters equivalent mutants (D-065): each surviving mutant is run side by side with the gold, inside the sandbox, on the inputs the task's tests pass plus inputs derived from them. A survivor that behaves differently is reported with the counterexample input; one that behaves like the gold on at least 20 valid inputs is not reported and is listed in the report's coverage. Mutants with bytecode identical to the gold are never selected (TCE). On the external HumanEval bench: precision 0.4615 -> 0.8158, recall 0.8667 -> 0.80 (same run, filter off vs on). **Changes C004's output; owner approval requested.**
 
