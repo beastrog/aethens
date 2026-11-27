@@ -1,0 +1,161 @@
+---
+import Docs from "../../layouts/Docs.astro";
+const base = import.meta.env.BASE_URL;
+---
+
+<Docs
+  current="checks"
+  title="Checks C001–C007"
+  description="What each Aethens check does, the severity of its findings, and what it cannot catch."
+>
+  <p class="kicker mb-5"><span>Docs</span><span class="num" aria-hidden="true">/</span><span>Checks</span></p>
+  <h1 class="font-serif italic font-semibold text-section leading-[1.1]">Checks C001–C007</h1>
+  <p class="mt-6 text-paper/90">
+    Aethens does not prove a verifier is sound. No findings means only that these
+    checks found nothing at the chosen budget and seed. Severities are
+    <code class="text-gold">error</code>, <code class="text-gold">warning</code>, and
+    <code class="text-gold">info</code>. Confidence is
+    <code class="text-gold">confirmed</code> or
+    <code class="text-gold">needs-review</code>.
+  </p>
+  <p class="mt-4 text-paper/90">
+    The three questions the checks ask: does the gold pass, and would a
+    behaviour-preserving rewrite still pass? Do labelled-wrong, mutated, or gaming
+    candidates get rejected? Does the verdict hold across reruns, shuffles, and
+    tests run alone?
+  </p>
+
+  <h2 id="c001" class="mt-12 font-serif italic text-2xl">C001 — Gold sanity</h2>
+  <p class="mt-4 text-paper/90">
+    Runs the unsolved starting state (must fail) and the reference gold solution
+    (must pass), once each.
+  </p>
+  <ul class="mt-4 list-disc pl-5 space-y-2 text-paper/90">
+    <li><strong class="text-error">Error</strong> if the verifier accepts the starter, or if the gold fails.</li>
+    <li>Confidence: confirmed.</li>
+    <li>Can catch tests with no real assertions, a broken gold solution, or a wrong file layout.</li>
+    <li>Cannot catch defects that only show on some runs — see C002.</li>
+  </ul>
+
+  <h2 id="c002" class="mt-12 font-serif italic text-2xl">C002 — Adaptive flakiness</h2>
+  <p class="mt-4 text-paper/90">
+    Runs the gold at least 3, 5, or 10 times (smoke, standard, deep), varying only
+    <code class="text-gold">PYTHONHASHSEED</code>. While every run agrees it keeps
+    going — up to 6, 11, or 59 runs, or 120, 300, or 1800 seconds — until it can
+    state a flake rate below 0.5, 0.25, or 0.05 at 95% confidence (an exact
+    binomial bound, recorded in the report’s coverage list).
+  </p>
+  <ul class="mt-4 list-disc pl-5 space-y-2 text-paper/90">
+    <li><strong class="text-error">Error</strong> if the same gold both passes and fails across runs.</li>
+    <li><strong class="text-warn">Warning</strong> if verdicts differ only because some runs time out.</li>
+    <li>Confidence: confirmed. When it finds no flake, the coverage list records the bound it could state.</li>
+    <li>Can catch verdicts that depend on set or dict ordering or <code class="text-gold">hash()</code>, including flips rarer than a fixed run count could see.</li>
+    <li>Cannot reliably catch flakiness from time, unseeded randomness, or scheduling, except by chance. A rarer flake can pass unseen. The time budget can stop the check before the target bound. The bound assumes independent runs.</li>
+  </ul>
+
+  <h2 id="c003" class="mt-12 font-serif italic text-2xl">C003 — Labelled candidates</h2>
+  <p class="mt-4 text-paper/90">
+    Runs each candidate in <code class="text-gold">candidates/valid</code> and
+    <code class="text-gold">candidates/invalid</code>. Aethens does not decide
+    whether a solution is correct; it relies on the labels you provide.
+  </p>
+  <ul class="mt-4 list-disc pl-5 space-y-2 text-paper/90">
+    <li><strong class="text-error">Error</strong> for a false reject or false accept when the label source is <code class="text-gold">human</code> or <code class="text-gold">oracle</code>.</li>
+    <li><strong class="text-warn">Warning</strong>, confidence needs-review, when the label source is <code class="text-gold">llm-unreviewed</code>.</li>
+    <li>Can catch over-strict tests and weak tests, but only as good as the labels.</li>
+    <li>Cannot catch anything for which you have no labelled candidate.</li>
+  </ul>
+
+  <h2 id="c004" class="mt-12 font-serif italic text-2xl">C004 — Mutation probes</h2>
+  <p class="mt-4 text-paper/90">
+    Runs up to 5, 10, or 30 AST mutants of the gold solution, depending on the
+    budget (smoke, standard, deep). A mutant that still passes (“survives”) hints
+    that the tests do not check that behaviour. Survivors are only ever severity
+    <strong class="text-muted">info</strong> with confidence needs-review, because
+    a mutant can be semantically equivalent to the gold.
+  </p>
+  <p class="mt-4 text-paper/90">
+    Equivalent-mutant filter (D-065): each surviving mutant is then called side by
+    side with the gold, inside the sandbox, on the inputs the tests use plus
+    derived inputs. A survivor that behaves differently is reported with that
+    input as a counterexample. One that behaved like the gold on every valid input
+    tried is not reported, and is listed in the report’s coverage instead. Mutants
+    with bytecode identical to the gold are never selected.
+  </p>
+  <ul class="mt-4 list-disc pl-5 space-y-2 text-paper/90">
+    <li>Can catch behaviour the tests never check (surviving mutants, reported at info level).</li>
+    <li>A mutant that differs only on inputs the probe never tried is hidden. A counterexample input may be outside the task’s intended inputs. A killed mutant does not prove the tests are strong.</li>
+  </ul>
+  <p class="mt-4 text-paper/90">
+    Published accuracy on public data Aethens did not write, from
+    <code class="text-gold">bench/external/results.json</code> as reported in the
+    README (164 HumanEval tasks, MIT, judged by EvalPlus’s HumanEval+ tests,
+    Apache-2.0, as an outside oracle; aethens 0.1.0.dev0, seed 0, budget standard;
+    D-065 filter on):
+  </p>
+  <ul class="mt-4 list-disc pl-5 space-y-2 text-paper/90">
+    <li>C004 precision 0.8158 (31/38): 31 of 38 mutants that HumanEval’s own tests accepted are rejected by HumanEval+.</li>
+    <li>C004 recall 0.80 (24/30) relative to exhaustive mutation: 24 of 30 weak tasks found at budget standard.</li>
+    <li>Without the equivalent-mutant filter, on the same run: precision 0.4615, recall 0.8667. The filter hid 51 survivors, 5 of which HumanEval+ rejects.</li>
+  </ul>
+  <p class="mt-4 text-sm text-muted">
+    Method and caveats: <a class="prose-link" href="https://github.com/beastrog/aethens/blob/main/docs/EXTERNAL_BENCH.md">docs/EXTERNAL_BENCH.md</a>.
+    The self-authored planted-defect bench (precision and recall of 1.0 on those
+    planted defects) is a separate measurement; see the
+    <a class="prose-link" href={`${base}#accuracy`}>accuracy section</a> on the homepage
+    and the README.
+  </p>
+
+  <h2 id="c005" class="mt-12 font-serif italic text-2xl">C005 — Test order and isolation</h2>
+  <p class="mt-4 text-paper/90">
+    Reruns the gold’s tests in their default order, reversed, in 1, 2, or 5 seeded
+    shuffles, and each test alone (up to 10, 30, or 200), all with the same
+    <code class="text-gold">PYTHONHASHSEED</code>. A changed verdict must reproduce
+    on a second run.
+  </p>
+  <ul class="mt-4 list-disc pl-5 space-y-2 text-paper/90">
+    <li><strong class="text-error">Error</strong>, confidence confirmed, when a test’s verdict depends on order or isolation and the change reproduces.</li>
+    <li><strong class="text-muted">Info</strong>, confidence needs-review, if a verdict changed once and did not reproduce (more likely flakiness; see C002).</li>
+    <li><strong class="text-muted">Info</strong> if the verifier is not <code class="text-gold">python -m unittest</code>, or if C005 could not list the tests: nothing was checked for that task.</li>
+    <li>Can catch tests that pass only because an earlier test left state behind, or that break when another test runs first.</li>
+    <li>Cannot catch orders it did not try, or verifiers other than <code class="text-gold">python -m unittest</code>.</li>
+  </ul>
+
+  <h2 id="c006" class="mt-12 font-serif italic text-2xl">C006 — Over-specified tests</h2>
+  <p class="mt-4 text-paper/90">
+    Reruns the gold after behaviour-preserving rewrites: reformat, local renames,
+    swapping adjacent constant assignments, turning an append loop into a
+    comprehension, and if/else inversion. Smoke budget uses the first two
+    rewrites. Each rewrite is applied only where its safety conditions hold. A
+    rejection must reproduce, and the gold must still pass. The five rewrites are
+    argued and tested to preserve behaviour, not machine-proved, and the check
+    skips every site it cannot show is safe.
+  </p>
+  <ul class="mt-4 list-disc pl-5 space-y-2 text-paper/90">
+    <li><strong class="text-warn">Warning</strong>, confidence needs-review, if the tests reject a rewrite. A statement may legitimately require an implementation detail.</li>
+    <li><strong class="text-muted">Info</strong> if no behaviour-preserving rewrite applies, so C006 checked nothing for that task.</li>
+    <li>Can catch tests that read the gold’s source, line numbers, local variable names, or code shape, and would reject a correct solution written differently.</li>
+    <li>Cannot catch over-strict tests on behaviour the statement leaves open, such as exact messages or float digits (use C003).</li>
+  </ul>
+
+  <h2 id="c007" class="mt-12 font-serif italic text-2xl">C007 — Reward-hacking probes</h2>
+  <p class="mt-4 text-paper/90">
+    When the unsolved starter fails, runs candidates that do not solve the task,
+    in the same sandbox: <code class="text-gold">os._exit(0)</code> on import, an
+    atexit hook forcing exit 0, a unittest patch that reports success, a
+    <code class="text-gold">sitecustomize.py</code> hook, functions returning an
+    object equal to everything, and a lookup table of the visible tests’ literal
+    answers. An accepted probe must pass twice.
+  </p>
+  <ul class="mt-4 list-disc pl-5 space-y-2 text-paper/90">
+    <li><strong class="text-error">Error</strong> if the verifier accepts a probe that does not solve the task.</li>
+    <li><strong class="text-warn">Warning</strong>, needs review, for the lookup-table (hardcoded-visible) probe, because it matters only when tests are visible.</li>
+    <li>Can catch verifiers a policy can game without solving the task.</li>
+    <li>Cannot catch other gaming routes. It does not probe pytest <code class="text-gold">conftest.py</code> hooks. A verifier that resists these six families can still be gamed. Almost every plain <code class="text-gold">python -m unittest</code> verifier is gameable by the exit-code probes, so expect C007 errors on most such tasks until the harness judges results outside the solution’s process.</li>
+  </ul>
+  <p class="mt-8 text-sm text-muted">
+    Sources: the README check reference, <code>website/src/components/Checks.astro</code>,
+    and the check modules under <code>src/aethens/checks/</code>. C004 figures are
+    from the README block generated from <code>bench/external/results.json</code>.
+  </p>
+</Docs>

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -186,8 +187,26 @@ def test_sdist_excludes_website() -> None:
     assert "website" in exclude
 
 
-def test_package_metadata_files_have_no_folric() -> None:
-    # Contact is GitHub Discussions; Folric is a separate project.
-    for name in ("pyproject.toml", "action.yml", ".github/workflows/release.yml"):
-        text = (REPO / name).read_text().lower()
-        assert "folric" not in text, name
+def test_package_metadata_and_website_omit_unrelated_company_name() -> None:
+    # Public contact is GitHub Discussions. The needle is built from parts so
+    # this test file does not match itself.
+    needle = ("fo" + "lric").encode()
+    paths = [
+        REPO / "pyproject.toml",
+        REPO / "action.yml",
+        REPO / ".github/workflows/release.yml",
+    ]
+    tracked = subprocess.check_output(
+        ["git", "ls-files", "-z", "website"],
+        cwd=REPO,
+    ).split(b"\0")
+    rels = [rel.decode() for rel in tracked if rel]
+    assert rels, "expected tracked files under website/"
+    paths.extend(REPO / rel for rel in rels)
+    seen: set[Path] = set()
+    for path in paths:
+        if path in seen:
+            continue
+        seen.add(path)
+        data = path.read_bytes().lower()
+        assert needle not in data, path.relative_to(REPO).as_posix()

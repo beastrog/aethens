@@ -4,6 +4,10 @@ All notable changes are recorded here. The format follows Keep a Changelog; vers
 
 ## [Unreleased]
 
+### Added
+
+- Docs section on the marketing site at `/docs/`: getting started, CLI, checks C001–C007, GitHub Action, report format, and FAQ.
+
 ## [0.1.0] - 2026-11-27
 
 ### Added
