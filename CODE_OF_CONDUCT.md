@@ -58,18 +58,20 @@ representative at an online or offline event.
 
 ## Enforcement
 
-<!-- TODO for Ani: confirm or replace the hello@folric.ai enforcement address. -->
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-hello@folric.ai. All complaints will be reviewed and investigated promptly and
+reported privately to the community leaders responsible for enforcement through
+[GitHub private vulnerability reporting](https://github.com/beastrog/aethens/security/advisories/new).
+Mark the report as a code-of-conduct issue so it is not treated as a product
+vulnerability. All complaints will be reviewed and investigated promptly and
 fairly.
+
+<!-- TODO for Ani: add a private 'conduct' Discussions category (or another private contact) and point this section at it, so conduct reports are not mixed with security advisories. -->
 
 All community leaders are obligated to respect the privacy and security of the
 reporter of any incident.
 
-Security vulnerabilities in Aethens itself should be reported privately through
-GitHub's advisory form, as described in [SECURITY.md](SECURITY.md), not as a
-conduct report.
+Security vulnerabilities in Aethens itself should also be reported through the
+same private advisory form, as described in [SECURITY.md](SECURITY.md).
 
 ## Enforcement Guidelines
 
