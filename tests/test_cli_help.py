@@ -20,7 +20,8 @@ def test_no_command_prints_help_and_exits_0(capsys: pytest.CaptureFixture[str]) 
     assert "1 findings at or above --fail-on" in out
     assert "2 tool error" in out
     assert "3 a gold-solution run in C001 or C002 timed out" in out
-    assert "aethens audit path/to/task" in out
+    assert "aethens init demo" in out
+    assert "aethens audit demo --budget smoke --check C001" in out
     assert "does not mean the verifier is sound" in out
 
 

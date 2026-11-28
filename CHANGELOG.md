@@ -7,6 +7,7 @@ All notable changes are recorded here. The format follows Keep a Changelog; vers
 ### Added
 - Public findings, in the README and on the site: a Terminal-Bench 2 broken solution scored full reward (3/3 tests, reward 1), and SWE-bench Verified graded wrong patches resolved on 9 instances (8 test gaps across 4 repositories, plus the sympy log-parser bug), linked to SWE-bench issue 733. `django__django-16631` is described as a test gap, not a Django security issue. The probes are not part of v0.1.0. Each result was confirmed with the benchmark's own harness.
 - CLI: `aethens` and `aethens audit --help` now show a copy-paste example, the exit codes (0/1/2/3), what `--budget`, `--fail-on`, `--format` and `--seed` do, and the limit that a clean report is not a proof the verifier is sound.
+- CLI: `aethens init [PATH]` writes a minimal `aethens-task/v1` task (default directory `aethens-task`) so an installed copy can be tried without cloning the repository. It refuses to overwrite existing files. The printed next step runs C001 only, and says that a full audit's C007 probes usually pass this plain unittest harness.
 - CI: a non-required `website build` job runs `npm ci` and `npm run build` in `website/` on pull requests and pushes to main that touch `website/**`, `bench/results.json`, `bench/external/results.json`, or the workflow file. It does not deploy, and it is not a required ruleset check.
 - Docs section on the marketing site at `/docs/`: getting started, CLI, checks C001–C007, GitHub Action, report format, and FAQ. The site header links to it.
 

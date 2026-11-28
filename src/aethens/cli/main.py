@@ -37,6 +37,7 @@ from aethens.models import Budget, Report, Severity
 from aethens.report import render_json, render_markdown
 from aethens.runner import DockerRunner, LocalRunner, Runner
 from aethens.runner.docker import LEDGER
+from aethens.scaffold import write_example
 
 ALL_CHECKS: dict[str, type[Check]] = {
     "C001": C001GoldSanity,
@@ -59,8 +60,8 @@ UNSAFE_WARNING = (
 # Shown by `aethens` and `aethens audit --help`. Kept in one place so the two texts cannot drift.
 HELP_EPILOG = """\
 examples:
-  aethens audit path/to/task
-  aethens audit path/to/task --budget smoke --check C001 --seed 0
+  aethens init demo
+  aethens audit demo --budget smoke --check C001
   aethens audit path/to/task --format markdown --fail-on warning
 
 exit codes:
@@ -145,6 +146,22 @@ def build_parser() -> argparse.ArgumentParser:
             "It can read your files and use your network. Only for code you trust"
         ),
     )
+    init = sub.add_parser(
+        "init",
+        help="write a minimal example task you can audit",
+        description=(
+            "Write a tiny aethens-task/v1 directory: an add function, a starter that "
+            "raises, a gold solution, and unittest tests. Refuses to overwrite. "
+            "The generated verifier is a plain unittest harness, so C001 can pass and "
+            "C007 reward-hacking probes usually get through."
+        ),
+    )
+    init.add_argument(
+        "path",
+        nargs="?",
+        default="aethens-task",
+        help="directory to create (default: %(default)s)",
+    )
     return parser
 
 
@@ -202,9 +219,29 @@ def main(argv: list[str] | None = None) -> int:
         signal.signal(signal.SIGTERM, previous)
 
 
+def _init(path: str) -> int:
+    try:
+        written = write_example(Path(path))
+    except AethensError as exc:
+        print(f"aethens: error: {type(exc).__name__}: {exc}", file=sys.stderr)
+        return EXIT_TOOL_ERROR
+    print(f"Wrote {path} ({len(written)} files, schema aethens-task/v1).")
+    print("Next:")
+    print("  docker pull python:3.12-slim")
+    print(f"  aethens audit {path} --budget smoke --check C001")
+    print(
+        "A full audit also runs C007. This example uses a plain unittest verifier, "
+        "which those probes usually get past, so expect exit 1 until the harness "
+        "judges the solution in a separate process."
+    )
+    return EXIT_OK
+
+
 def _main(argv: list[str] | None) -> int:
     parser = build_parser()
     args = parser.parse_args(sys.argv[1:] if argv is None else argv)
+    if args.command == "init":
+        return _init(args.path)
     if args.command != "audit":
         parser.print_help()
         return EXIT_OK

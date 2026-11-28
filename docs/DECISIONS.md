@@ -331,4 +331,11 @@ CI installs uv with `pip install uv==0.13.7` instead of a third-party setup acti
   external C004 precision 0.46 -> 0.82 (0.4615 -> 0.8158) and recall 0.87 -> 0.80 (0.8667 -> 0.80),
   filter off vs on in the same run. Budgets and MIN_VALID=20 stay as above; the CLI switch to turn
   the filter off is still open (docs/IDEAS.md, review item O6).
+- D-088 (launch-week CLI, no check-semantics change) `aethens init` writes a minimal
+  aethens-task/v1 directory from strings in `aethens.scaffold` (so a wheel has the example; the
+  repository's `examples/` tree is not package data). The task id is the directory name when that
+  name matches the loader's id pattern, otherwise `example-task`. Existing files are never
+  overwritten. The generated verifier is plain `unittest`, the same shape as `tests/fixtures/plain-add`:
+  C001 can pass, and C007 is expected to fire. The command prints that limit and suggests
+  `--check C001` as the first audit. No new dependency. Isolation settings are unchanged.
 
