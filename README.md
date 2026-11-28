@@ -79,7 +79,7 @@ Tasks use the `aethens-task/v1` directory format: [docs/task-format.md](docs/tas
 
 ## Findings
 
-These notes name defects in other people's benchmarks. The Terminal-Bench 2 converter and the SWE-bench patch probes that surfaced them are not part of the v0.1.0 release. Each result was confirmed with that benchmark's own harness, not with Aethens' grader. Policy for findings that are not yet public: [docs/DISCLOSURE.md](docs/DISCLOSURE.md). The same text is on the site: [Findings](https://beastrog.github.io/aethens/findings/).
+These notes name defects in other people's benchmarks. The Terminal-Bench 2 converter and the SWE-bench patch probes that surfaced them are not part of the v0.1.0 release. Each result was confirmed with that benchmark's own harness, not with Aethens' grader. Policy for findings that are not yet public: [docs/DISCLOSURE.md](docs/DISCLOSURE.md). The same text is on the site: [Findings](https://beastrog.github.io/aethens/findings/). Harness commands: [docs/reproduce-findings.md](docs/reproduce-findings.md).
 
 **Terminal-Bench 2.** A broken solution scored full reward: 3 of 3 tests passed, reward 1. Confirmed with Terminal-Bench's own harness.
 
@@ -237,6 +237,10 @@ Where Aethens is behind, as of that survey: own task format only; no leak scanne
 - Tested on Linux with Docker Engine. Rootless Docker, Docker Desktop and Podman are untested.
 
 </details>
+
+## Reproducing findings on other benchmarks
+
+The public notes are the [Findings](#findings) section above and the site [Findings](https://beastrog.github.io/aethens/findings/) page. Harness commands, and what is not in this repository, are in [docs/reproduce-findings.md](docs/reproduce-findings.md). Those notes are separate from the accuracy tables above, which measure this repository's own bench.
 
 ## Contributing, security and disclosure
 

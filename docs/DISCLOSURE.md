@@ -17,7 +17,8 @@ handles those findings as follows.
 
 The write-up for the notices the maintainer has already sent is the Findings section of the README
 and <https://beastrog.github.io/aethens/findings/>. It covers a Terminal-Bench 2 full-reward result
-and [SWE-bench Verified issue #733](https://github.com/SWE-bench/SWE-bench/issues/733). Later findings
+and [SWE-bench Verified issue #733](https://github.com/SWE-bench/SWE-bench/issues/733). The harness
+commands for those two notices are in [reproduce-findings.md](reproduce-findings.md). Later findings
 still follow steps 1–4 before they are named.
 
 Bench numbers elsewhere on the site and in the README are the project's own measurements. A
