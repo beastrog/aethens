@@ -1,31 +1,17 @@
 ---
-import Base from "../layouts/Base.astro";
-import Header from "../components/Header.astro";
+import Page from "../layouts/Page.astro";
 import Hero from "../components/Hero.astro";
-import Problem from "../components/Problem.astro";
-import Checks from "../components/Checks.astro";
-import Accuracy from "../components/Accuracy.astro";
-import Compare from "../components/Compare.astro";
-import Report from "../components/Report.astro";
-import Teams from "../components/Teams.astro";
-import OpenSource from "../components/OpenSource.astro";
-import Footer from "../components/Footer.astro";
+import What from "../components/What.astro";
+import FindingsTeaser from "../components/FindingsTeaser.astro";
+import SectionLinks from "../components/SectionLinks.astro";
 ---
 
-<Base
+<Page
   title="Aethens — audit the tests that score your agents"
-  description="Open-source Python CLI and GitHub Action that audits the verifiers of RL environments and code-task benchmarks by running them in a Docker sandbox. Published, reproducible accuracy."
+  description="Open-source Python CLI and GitHub Action that audits the verifiers of RL environments and code-task benchmarks by running them in a Docker sandbox."
 >
-  <Header />
-  <main id="main">
-    <Hero />
-    <Problem />
-    <Checks />
-    <Accuracy />
-    <Compare />
-    <Report />
-    <Teams />
-    <OpenSource />
-  </main>
-  <Footer />
-</Base>
+  <Hero />
+  <What />
+  <FindingsTeaser />
+  <SectionLinks />
+</Page>

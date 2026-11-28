@@ -34,7 +34,7 @@ const groups = [
         name: "Mutation probes",
         does: "Runs up to 5, 10 or 30 AST mutants of the gold solution, depending on the budget (smoke, standard, deep).",
         catch: "Behaviour the tests never check (surviving mutants, reported at info level).",
-        miss: "Equivalent mutants look like weaknesses. A killed mutant does not prove the tests are strong. See the accuracy section for published precision on HumanEval, with and without the equivalent-mutant filter.",
+        miss: "Equivalent mutants look like weaknesses. A killed mutant does not prove the tests are strong. Published precision on HumanEval, with and without the equivalent-mutant filter, is a separate measurement.",
       },
       {
         id: "C007",
@@ -65,6 +65,7 @@ const groups = [
     ],
   },
 ];
+const base = import.meta.env.BASE_URL;
 ---
 
 <section id="checks" class="border-t border-line py-20 sm:py-28" aria-labelledby="checks-heading">
@@ -77,6 +78,8 @@ const groups = [
       Aethens does not prove a verifier is sound. No findings means only that these checks found
       nothing at the chosen budget and seed. It is not a sandbox product: task code runs in Docker
       with a locked-down configuration that reduces risk but is not a guarantee.
+      Published precision and recall, including the weak C004 figure, are on the
+      <a class="prose-link" href={`${base}accuracy/`}>accuracy page</a>.
     </p>
 
     <div class="mt-14 space-y-16">
@@ -88,7 +91,7 @@ const groups = [
             </h3>
             <div class="grid gap-4 lg:grid-cols-2">
               {group.checks.map((c) => (
-                <article class:list={["border border-line p-6 bg-ink/80", c.id === "C007" && "lg:col-span-2"]} id={c.id.toLowerCase()}>
+                <article class:list={["lift border border-line p-6 bg-ink/80", c.id === "C007" && "lg:col-span-2"]} id={c.id.toLowerCase()}>
                   <p class="font-mono text-[0.72rem] uppercase tracking-[0.16em] text-muted">
                     {c.id}
                   </p>
