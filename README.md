@@ -13,6 +13,7 @@
 [![PyPI](https://img.shields.io/pypi/v/aethens)](https://pypi.org/project/aethens/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-1f6feb.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11%2B-3776ab.svg)](pyproject.toml)
+[![Views](https://hits.sh/github.com/beastrog/aethens.svg?label=views&color=555555)](https://hits.sh/github.com/beastrog/aethens/)
 
 An open-source Python CLI and GitHub Action that audits the verifiers of RL environments and code-task benchmarks by running them in a Docker sandbox. Every finding comes with evidence and a one-line repro command. The checks themselves have published precision and recall you can reproduce.
 
