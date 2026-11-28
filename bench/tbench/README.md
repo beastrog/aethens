@@ -64,7 +64,10 @@ there after #3 merges.
 - **C007** probes Python modules and unittest; pytest `conftest.py` hooks are not probed (IDEAS).
 
 Findings about Terminal-Bench tasks are kept in the gitignored `audits/private/tb2/` for the owner
-to review (AGENTS.md rule 12). None are published here.
+to review (AGENTS.md rule 12). The one finding the maintainer has published is
+`constraints-scheduling` (tests 2 and 3 read the first `DTSTART`). It was confirmed with that
+task's own `tests/test.sh`, and it is written up in `docs/reproduce-findings.md` and in
+harbor-framework/terminal-bench-2 issue 107. Nothing else from the private directory is published here.
 
 ## Proposed Aethens changes (not made; need the owner's approval)
 

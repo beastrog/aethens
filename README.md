@@ -228,6 +228,10 @@ Where Aethens is behind, as of that survey: own task format only; no leak scanne
 
 </details>
 
+## Reproducing findings on other benchmarks
+
+Two findings are public. The harness that confirmed each one, and the fact that those probes are not in v0.1.0, are in [docs/reproduce-findings.md](docs/reproduce-findings.md). That note is separate from the accuracy tables above, which measure this repository's own bench.
+
 ## Contributing, security and disclosure
 
 See [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md), the documentation index in [docs/README.md](docs/README.md), and the disclosure policy for findings about other people's benchmarks in [docs/DISCLOSURE.md](docs/DISCLOSURE.md).

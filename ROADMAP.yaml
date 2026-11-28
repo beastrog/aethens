@@ -184,3 +184,38 @@ scale_triggers:
   - id: E
     trigger: growth limited by cash, not demand or time, with repeatable sales shown
     unlocks: consider outside capital
+
+# Launch-week tracking only. Not started. Do not implement these in a launch-day PR.
+# Check semantics, the report schema, severities, thresholds and Docker isolation
+# still need an explicit owner decision before they change.
+launch_week:
+  - id: LW-01
+    title: Ship the two public probes in the CLI
+    status: NOT_STARTED
+    scope: >
+      After v0.1.0, teach the CLI the probes described in docs/reproduce-findings.md:
+      a pytest conftest hook in the reward-hacking pack, and a first-DTSTART style
+      check only where the verifier is pytest over a file the task names. Each probe
+      needs a planted-defect fixture, a clean control, a unit test, and a bench
+      update before it merges. Candidate patches from the public issues are not
+      committed unless their licence is recorded in bench/LICENSES.md.
+    not_in_scope: downloading benchmarks, new adapters, changing isolation flags
+  - id: LW-02
+    title: Built-in support for public benchmark task layouts
+    status: NOT_STARTED
+    scope: >
+      Let the CLI read a Terminal-Bench 2 or SWE-bench task without a separate
+      convert script, still with no network inside the sandbox. bench/tbench/
+      stays the experimental converter until this exists. Record every dataset
+      licence in bench/LICENSES.md. Do not vendor benchmark task files.
+    not_in_scope: running the probes, loosening Docker isolation, a Harbor profile
+  - id: LW-03
+    title: RL environment adapters
+    status: NOT_STARTED
+    scope: >
+      Adapters for Harbor, a SWE-bench task layout, and the other layouts listed
+      under deferred_until_evidence. PR #3 is the open importer draft and stays
+      waiting on the owner (D-080 and the SWE-bench licence). The phase-4 trigger
+      (adapters when three users ask) still applies unless the owner waives it.
+      One adapter at a time, behind an explicit flag, isolation unchanged.
+    not_in_scope: merging #3, Gymnasium, a hosted runner

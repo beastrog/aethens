@@ -16,3 +16,5 @@ handles those findings as follows.
    status. It credits maintainers who responded and does not shame those who did not.
 
 Launch material uses only the project's own bench numbers, never named third-party findings.
+
+The maintainer filed two findings himself on 27 Nov 2026 and asked for a reproduction page before launch: [Terminal-Bench 2 issue 107](https://github.com/harbor-framework/terminal-bench-2/issues/107) and [SWE-bench issue 733](https://github.com/SWE-bench/SWE-bench/issues/733). [reproduce-findings.md](reproduce-findings.md) restates only what those issues already say, including which harness confirmed them. It is not a new audit. Every other third-party finding stays in `audits/private/` until the steps above are done.

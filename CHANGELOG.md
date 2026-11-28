@@ -5,6 +5,7 @@ All notable changes are recorded here. The format follows Keep a Changelog; vers
 ## [Unreleased]
 
 ### Added
+- Docs: `docs/reproduce-findings.md` records how the two public findings (Terminal-Bench 2 issue 107 and SWE-bench issue 733) were confirmed with each benchmark's own harness. The probes are not in v0.1.0. Follow-ups are tracked as LW-01, LW-02 and LW-03 in `ROADMAP.yaml` and are not started.
 - CI: a non-required `website build` job runs `npm ci` and `npm run build` in `website/` on pull requests and pushes to main that touch `website/**`, `bench/results.json`, `bench/external/results.json`, or the workflow file. It does not deploy, and it is not a required ruleset check.
 - Docs section on the marketing site at `/docs/`: getting started, CLI, checks C001–C007, GitHub Action, report format, and FAQ. The site header links to it.
 

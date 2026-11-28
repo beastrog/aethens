@@ -35,6 +35,7 @@ Guides and generated records for [Aethens](https://github.com/beastrog/aethens),
 | [../CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md) | Contributor Covenant |
 | [../GOVERNANCE.md](../GOVERNANCE.md) | How the project is maintained |
 | [DISCLOSURE.md](DISCLOSURE.md) | How findings about other people's benchmarks are handled |
+| [reproduce-findings.md](reproduce-findings.md) | How the two public Terminal-Bench 2 and SWE-bench findings were confirmed |
 | [LICENSING.md](LICENSING.md) | Third-party notices and dependency licences |
 | [../NOTICE](../NOTICE) | Apache-2.0 NOTICE shipped in the sdist |
 
