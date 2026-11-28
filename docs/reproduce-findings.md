@@ -1,6 +1,6 @@
 # Reproducing the findings
 
-Two findings about other people's benchmarks are public, because the maintainer filed them on 27 Nov 2026. This page says what was probed, where the steps live, and which harness confirmed each result. It does not add a finding that is not already in those issues.
+Two findings about other people's benchmarks are public, because the maintainer filed them on 27 Nov 2026. The short notes are the [README Findings section](https://github.com/beastrog/aethens/blob/main/README.md#findings) and the site [Findings](https://beastrog.github.io/aethens/findings/) page. This page says what was probed, where the steps live, and which harness confirmed each result. It does not add a finding that is not already in those issues.
 
 `aethens` 0.1.0 does not contain these probes. It audits `aethens-task/v1` Python tasks with checks C001–C007. Shipping the probes in the CLI, loading these benchmarks from the CLI, and RL adapters are tracked as LW-01, LW-02 and LW-03 in [ROADMAP.yaml](../ROADMAP.yaml) and are not started. The accuracy tables in the README are this repository's own bench. They are not a measurement of Terminal-Bench 2 or SWE-bench.
 
@@ -60,4 +60,4 @@ The dataset JSON, the prediction file, and the official `report.json` are not in
 
 ## What this page does not say
 
-A clean `aethens` report does not mean a verifier is sound. These two write-ups do not mean either benchmark has no other defects, and they do not mean v0.1.0 would have printed these findings. The marketing site's Findings section should link here once that section exists.
+A clean `aethens` report does not mean a verifier is sound. These two write-ups do not mean either benchmark has no other defects, and they do not mean v0.1.0 would have printed these findings. The short public notes are the [README Findings section](https://github.com/beastrog/aethens/blob/main/README.md#findings) and the site [Findings](https://beastrog.github.io/aethens/findings/) page.

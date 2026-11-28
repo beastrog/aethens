@@ -1,10 +1,10 @@
 ---
-import numbers from "../data/numbers.json";
-import { fmtScore, frac } from "../lib/format";
-const m = numbers.internal;
+const command = `pipx install aethens
+docker pull python:3.12-slim
+aethens audit path/to/task --format markdown`;
 ---
 
-<section id="top" class="relative overflow-hidden" aria-labelledby="hero-heading">
+<section id="top" class="relative" aria-labelledby="hero-heading">
   <div
     class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold to-transparent"
     aria-hidden="true"
@@ -28,77 +28,83 @@ const m = numbers.internal;
     </h1>
 
     <p class="mt-8 max-w-2xl text-lg sm:text-xl text-paper/90 leading-relaxed">
-      Aethens is an open-source Python CLI and GitHub Action that audits the
-      verifiers of RL environments and code-task benchmarks by running them in a
-      Docker sandbox. Every finding comes with evidence and a one-line repro
-      command. The checks themselves have published precision and recall you can
-      reproduce.
-    </p>
-
-    <p class="mt-5 max-w-2xl text-sm text-muted">
-      v0.1.0 is on{' '}
-      <a class="prose-link" href="https://pypi.org/project/aethens/">PyPI</a>.
-      Needs Docker and Python 3.11+. No LLMs, no network access for task code, no telemetry.
+      It runs a task’s verifier in Docker and reports tests that accept a wrong solution, reject a right one, or change their answer between runs.
     </p>
 
     <div class="mt-12 grid gap-4 lg:grid-cols-2">
       <div>
         <p class="cmd-label">Install and run</p>
-        <pre class="cmd" tabindex="0"><code>pipx install aethens
-docker pull python:3.12-slim
-aethens audit path/to/task --format markdown</code></pre>
+        <div class="cmd-frame">
+          <pre class="cmd" tabindex="0"><code id="install-cmd">{command}</code></pre>
+          <button type="button" class="copy-btn" data-copy-target="install-cmd">Copy</button>
+        </div>
         <p class="mt-2 text-xs text-muted">
           <code class="text-gold">uv tool install aethens</code> and{' '}
           <code class="text-gold">pip install aethens</code> install the same release.
-          From a clone, <code class="text-gold">python -m pip install .</code>
+          From a clone, <code class="text-gold">python -m pip install .</code>{' '}
+          Needs Docker and Python 3.11+.
         </p>
       </div>
       <div>
-        <p class="cmd-label">GitHub Action</p>
-        <pre class="cmd" tabindex="0"><code>- uses: beastrog/aethens@v0.1.0
-  with:
-    path: path/to/tasks
-    budget: standard
-    fail-on: error
-    seed: "0"</code></pre>
+        <p class="cmd-label">Report lines, typed</p>
+        <pre class="term" id="cli-demo" tabindex="0" aria-hidden="true"></pre>
+        <p class="sr-only">
+          aethens audit bench/tasks/order-alphabetical --check C005 --seed 0 --budget smoke.
+          1 error, 0 warning, 0 info.
+          error, C005, order-alphabetical.
+          Test verdict depends on test order or isolation: test_reg.TestRegistry.test_b_lookup.
+          Observed: default order: pass; in reversed order: error.
+        </p>
         <p class="mt-2 text-xs text-muted">
-          <a class="prose-link" href="https://github.com/marketplace/actions/aethens-audit">Marketplace</a>,
-          tag <code class="text-gold">v0.1.0</code>.
+          Lines from a real report,{' '}
+          <code class="text-gold">data/report-order-alphabetical.md</code>
+          {' '}(local run, 27 Nov 2026, aethens 0.1.0.dev0). Not a mock-up.
+          <a class="prose-link" href={`${import.meta.env.BASE_URL}how-it-works/#report`}>Full report</a>.
         </p>
       </div>
     </div>
-
-    <dl
-      class="mt-12 grid grid-cols-2 gap-px bg-line sm:grid-cols-4 border border-line"
-      aria-label={`Internal bench summary, ${m.label}`}
-    >
-      <div class="bg-ink px-4 py-4 sm:px-5">
-        <dt class="metric-label">Precision</dt>
-        <dd class="font-serif italic text-4xl sm:text-5xl leading-none">{fmtScore(m.precision)}</dd>
-      </div>
-      <div class="bg-ink px-4 py-4 sm:px-5">
-        <dt class="metric-label">Recall</dt>
-        <dd class="font-serif italic text-4xl sm:text-5xl leading-none">
-          {fmtScore(m.recall)}
-          <span class="block font-mono text-[0.7rem] not-italic tracking-normal text-muted mt-2 normal-case">
-            {frac(m.found, m.planted)} planted defects
-          </span>
-        </dd>
-      </div>
-      <div class="bg-ink px-4 py-4 sm:px-5">
-        <dt class="metric-label">False positives</dt>
-        <dd class="font-serif italic text-4xl sm:text-5xl leading-none">{m.false_positives}</dd>
-      </div>
-      <div class="bg-ink px-4 py-4 sm:px-5">
-        <dt class="metric-label">Reward-hacking</dt>
-        <dd class="font-serif italic text-4xl sm:text-5xl leading-none">{frac(m.reward_hack.found, m.reward_hack.labelled)}</dd>
-      </div>
-    </dl>
-    <p class="mt-3 font-mono text-[0.7rem] text-muted tracking-wide">
-      Internal self-authored bench, 34 tasks, seed 0, budget standard.{' '}
-      {m.label}.
-      External-bench figures, including a weak C004 precision of {fmtScore(numbers.external.c004.precision)}, are in{' '}
-      <a class="prose-link" href="#accuracy">Published accuracy</a>.
-    </p>
   </div>
 </section>
+
+<script>
+  const demo = document.getElementById("cli-demo");
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const lines = [
+    "$ aethens audit bench/tasks/order-alphabetical --check C005 --seed 0 --budget smoke",
+    "",
+    "1 error, 0 warning, 0 info",
+    "error  C005  order-alphabetical",
+    "Test verdict depends on test order or isolation: test_reg.TestRegistry.test_b_lookup",
+    "Observed: default order: pass; in reversed order: error",
+  ];
+  const paint = (n: number) => {
+    if (!demo) return;
+    demo.textContent = lines.slice(0, n).join("\n");
+  };
+  if (!demo) {
+    /* no demo node */
+  } else if (reduce.matches) {
+    paint(lines.length);
+  } else {
+    let i = 0;
+    let pos = 0;
+    const step = () => {
+      if (reduce.matches) {
+        paint(lines.length);
+        return;
+      }
+      i += 1;
+      if (i > lines[pos].length) {
+        pos += 1;
+        i = 0;
+        if (pos >= lines.length) {
+          paint(lines.length);
+          return;
+        }
+      }
+      demo.textContent = lines.slice(0, pos).concat(lines[pos].slice(0, i)).join("\n");
+      window.setTimeout(step, lines[pos] === "" ? 180 : 16);
+    };
+    step();
+  }
+</script>

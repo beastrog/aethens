@@ -1,0 +1,39 @@
+---
+const base = import.meta.env.BASE_URL;
+---
+
+<section class="border-t border-line py-16 sm:py-20" aria-labelledby="findings-teaser-heading">
+  <div class="wrap">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <h2 id="findings-teaser-heading" class="font-serif italic font-semibold text-section leading-[1.1]">
+        Findings
+      </h2>
+      <a class="prose-link font-mono text-[0.75rem]" href={`${base}findings/`}>Full notes</a>
+    </div>
+    <p class="mt-4 max-w-2xl text-sm text-muted">
+      Confirmed with each benchmark’s own harness. The probes are not part of the v0.1.0 release.
+    </p>
+    <div class="mt-8 grid gap-4 md:grid-cols-2">
+      <article class="reveal lift border border-line p-6 bg-ink/80">
+        <p class="font-mono text-[0.68rem] uppercase tracking-[0.14em] text-gold">Terminal-Bench 2</p>
+        <p class="mt-4 text-paper/90 leading-relaxed">
+          A broken solution scored full reward: 3 of 3 tests passed, reward 1.
+        </p>
+        <p class="mt-4">
+          <a class="prose-link font-mono text-[0.75rem]" href={`${base}findings/#terminal-bench-2`}>Notes</a>
+        </p>
+      </article>
+      <article class="reveal lift border border-line p-6 bg-ink/80">
+        <p class="font-mono text-[0.68rem] uppercase tracking-[0.14em] text-gold">SWE-bench Verified</p>
+        <p class="mt-4 text-paper/90 leading-relaxed">
+          Wrong patches graded resolved on 9 instances: 8 test gaps across 4 repositories, plus a sympy log-parser bug.
+        </p>
+        <p class="mt-4">
+          <a class="prose-link font-mono text-[0.75rem]" href="https://github.com/SWE-bench/SWE-bench/issues/733">
+            SWE-bench issue #733
+          </a>
+        </p>
+      </article>
+    </div>
+  </div>
+</section>

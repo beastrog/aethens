@@ -17,6 +17,8 @@ def test_page_names_the_harness_and_the_limit() -> None:
     assert "swebench.harness.run_evaluation" in text
     assert "not part of `make check`" in text or "not the v0.1.0 CLI" in text
     assert "0.1.0 does not contain these probes" in text
+    assert "https://beastrog.github.io/aethens/findings/" in text
+    assert "README.md#findings" in text
     assert "bench/tbench/" in text
     assert "LW-01" in text and "LW-02" in text and "LW-03" in text
     # The private audit tallies are not part of either public issue.

@@ -15,6 +15,11 @@ handles those findings as follows.
 5. **Public write-up.** Afterwards, a public post may describe method, numbers, misses and disclosure
    status. It credits maintainers who responded and does not shame those who did not.
 
-Launch material uses only the project's own bench numbers, never named third-party findings.
+The write-up for the notices the maintainer has already sent is the Findings section of the README
+and <https://beastrog.github.io/aethens/findings/>. It covers a Terminal-Bench 2 full-reward result
+and [SWE-bench Verified issue #733](https://github.com/SWE-bench/SWE-bench/issues/733). The harness
+commands for those two notices are in [reproduce-findings.md](reproduce-findings.md). Later findings
+still follow steps 1–4 before they are named.
 
-The maintainer filed two findings himself on 27 Nov 2026 and asked for a reproduction page before launch: [Terminal-Bench 2 issue 107](https://github.com/harbor-framework/terminal-bench-2/issues/107) and [SWE-bench issue 733](https://github.com/SWE-bench/SWE-bench/issues/733). [reproduce-findings.md](reproduce-findings.md) restates only what those issues already say, including which harness confirmed them. It is not a new audit. Every other third-party finding stays in `audits/private/` until the steps above are done.
+Bench numbers elsewhere on the site and in the README are the project's own measurements. A
+third-party finding is named only in that write-up, after the notice above.
