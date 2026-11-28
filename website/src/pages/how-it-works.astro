@@ -1,0 +1,38 @@
+---
+import Page from "../layouts/Page.astro";
+import Problem from "../components/Problem.astro";
+import Checks from "../components/Checks.astro";
+import Report from "../components/Report.astro";
+const base = import.meta.env.BASE_URL;
+---
+
+<Page
+  title="How it works — Aethens"
+  description="Why verifier bugs matter, what checks C001–C007 can and cannot catch, and a real Aethens report."
+>
+  <section class="border-b border-line" aria-labelledby="how-heading">
+    <div class="wrap py-16 sm:py-20">
+      <p class="kicker mb-5"><span>How it works</span></p>
+      <h1 id="how-heading" class="font-serif italic font-semibold text-section leading-[1.1] max-w-3xl">
+        A CLI and a GitHub Action that run the verifier.
+      </h1>
+      <div class="mt-6 max-w-2xl space-y-4 text-paper/90">
+        <p>
+          Aethens is an open-source Python CLI and GitHub Action that audits the verifiers of RL
+          environments and code-task benchmarks by running them in a Docker sandbox. Every finding
+          comes with evidence and a one-line repro command. The checks themselves have published
+          precision and recall you can reproduce.
+        </p>
+        <p>
+          v0.1.0 is on PyPI. No LLMs, no network access for task code, no telemetry, no hosted
+          service yet. Install instructions are on the
+          <a class="prose-link" href={`${base}docs/`}>docs</a> page. The Action is documented
+          separately.
+        </p>
+      </div>
+    </div>
+  </section>
+  <Problem />
+  <Checks />
+  <Report />
+</Page>

@@ -1,0 +1,37 @@
+---
+import Page from "../layouts/Page.astro";
+import Teams from "../components/Teams.astro";
+import OpenSource from "../components/OpenSource.astro";
+const base = import.meta.env.BASE_URL;
+---
+
+<Page
+  title="Roadmap — Aethens"
+  description="What Aethens 0.1.0 includes, what it does not, and how to ask about an audit or hosted CI."
+>
+  <section class="border-b border-line" aria-labelledby="roadmap-heading">
+    <div class="wrap py-16 sm:py-20 max-w-3xl">
+      <p class="kicker mb-5"><span>Roadmap</span></p>
+      <h1 id="roadmap-heading" class="font-serif italic font-semibold text-section leading-[1.1]">
+        0.1.0 is a local CLI and a GitHub Action.
+      </h1>
+      <p class="mt-6 text-paper/90">
+        Python tasks in the <code class="text-gold">aethens-task/v1</code> format. Docker by default.
+        The checks, the planted-defect bench, and the HumanEval figures are in the release.
+      </p>
+      <h2 class="mt-10 font-serif italic text-2xl">Not in this release</h2>
+      <ul class="mt-4 list-disc pl-5 space-y-2 text-paper/90">
+        <li>Other languages, and adapters for Harbor, SWE-bench, or verifiers environments.</li>
+        <li>A leak scanner.</li>
+        <li>The Terminal-Bench 2 converter and the SWE-bench patch probes. Those are how the <a class="prose-link" href={`${base}findings/`}>published findings</a> were produced. They are not part of v0.1.0.</li>
+        <li>Hosted CI. It is planned and not available. There is no signup.</li>
+        <li>Rootless Docker, Docker Desktop, and Podman. Those are untested.</li>
+      </ul>
+      <p class="mt-4 text-sm text-muted">
+        Check limits are on the <a class="prose-link" href={`${base}docs/faq/`}>FAQ</a>.
+      </p>
+    </div>
+  </section>
+  <Teams />
+  <OpenSource />
+</Page>

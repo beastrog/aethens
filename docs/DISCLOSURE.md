@@ -15,4 +15,10 @@ handles those findings as follows.
 5. **Public write-up.** Afterwards, a public post may describe method, numbers, misses and disclosure
    status. It credits maintainers who responded and does not shame those who did not.
 
-Launch material uses only the project's own bench numbers, never named third-party findings.
+The write-up for the notices the maintainer has already sent is the Findings section of the README
+and <https://beastrog.github.io/aethens/findings/>. It covers a Terminal-Bench 2 full-reward result
+and [SWE-bench Verified issue #733](https://github.com/SWE-bench/SWE-bench/issues/733). Later findings
+still follow steps 1–4 before they are named.
+
+Bench numbers elsewhere on the site and in the README are the project's own measurements. A
+third-party finding is named only in that write-up, after the notice above.

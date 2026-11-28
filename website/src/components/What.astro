@@ -1,0 +1,50 @@
+---
+const base = import.meta.env.BASE_URL;
+const items = [
+  {
+    k: "01",
+    title: "Run the verifier",
+    text: "Gold, labelled candidates, and mutants run in Docker. No network for task code, no telemetry, no LLM.",
+    href: `${base}how-it-works/`,
+  },
+  {
+    k: "02",
+    title: "Three failure modes",
+    text: "Tests that accept a wrong solution, reject a right one, or give a different answer on another run.",
+    href: `${base}how-it-works/#checks`,
+  },
+  {
+    k: "03",
+    title: "Evidence, then a repro",
+    text: "Each finding names the check, the command that was run, the result, a seed, and a one-line repro.",
+    href: `${base}how-it-works/#report`,
+  },
+  {
+    k: "04",
+    title: "Numbers you can rerun",
+    text: "Precision and recall on a planted-defect bench, and a weaker C004 figure on HumanEval.",
+    href: `${base}accuracy/`,
+  },
+];
+---
+
+<section class="border-t border-line py-16 sm:py-20" aria-labelledby="what-heading">
+  <div class="wrap">
+    <h2 id="what-heading" class="font-mono text-[0.72rem] uppercase tracking-[0.14em] text-gold">
+      What it does
+    </h2>
+    <ol class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {
+        items.map((item) => (
+          <li class="reveal lift border border-line p-5 bg-ink/80">
+            <p class="font-mono text-[0.68rem] tracking-[0.14em] text-muted">{item.k}</p>
+            <h3 class="mt-3 font-serif italic text-2xl leading-tight">
+              <a class="prose-link" href={item.href}>{item.title}</a>
+            </h3>
+            <p class="mt-3 text-sm text-paper/85 leading-relaxed">{item.text}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
