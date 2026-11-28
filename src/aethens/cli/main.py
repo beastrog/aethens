@@ -56,36 +56,94 @@ UNSAFE_WARNING = (
     "isolation. It can read your files and use your network. Only use it on code you trust."
 )
 
+# Shown by `aethens` and `aethens audit --help`. Kept in one place so the two texts cannot drift.
+HELP_EPILOG = """\
+examples:
+  aethens audit path/to/task
+  aethens audit path/to/task --budget smoke --check C001 --seed 0
+  aethens audit path/to/task --format markdown --fail-on warning
+
+exit codes:
+  0  no finding at or above --fail-on
+  1  findings at or above --fail-on
+  2  tool error (bad task, Docker unavailable, Ctrl-C, internal error)
+  3  a gold-solution run in C001 or C002 timed out
+
+A run with no error or warning findings means these checks found nothing at this
+budget and seed. It does not mean the verifier is sound.
+"""
+
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="aethens", description="Validate the verifiers of code tasks by running them."
+        prog="aethens",
+        description=(
+            "Audit the verifiers of code tasks by running them in a Docker sandbox. "
+            "Every finding includes what was run, what happened, and a one-line repro."
+        ),
+        epilog=HELP_EPILOG,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument("--version", action="version", version=f"aethens {__version__}")
     sub = parser.add_subparsers(dest="command")
-    audit = sub.add_parser("audit", help="audit one task directory or a directory of tasks")
-    audit.add_argument("path", help="a task directory (with task.yaml) or a directory of tasks")
+    audit = sub.add_parser(
+        "audit",
+        help="audit one task directory or a directory of tasks",
+        description=(
+            "Run the task verifiers in a Docker sandbox and write a report. "
+            "Each finding has evidence and a one-line repro command."
+        ),
+        epilog=HELP_EPILOG,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    audit.add_argument(
+        "path",
+        help="a task directory (contains task.yaml) or a directory of tasks",
+    )
     audit.add_argument(
         "--budget",
         choices=[b.value for b in Budget],
         default="standard",
-        help="smoke: 3 flaky runs, 5 mutants; standard: 5, 10; deep: 10, 30",
+        help=(
+            "how far the checks go (default: %(default)s). "
+            "smoke / standard / deep: C002 starts at 3 / 5 / 10 gold runs "
+            "(stops early once it can bound the flake rate); "
+            "C004 tries up to 5 / 10 / 30 mutants"
+        ),
     )
-    audit.add_argument("--fail-on", choices=["error", "warning"], default="error")
-    audit.add_argument("--format", choices=["json", "markdown"], default="json")
-    audit.add_argument("--seed", type=int, default=0)
+    audit.add_argument(
+        "--fail-on",
+        choices=["error", "warning"],
+        default="error",
+        help="minimum severity that exits 1 (default: %(default)s). warning also fails on warnings",
+    )
+    audit.add_argument(
+        "--format",
+        choices=["json", "markdown"],
+        default="json",
+        help="report on stdout, or in --output (default: %(default)s)",
+    )
+    audit.add_argument(
+        "--seed",
+        type=int,
+        default=0,
+        help="seed for shuffles, mutants and PYTHONHASHSEED (default: %(default)s)",
+    )
     audit.add_argument(
         "--check",
         action="append",
         choices=sorted(ALL_CHECKS),
         dest="checks",
-        help="run only this check (repeatable); default: all",
+        help="run only this check (repeatable). Default: C001 through C007",
     )
     audit.add_argument("--output", help="write the report to this file instead of stdout")
     audit.add_argument(
         "--unsafe-local",
         action="store_true",
-        help="run task code directly on this machine WITHOUT container isolation",
+        help=(
+            "run task code on this machine with no container isolation. "
+            "It can read your files and use your network. Only for code you trust"
+        ),
     )
     return parser
 
