@@ -338,4 +338,9 @@ CI installs uv with `pip install uv==0.13.7` instead of a third-party setup acti
   overwritten. The generated verifier is plain `unittest`, the same shape as `tests/fixtures/plain-add`:
   C001 can pass, and C007 is expected to fire. The command prints that limit and suggests
   `--check C001` as the first audit. No new dependency. Isolation settings are unchanged.
+- D-089 (launch-week CLI) Tool-error hints are printed by the CLI only (`aethens: hint:`).
+  Loader and runner exception text is unchanged, and so are exit codes. Hints cover
+  `MissingFileError` (points at `aethens init`), `SchemaError` (points at `aethens-task/v1`),
+  and `DockerUnavailableError` (Docker, or `--unsafe-local` with the isolation warning).
+  `aethens init` failures are not given an audit hint.
 

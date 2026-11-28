@@ -32,7 +32,7 @@ from aethens.checks import (
     Check,
     CheckContext,
 )
-from aethens.errors import AethensError
+from aethens.errors import AethensError, DockerUnavailableError, MissingFileError, SchemaError
 from aethens.models import Budget, Report, Severity
 from aethens.report import render_json, render_markdown
 from aethens.runner import DockerRunner, LocalRunner, Runner
@@ -219,6 +219,36 @@ def main(argv: list[str] | None = None) -> int:
         signal.signal(signal.SIGTERM, previous)
 
 
+def error_hint(exc: AethensError) -> str | None:
+    """A next step for the failures a first audit usually hits. None when we have nothing to add.
+
+    The exception text itself stays the loader's or the runner's. Exit codes do not change.
+    """
+    if isinstance(exc, DockerUnavailableError):
+        return (
+            "Install Docker and start the daemon (the default task image is python:3.12-slim), "
+            "or rerun with --unsafe-local on code you trust. That flag has no container isolation."
+        )
+    if isinstance(exc, MissingFileError):
+        return (
+            "Pass a task directory that contains task.yaml, or a directory of such tasks. "
+            "Create a minimal one with: aethens init demo"
+        )
+    if isinstance(exc, SchemaError):
+        return (
+            "task.yaml must use schema aethens-task/v1 with the required keys. "
+            "See docs/task-format.md in the repository."
+        )
+    return None
+
+
+def _print_tool_error(exc: AethensError) -> None:
+    print(f"aethens: error: {type(exc).__name__}: {exc}", file=sys.stderr)
+    hint = error_hint(exc)
+    if hint is not None:
+        print(f"aethens: hint: {hint}", file=sys.stderr)
+
+
 def _init(path: str) -> int:
     try:
         written = write_example(Path(path))
@@ -264,7 +294,7 @@ def _main(argv: list[str] | None) -> int:
         )
         report = run_audit(tasks, [ALL_CHECKS[i]() for i in ids], ctx)
     except AethensError as exc:
-        print(f"aethens: error: {type(exc).__name__}: {exc}", file=sys.stderr)
+        _print_tool_error(exc)
         return EXIT_TOOL_ERROR
     text = render_json(report) if args.format == "json" else render_markdown(report)
     if args.output:
