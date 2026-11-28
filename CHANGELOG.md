@@ -5,6 +5,7 @@ All notable changes are recorded here. The format follows Keep a Changelog; vers
 ## [Unreleased]
 
 ### Added
+- Docs: the 7 C004 survivors HumanEval+ did not reject are labelled in `docs/EXTERNAL_BENCH.md` (0 equivalent, 4 out of precondition, 3 real gaps the oracle also misses), plus the 5 filter-hidden survivors HumanEval+ rejects. Precision 0.8158 and recall 0.8 are unchanged. The next planned check, in `ROADMAP.yaml`, is a C007 pytest `conftest.py` hook, citing SWE-bench issue 733.
 - Public findings, in the README and on the site: a Terminal-Bench 2 broken solution scored full reward (3/3 tests, reward 1), and SWE-bench Verified graded wrong patches resolved on 9 instances (8 test gaps across 4 repositories, plus the sympy log-parser bug), linked to SWE-bench issue 733. `django__django-16631` is described as a test gap, not a Django security issue. The probes are not part of v0.1.0. Each result was confirmed with the benchmark's own harness.
 - Docs: `docs/reproduce-findings.md` records how the two public findings (Terminal-Bench 2 issue 107 and SWE-bench issue 733) were confirmed with each benchmark's own harness. The probes are not in v0.1.0. Follow-ups are tracked as LW-01, LW-02 and LW-03 in `ROADMAP.yaml` and are not started. The short notes stay in the README Findings section and on the site Findings page.
 - CLI: `aethens` and `aethens audit --help` now show a copy-paste example, the exit codes (0/1/2/3), what `--budget`, `--fail-on`, `--format` and `--seed` do, and the limit that a clean report is not a proof the verifier is sound.

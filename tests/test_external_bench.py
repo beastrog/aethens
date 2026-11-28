@@ -196,6 +196,35 @@ def test_generated_doc_is_in_sync_with_results() -> None:
     assert doc == render_external.render(full, sample)
 
 
+def test_unconfirmed_survivors_match_the_committed_run() -> None:
+    """The hand labels name exactly the 7 unconfirmed and 5 filter-hidden mutants."""
+    full = json.loads((EXT / "results.json").read_text(encoding="utf-8"))
+    labels = json.loads((EXT / "c004_unconfirmed.json").read_text(encoding="utf-8"))
+    judged = [
+        (r["task"], s["mutant"])
+        for r in full["per_task"]
+        if r["oracle_accepts_gold"]
+        for s in r["survivors"]
+        if s["oracle"] == "unconfirmed"
+    ]
+    hidden = [
+        (r["task"], s["mutant"])
+        for r in full["per_task"]
+        if r["oracle_accepts_gold"]
+        for s in r.get("filtered", [])
+        if s["oracle"] == "confirmed"
+    ]
+    assert [(r["task"], r["mutant"]) for r in labels["unconfirmed"]] == judged
+    assert [(r["task"], r["mutant"]) for r in labels["filter_hidden"]] == hidden
+    counts = {b: sum(1 for r in labels["unconfirmed"] if r["bucket"] == b) for b in "abc"}
+    assert counts == {"a": 0, "b": 5, "c": 2}
+    assert sum(counts.values()) == full["metrics"]["per_check"]["C004"]["unconfirmed"]
+    for row in labels["unconfirmed"]:
+        assert row["counterexample"] and row["reason"] and row["operator"]
+    c004 = full["metrics"]["per_check"]["C004"]
+    assert c004["precision"] == 0.8158 and c004["recall"] == 0.8
+
+
 def test_readme_external_block_is_in_sync() -> None:
     full = json.loads((EXT / "results.json").read_text(encoding="utf-8"))
     readme = (REPO / "README.md").read_text(encoding="utf-8")

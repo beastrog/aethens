@@ -50,6 +50,44 @@ Tasks whose original HumanEval canonical solution fails the HumanEval+ oracle (o
 - `he-140`: the original HumanEval canonical solution on the HumanEval+ tests: exit code 1
 - `he-150`: the original HumanEval canonical solution on the HumanEval+ tests: exit code 1
 
+### The 7 unconfirmed C004 survivors
+
+Hand labels for the 7 C004 survivors HumanEval+ did not reject in bench/external/results.json (seed 0, budget standard, exhaustive, D-065 filter on: 38 judged, 31 confirmed, 7 unconfirmed). Counterexamples were re-probed on 28 Nov 2026 with the same equivalence driver, seed 0 and budget standard (LocalRunner, explicit opt-in). The full external run was not repeated. Precision 0.8158 and recall 0.8 are unchanged. Buckets: (a) equivalent mutant, no valid input distinguishes it from the gold; (b) out of precondition, differs only on an input the task docstring rules out; (c) real gap, a valid input distinguishes it and HumanEval+ misses it too.
+
+Buckets: (a) equivalent 0, (b) out of precondition 5, (c) real gap 2.
+
+| task | mutant | change | bucket | reason |
+|---|---|---|---|---|
+| `he-006` | `solution.py:25:constant-plus-one:0` | max_depth = 0 -> 1 | b | The extra 1 is a lone ')' group, which is not a group of nested parentheses the prompt describes. |
+| `he-018` | `solution.py:32:constant-plus-one:0` | range(... + 1) -> range(... + 2) | c | The prompt does not rule out an empty substring (its own example uses an empty string), and HumanEval+ never calls how_many_times('', ''). |
+| `he-025` | `solution.py:66:constant-plus-one:0` | math.sqrt(n) + 1 -> math.sqrt(n) + 2 | b | The prompt requires the input to equal the product of its prime factors; 0 is not that product. |
+| `he-059` | `solution.py:32:binop-swap:0` | range(2, n + 1) -> range(2, n - 1) | b | 331 is prime, and the prompt says to assume n is not a prime, so the loop only misses n itself. |
+| `he-116` | `solution.py:29:constant-plus-one:0` | bin(x)[2:] -> bin(x)[3:] | c | The prompt's own examples use negatives and 1, and HumanEval+ does not include this mix, where the shorter slice drops a bit of bin(1). |
+| `he-129` | `solution.py:32:constant-plus-one:0` | n * n + 1 -> n * n + 2 | b | The grid is not N by N and does not contain each of 1..N*N once, which the prompt requires. |
+| `he-135` | `solution.py:25:compare-boundary:0` | arr[i] < arr[i-1] -> arr[i] <= arr[i-1] | b | The prompt says the array will not contain duplicates, and the two comparisons differ on the repeated 2. |
+
+Counterexamples, re-probed with the same driver (not stored in `results.json`):
+
+- `he-006`: parse_nested_parens('() (()) (()) ((()) ) (((())))') returns [1, 2, 2, 3, 0, 4] for the gold and [1, 2, 2, 3, 1, 4] for the mutant
+- `he-018`: how_many_times('', '') returns 1 for the gold and 2 for the mutant
+- `he-025`: factorize(0) returns [] for the gold and does not return within 2 s for the mutant
+- `he-059`: largest_prime_factor(331) returns 331 for the gold and 1 for the mutant
+- `he-116`: sort_array([-2, -3, -4, -5, -6, 1]) returns [-4, -2, 1, -6, -5, -3] for the gold and [1, -4, -2, -6, -5, -3] for the mutant
+- `he-129`: minPath([[11, 8, 7, 2], [9, 3, 15, 6], [12, 13, 10, 1]], 10) returns [1, 10, ...] for the gold and [1, 11, ...] for the mutant
+- `he-135`: can_arrange([1, 4, 2, 2, 6, 7, 8, 9, 10]) returns 2 for the gold and 3 for the mutant
+
+### Five filter-hidden survivors HumanEval+ rejects
+
+These are the 5 of 51 filtered mutants that HumanEval+ rejects. The probe reported no counterexample, so each is a real gap the filter misses. Precision and recall above already include that cost and were not recomputed.
+
+| task | mutant | change | why it is still a gap |
+|---|---|---|---|
+| `he-019` | `solution.py:33:constant-plus-one:0` | 'six': 6 -> 7 | HumanEval+ rejects it. The probe found no difference on 134 inputs, so a wrong rank for the word six was hidden. |
+| `he-020` | `solution.py:88:binop-swap:0` | abs(elem - elem2) -> abs(elem + elem2) on the first pair | HumanEval+ rejects it. The probe found no difference on 300 inputs, so the wrong first-pair distance was hidden. |
+| `he-094` | `solution.py:86:binop-swap:0` | n**0.5 -> n*0.5 in the prime test | HumanEval+ rejects it. The probe found no difference on 300 inputs, so a prime test that stops too early was hidden. |
+| `he-099` | `solution.py:53:constant-plus-one:0` | num > 0 -> num > 1 | HumanEval+ rejects it. The probe found no difference on 221 inputs, so rounding a fraction in (0, 1] the wrong way was hidden. |
+| `he-157` | `solution.py:19:binop-swap:0` | a*a + c*c -> a*a - c*c in the right-angle check | HumanEval+ rejects it. The probe found no difference on 300 inputs, so a hypotenuse on the b side was hidden. |
+
 ## Offline sample: 6 tasks (run by `make check`)
 
 | check | ground truth | result |

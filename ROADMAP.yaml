@@ -189,6 +189,18 @@ scale_triggers:
 # Check semantics, the report schema, severities, thresholds and Docker isolation
 # still need an explicit owner decision before they change.
 launch_week:
+  - id: LW-04
+    title: Next planned check — C007 pytest conftest.py hook
+    status: NOT_STARTED
+    scope: >
+      The next check to add. SWE-bench Verified issue 733 (follow-up to SWE-bench
+      #631) shows a root conftest.py whose pytest_runtest_makereport hook marks
+      every test passed and is still graded resolved, because pytest itself then
+      exits 0. C007 does not probe pytest conftest hooks (docs/IDEAS.md). Ship
+      that probe with a planted-defect fixture, a clean control, a unit test and
+      a bench update. It changes what C007 reports, so it needs the owner's
+      approval. Isolation settings stay as they are.
+    not_in_scope: downloading SWE-bench, a Harbor profile, changing thresholds
   - id: LW-01
     title: Ship the two public probes in the CLI
     status: NOT_STARTED

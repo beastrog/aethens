@@ -199,6 +199,39 @@ const cats = Object.entries(m.reward_hack.per_category) as [
         survivors, {x.c004.filtered_rejected_by_oracle} of which HumanEval+ rejects. A surviving
         mutant is not, by itself, evidence of a weak test. We publish both figures.
       </p>
+      {
+        x.c004.unconfirmed_breakdown && (
+          <div class="mt-8">
+            <h4 class="font-serif italic text-2xl">Where the {x.c004.unconfirmed} unconfirmed survivors went</h4>
+            <p class="mt-3 max-w-2xl text-sm text-paper/85">
+              Hand labels of the same run. Precision and recall are unchanged.
+              (a) equivalent: {x.c004.unconfirmed_breakdown.equivalent}.
+              (b) out of precondition: {x.c004.unconfirmed_breakdown.out_of_precondition}.
+              (c) real gap that HumanEval+ also misses: {x.c004.unconfirmed_breakdown.real_gap}.
+              The filter also hid {x.c004.unconfirmed_breakdown.filter_hidden} survivors that HumanEval+ rejects.
+              The per-mutant table is in the repository's external-bench write-up.
+            </p>
+            <table class="mt-4 w-full text-sm">
+              <thead>
+                <tr>
+                  <th scope="col">Task</th>
+                  <th scope="col">Change</th>
+                  <th scope="col">Bucket</th>
+                </tr>
+              </thead>
+              <tbody>
+                {x.c004.unconfirmed_breakdown.rows.map((row) => (
+                  <tr>
+                    <td class="font-mono">{row.task}</td>
+                    <td>{row.change}</td>
+                    <td class="font-mono">{row.bucket}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )
+      }
       <p class="mt-4 max-w-2xl text-sm text-muted">
         Checks without labels in this data are treated as presumed clean; no precision is claimed
         from zero findings. Error/warning findings on those checks: C001{' '}
