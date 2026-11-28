@@ -67,4 +67,4 @@ note: optional free text
 
 ## Examples
 
-See `examples/add-two` and `examples/word-format`.
+See `examples/add-two` and `examples/word-format`. From an installed copy, `aethens init demo` writes a minimal task in `demo/` and refuses to overwrite files that are already there. That example uses a plain `unittest` verifier: C001 can pass, and C007's reward-hacking probes usually get through.
