@@ -1,6 +1,8 @@
 # Status
 
-Last updated: 2026-11-27 (Asia/Calcutta), after the pre-launch fixes and the hardening review.
+Last updated: 2026-11-28 (Asia/Calcutta). Public findings are in the README and on the site
+Findings page, after the maintainer filed SWE-bench issue 733. The Terminal-Bench 2 note stays
+general: the task-level write-up was not in this checkout.
 
 ## Mode
 

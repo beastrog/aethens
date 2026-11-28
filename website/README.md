@@ -18,17 +18,14 @@ This is a static Astro site, deployed to GitHub Pages at
 
 ## Pages
 
-A single page, `src/pages/index.astro`, with these sections:
+The home page (`src/pages/index.astro`) is short: hero and install command, a four-item "what it does" strip, a findings teaser (Terminal-Bench 2 and SWE-bench issue 733), and links to the detail pages. The header links to those pages.
 
-1. Hero — pitch, `pipx install aethens`, GitHub Action at `@v0.1.0`, internal-bench ribbon
-2. The problem — public citations only (OpenAI SWE-bench Verified retirement, SWE-Bench+, EvalPlus)
-3. The checks — C001–C007, with what each can and cannot catch
-4. Published accuracy — internal bench, C007, external HumanEval / HumanEval+ (C004 precision 0.8158 with the equivalent-mutant filter, 0.4615 without; both from `bench/external/results.json`)
-5. Comparison — Aethens, rlgate, BenchJack, Assay, dated 18 Nov 2026
-6. Example report — a real C005 run on `bench/tasks/order-alphabetical`
-7. Work with us — expert audits and a hosted-CI note, with CTAs to GitHub Discussions
-8. Open source — link to the GitHub repo
-9. Footer — GitHub, Discussions, and the founder LinkedIn
+1. How it works — the problem (OpenAI SWE-bench Verified retirement, SWE-Bench+, EvalPlus), checks C001–C007, and a real C005 report
+2. Findings — Terminal-Bench 2 (full reward, 3/3) and SWE-bench Verified (issue 733)
+3. Accuracy — internal bench, C007, external HumanEval / HumanEval+ (C004 precision 0.8158 with the equivalent-mutant filter, 0.4615 without; both from `bench/external/results.json`), then the comparison with rlgate, BenchJack, and Assay (18 Nov 2026)
+4. Docs — getting started, CLI, checks, GitHub Action, report format, FAQ
+5. Roadmap — what 0.1.0 is not, expert audits, hosted CI marked "Not available", open-source status
+6. Footer — GitHub, Discussions, and the founder LinkedIn
 
 ## Numbers, and how to refresh them
 

@@ -77,6 +77,16 @@ GitHub Action ([Marketplace](https://github.com/marketplace/actions/aethens-audi
 
 Tasks use the `aethens-task/v1` directory format: [docs/task-format.md](docs/task-format.md). Reports follow `aethens-report/v2`: [docs/report-schema.json](docs/report-schema.json).
 
+## Findings
+
+These notes name defects in other people's benchmarks. The Terminal-Bench 2 converter and the SWE-bench patch probes that surfaced them are not part of the v0.1.0 release. Each result was confirmed with that benchmark's own harness, not with Aethens' grader. Policy for findings that are not yet public: [docs/DISCLOSURE.md](docs/DISCLOSURE.md). The same text is on the site: [Findings](https://beastrog.github.io/aethens/findings/).
+
+**Terminal-Bench 2.** A broken solution scored full reward: 3 of 3 tests passed, reward 1. Confirmed with Terminal-Bench's own harness.
+
+**SWE-bench Verified.** Wrong patches were graded resolved on 9 instances: 8 test gaps across 4 repositories (sphinx-doc, astropy, django, and pydata/xarray), plus a log-parser bug on `sympy__sympy-14248`. `parse_log_sympy` keys results by bare test name, so a later file that shares the name can leave a failing test recorded as passed. Reported to the SWE-bench maintainers in [issue #733](https://github.com/SWE-bench/SWE-bench/issues/733). Confirmed with `swebench.harness.run_evaluation` from swebench 5.0.2.
+
+`django__django-16631` is one of those test gaps. The instance tests do not check that a password change logs the user out, so a patch that leaves the session authenticated is graded resolved. That is a gap in the instance tests, not a Django security issue.
+
 ## How it fits together
 
 ```mermaid

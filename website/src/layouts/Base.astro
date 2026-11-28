@@ -27,6 +27,9 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : un
     <meta name="twitter:description" content={description} />
     <link rel="icon" href={`${import.meta.env.BASE_URL}favicon.svg`} type="image/svg+xml" />
     <title>{title}</title>
+    <script is:inline>
+      document.documentElement.classList.add("js");
+    </script>
   </head>
   <body class="min-h-screen">
     <div class="site-ground" aria-hidden="true"></div>
@@ -62,6 +65,49 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : un
         if (!reduce.matches) return;
         root.style.removeProperty("--spot-x");
         root.style.removeProperty("--spot-y");
+      });
+
+      const revealed = document.querySelectorAll(".reveal");
+      if (reduce.matches || !("IntersectionObserver" in window)) {
+        revealed.forEach((node) => node.classList.add("is-in"));
+      } else {
+        const io = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (!entry.isIntersecting) continue;
+              entry.target.classList.add("is-in");
+              io.unobserve(entry.target);
+            }
+          },
+          { rootMargin: "0px 0px -8% 0px", threshold: 0.08 },
+        );
+        revealed.forEach((node) => io.observe(node));
+      }
+
+      document.addEventListener("click", async (event) => {
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+        const button = target.closest("button[data-copy-target]");
+        if (!(button instanceof HTMLButtonElement)) return;
+        const id = button.dataset.copyTarget;
+        const node = id ? document.getElementById(id) : null;
+        const text = node?.textContent?.replace(/\n$/, "") ?? "";
+        if (!text) return;
+        try {
+          await navigator.clipboard.writeText(text);
+        } catch {
+          button.textContent = "Failed";
+          window.setTimeout(() => {
+            button.textContent = "Copy";
+          }, 1600);
+          return;
+        }
+        button.textContent = "Copied";
+        button.classList.add("is-copied");
+        window.setTimeout(() => {
+          button.textContent = "Copy";
+          button.classList.remove("is-copied");
+        }, 1600);
       });
     </script>
   </body>

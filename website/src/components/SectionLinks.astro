@@ -1,0 +1,32 @@
+---
+const base = import.meta.env.BASE_URL;
+const links = [
+  { href: `${base}how-it-works/`, title: "How it works", text: "The problem, checks C001–C007, and a real report." },
+  { href: `${base}findings/`, title: "Findings", text: "Terminal-Bench 2 and SWE-bench Verified, after notice to the maintainers." },
+  { href: `${base}accuracy/`, title: "Accuracy", text: "Planted-defect bench, HumanEval, and the comparison table." },
+  { href: `${base}docs/`, title: "Docs", text: "Install, first audit, and the task format." },
+  { href: `${base}docs/action/`, title: "GitHub Action", text: "beastrog/aethens@v0.1.0, inputs, and a workflow example." },
+  { href: `${base}roadmap/`, title: "Roadmap", text: "What 0.1.0 is, hosted CI (not available), and how to talk to us." },
+  { href: `${base}docs/faq/`, title: "FAQ", text: "Isolation, limits, and what a clean report does not mean." },
+];
+---
+
+<section class="border-t border-line py-16 sm:py-20" aria-labelledby="more-heading">
+  <div class="wrap">
+    <h2 id="more-heading" class="font-mono text-[0.72rem] uppercase tracking-[0.14em] text-gold">
+      Read the detail
+    </h2>
+    <ul class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        links.map((l) => (
+          <li class="reveal lift border border-line bg-ink/80">
+            <a class="block p-5 h-full" href={l.href}>
+              <span class="font-serif italic text-2xl text-paper">{l.title}</span>
+              <span class="mt-2 block text-sm text-muted leading-relaxed">{l.text}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>

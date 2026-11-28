@@ -12,14 +12,15 @@
         evaluation are measuring the wrong thing.
       </p>
       <p>
-        This is already documented in public sources. The citations below are from those sources,
-        not from an Aethens audit of the same benchmarks — Aethens has not published findings on
-        them.
+        This is already documented in public sources. The three citations below are from those
+        sources. They are not Aethens audits. Aethens’ own notes on Terminal-Bench 2 and SWE-bench
+        Verified, after notice to the maintainers, are on the
+        <a class="prose-link" href={`${import.meta.env.BASE_URL}findings/`}>Findings page</a>.
       </p>
     </div>
 
     <ul class="mt-12 grid gap-6 md:grid-cols-3">
-      <li class="border border-line bg-raised/40 p-6">
+      <li class="lift border border-line bg-raised/40 p-6">
         <p class="font-mono text-[0.68rem] uppercase tracking-[0.14em] text-gold">OpenAI, Feb 2026</p>
         <p class="mt-4 text-paper/95 leading-relaxed">
           OpenAI explained why it no longer evaluates on SWE-bench Verified. It had audited 27.6% of
@@ -35,7 +36,7 @@
           </a>
         </p>
       </li>
-      <li class="border border-line bg-raised/40 p-6">
+      <li class="lift border border-line bg-raised/40 p-6">
         <p class="font-mono text-[0.68rem] uppercase tracking-[0.14em] text-gold">SWE-Bench+, 2024</p>
         <p class="mt-4 text-paper/95 leading-relaxed">
           The SWE-Bench+ paper reported that 31.08% of “resolved” patches passed through weak tests,
@@ -47,7 +48,7 @@
           </a>
         </p>
       </li>
-      <li class="border border-line bg-raised/40 p-6">
+      <li class="lift border border-line bg-raised/40 p-6">
         <p class="font-mono text-[0.68rem] uppercase tracking-[0.14em] text-gold">EvalPlus / HumanEval+</p>
         <p class="mt-4 text-paper/95 leading-relaxed">
           EvalPlus’s HumanEval+ adds roughly 80× more tests than the original HumanEval suite —

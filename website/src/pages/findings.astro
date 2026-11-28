@@ -1,0 +1,52 @@
+---
+import Page from "../layouts/Page.astro";
+const base = import.meta.env.BASE_URL;
+---
+
+<Page
+  title="Findings — Aethens"
+  description="Published findings on Terminal-Bench 2 and SWE-bench Verified. Each was confirmed with the benchmark's own harness."
+>
+  <article class="wrap py-16 sm:py-20 max-w-3xl">
+    <p class="kicker mb-5"><span>Findings</span></p>
+    <h1 class="font-serif italic font-semibold text-section leading-[1.1]">
+      What we reported, after checking it with their harness.
+    </h1>
+    <p class="mt-6 text-paper/90">
+      These notes name defects in other people’s benchmarks. The Terminal-Bench 2 converter and the
+      SWE-bench patch probes that surfaced them are not part of the v0.1.0 release. Each result was
+      confirmed with that benchmark’s own harness, not with Aethens’ grader. The policy for findings
+      that are not yet public is
+      <a class="prose-link" href="https://github.com/beastrog/aethens/blob/main/docs/DISCLOSURE.md">docs/DISCLOSURE.md</a>.
+    </p>
+
+    <h2 id="terminal-bench-2" class="mt-14 font-serif italic text-3xl">Terminal-Bench 2</h2>
+    <p class="mt-4 text-paper/90">
+      A broken solution scored full reward: 3 of 3 tests passed, reward 1. Confirmed with
+      Terminal-Bench’s own harness.
+    </p>
+
+    <h2 id="swe-bench" class="mt-14 font-serif italic text-3xl">SWE-bench Verified</h2>
+    <p class="mt-4 text-paper/90">
+      Wrong patches were graded resolved on 9 instances: 8 test gaps across 4 repositories
+      (sphinx-doc, astropy, django, and pydata/xarray), plus a log-parser bug on
+      <code class="text-gold">sympy__sympy-14248</code>.
+      <code class="text-gold">parse_log_sympy</code> keys results by bare test name, so a later file
+      that shares the name can leave a failing test recorded as passed. Reported to the SWE-bench
+      maintainers in
+      <a class="prose-link" href="https://github.com/SWE-bench/SWE-bench/issues/733">issue #733</a>.
+      Confirmed with <code class="text-gold">swebench.harness.run_evaluation</code> from swebench 5.0.2.
+    </p>
+    <p class="mt-4 text-paper/90">
+      <code class="text-gold">django__django-16631</code> is one of those test gaps. The instance
+      tests do not check that a password change logs the user out, so a patch that leaves the
+      session authenticated is graded resolved. That is a gap in the instance tests, not a Django
+      security issue.
+    </p>
+    <p class="mt-4 text-sm text-muted">
+      The same page on the repository README is the text source for this note.
+      Bench precision and recall, which measure Aethens itself, are on the
+      <a class="prose-link" href={`${base}accuracy/`}>accuracy page</a>.
+    </p>
+  </article>
+</Page>
