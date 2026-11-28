@@ -59,6 +59,53 @@ def summary_table(res: dict[str, Any]) -> list[str]:
     return lines
 
 
+def unconfirmed_section() -> list[str]:
+    """Hand labels for the 7 unconfirmed C004 survivors. Omitted when the file is absent."""
+    path = HERE / "c004_unconfirmed.json"
+    if not path.is_file():
+        return []
+    data = json.loads(path.read_text(encoding="utf-8"))
+    rows = data["unconfirmed"]
+    counts = {b: sum(1 for r in rows if r["bucket"] == b) for b in ("a", "b", "c")}
+    lines = [
+        "",
+        "### The 7 unconfirmed C004 survivors",
+        "",
+        data["note"],
+        "",
+        f"Buckets: (a) equivalent {counts['a']}, (b) out of precondition {counts['b']}, "
+        f"(c) real gap {counts['c']}.",
+        "",
+        "| task | mutant | change | bucket | reason |",
+        "|---|---|---|---|---|",
+    ]
+    for r in rows:
+        lines.append(
+            f"| `{r['task']}` | `{r['mutant']}` | {r['change']} | {r['bucket']} | {r['reason']} |"
+        )
+    lines += [
+        "",
+        "Counterexamples, re-probed with the same driver (not stored in `results.json`):",
+        "",
+    ]
+    for r in rows:
+        lines.append(f"- `{r['task']}`: {r['counterexample']}")
+    lines += [
+        "",
+        "### Five filter-hidden survivors HumanEval+ rejects",
+        "",
+        "These are the 5 of 51 filtered mutants that HumanEval+ rejects. The probe reported "
+        "no counterexample, so each is a real gap the filter misses. Precision and recall "
+        "above already include that cost and were not recomputed.",
+        "",
+        "| task | mutant | change | why it is still a gap |",
+        "|---|---|---|---|",
+    ]
+    for r in data["filter_hidden"]:
+        lines.append(f"| `{r['task']}` | `{r['mutant']}` | {r['change']} | {r['reason']} |")
+    return lines
+
+
 def render(full: dict[str, Any], sample: dict[str, Any]) -> str:
     m = full["metrics"]
     lines = [
@@ -112,6 +159,7 @@ def render(full: dict[str, Any], sample: dict[str, Any]) -> str:
         )
     if not no_oracle:
         lines.append("- none")
+    lines += unconfirmed_section()
     lines += [
         "",
         f"## Offline sample: {sample['tasks']} tasks (run by `make check`)",

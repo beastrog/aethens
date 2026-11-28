@@ -19,6 +19,7 @@ const repoRoot = resolve(websiteRoot, "..");
 const internalSrc = resolve(repoRoot, "bench/results.json");
 const externalSrc = resolve(repoRoot, "bench/external/results.json");
 const metaPath = resolve(websiteRoot, "data/bench/meta.json");
+const unconfirmedPath = resolve(repoRoot, "bench/external/c004_unconfirmed.json");
 
 if (!existsSync(internalSrc) || !existsSync(externalSrc)) {
   throw new Error(
@@ -33,6 +34,9 @@ if (!existsSync(metaPath)) {
 const internal = JSON.parse(readFileSync(internalSrc, "utf8"));
 const external = JSON.parse(readFileSync(externalSrc, "utf8"));
 const meta = JSON.parse(readFileSync(metaPath, "utf8"));
+const unconfirmed = existsSync(unconfirmedPath)
+  ? JSON.parse(readFileSync(unconfirmedPath, "utf8"))
+  : null;
 
 const taskCount = Array.isArray(internal.tasks) ? internal.tasks.length : internal.tasks;
 const c004 = external.metrics.per_check.C004;
@@ -99,6 +103,20 @@ const out = {
       recall_without_filter: c004.recall_without_filter ?? null,
       filtered_as_equivalent: c004.filtered_as_equivalent ?? null,
       filtered_rejected_by_oracle: c004.filtered_rejected_by_oracle ?? null,
+      unconfirmed_breakdown: unconfirmed
+        ? {
+            equivalent: unconfirmed.unconfirmed.filter((r) => r.bucket === "a").length,
+            out_of_precondition: unconfirmed.unconfirmed.filter((r) => r.bucket === "b").length,
+            real_gap: unconfirmed.unconfirmed.filter((r) => r.bucket === "c").length,
+            rows: unconfirmed.unconfirmed.map((r) => ({
+              task: r.task,
+              change: r.change,
+              bucket: r.bucket,
+              reason: r.reason,
+            })),
+            filter_hidden: unconfirmed.filter_hidden.length,
+          }
+        : null,
     },
     presumed_clean: {
       C001: {

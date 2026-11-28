@@ -176,7 +176,57 @@
       "precision_without_filter": 0.4615,
       "recall_without_filter": 0.8667,
       "filtered_as_equivalent": 51,
-      "filtered_rejected_by_oracle": 5
+      "filtered_rejected_by_oracle": 5,
+      "unconfirmed_breakdown": {
+        "equivalent": 0,
+        "out_of_precondition": 5,
+        "real_gap": 2,
+        "rows": [
+          {
+            "task": "he-006",
+            "change": "max_depth = 0 -> 1",
+            "bucket": "b",
+            "reason": "The extra 1 is a lone ')' group, which is not a group of nested parentheses the prompt describes."
+          },
+          {
+            "task": "he-018",
+            "change": "range(... + 1) -> range(... + 2)",
+            "bucket": "c",
+            "reason": "The prompt does not rule out an empty substring (its own example uses an empty string), and HumanEval+ never calls how_many_times('', '')."
+          },
+          {
+            "task": "he-025",
+            "change": "math.sqrt(n) + 1 -> math.sqrt(n) + 2",
+            "bucket": "b",
+            "reason": "The prompt requires the input to equal the product of its prime factors; 0 is not that product."
+          },
+          {
+            "task": "he-059",
+            "change": "range(2, n + 1) -> range(2, n - 1)",
+            "bucket": "b",
+            "reason": "331 is prime, and the prompt says to assume n is not a prime, so the loop only misses n itself."
+          },
+          {
+            "task": "he-116",
+            "change": "bin(x)[2:] -> bin(x)[3:]",
+            "bucket": "c",
+            "reason": "The prompt's own examples use negatives and 1, and HumanEval+ does not include this mix, where the shorter slice drops a bit of bin(1)."
+          },
+          {
+            "task": "he-129",
+            "change": "n * n + 1 -> n * n + 2",
+            "bucket": "b",
+            "reason": "The grid is not N by N and does not contain each of 1..N*N once, which the prompt requires."
+          },
+          {
+            "task": "he-135",
+            "change": "arr[i] < arr[i-1] -> arr[i] <= arr[i-1]",
+            "bucket": "b",
+            "reason": "The prompt says the array will not contain duplicates, and the two comparisons differ on the repeated 2."
+          }
+        ],
+        "filter_hidden": 5
+      }
     },
     "presumed_clean": {
       "C001": {

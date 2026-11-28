@@ -1,0 +1,105 @@
+{
+  "note": "Hand labels for the 7 C004 survivors HumanEval+ did not reject in bench/external/results.json (seed 0, budget standard, exhaustive, D-065 filter on: 38 judged, 31 confirmed, 7 unconfirmed). Counterexamples were re-probed on 28 Nov 2026 with the same equivalence driver, seed 0 and budget standard (LocalRunner, explicit opt-in). The full external run was not repeated. Precision 0.8158 and recall 0.8 are unchanged. Buckets: (a) equivalent mutant, no valid input distinguishes it from the gold; (b) out of precondition, differs only on an input the task docstring rules out; (c) real gap, a valid input distinguishes it and HumanEval+ misses it too.",
+  "unconfirmed": [
+    {
+      "task": "he-006",
+      "mutant": "solution.py:25:constant-plus-one:0",
+      "operator": "constant-plus-one",
+      "change": "max_depth = 0 -> 1",
+      "counterexample": "parse_nested_parens('() (()) (()) ((()) ) (((())))') returns [1, 2, 2, 3, 0, 4] for the gold and [1, 2, 2, 3, 1, 4] for the mutant",
+      "bucket": "b",
+      "reason": "The extra 1 is a lone ')' group, which is not a group of nested parentheses the prompt describes."
+    },
+    {
+      "task": "he-018",
+      "mutant": "solution.py:32:constant-plus-one:0",
+      "operator": "constant-plus-one",
+      "change": "range(... + 1) -> range(... + 2)",
+      "counterexample": "how_many_times('', '') returns 1 for the gold and 2 for the mutant",
+      "bucket": "c",
+      "reason": "The prompt does not rule out an empty substring (its own example uses an empty string), and HumanEval+ never calls how_many_times('', '')."
+    },
+    {
+      "task": "he-025",
+      "mutant": "solution.py:66:constant-plus-one:0",
+      "operator": "constant-plus-one",
+      "change": "math.sqrt(n) + 1 -> math.sqrt(n) + 2",
+      "counterexample": "factorize(0) returns [] for the gold and does not return within 2 s for the mutant",
+      "bucket": "b",
+      "reason": "The prompt requires the input to equal the product of its prime factors; 0 is not that product."
+    },
+    {
+      "task": "he-059",
+      "mutant": "solution.py:32:binop-swap:0",
+      "operator": "binop-swap",
+      "change": "range(2, n + 1) -> range(2, n - 1)",
+      "counterexample": "largest_prime_factor(331) returns 331 for the gold and 1 for the mutant",
+      "bucket": "b",
+      "reason": "331 is prime, and the prompt says to assume n is not a prime, so the loop only misses n itself."
+    },
+    {
+      "task": "he-116",
+      "mutant": "solution.py:29:constant-plus-one:0",
+      "operator": "constant-plus-one",
+      "change": "bin(x)[2:] -> bin(x)[3:]",
+      "counterexample": "sort_array([-2, -3, -4, -5, -6, 1]) returns [-4, -2, 1, -6, -5, -3] for the gold and [1, -4, -2, -6, -5, -3] for the mutant",
+      "bucket": "c",
+      "reason": "The prompt's own examples use negatives and 1, and HumanEval+ does not include this mix, where the shorter slice drops a bit of bin(1)."
+    },
+    {
+      "task": "he-129",
+      "mutant": "solution.py:32:constant-plus-one:0",
+      "operator": "constant-plus-one",
+      "change": "n * n + 1 -> n * n + 2",
+      "counterexample": "minPath([[11, 8, 7, 2], [9, 3, 15, 6], [12, 13, 10, 1]], 10) returns [1, 10, ...] for the gold and [1, 11, ...] for the mutant",
+      "bucket": "b",
+      "reason": "The grid is not N by N and does not contain each of 1..N*N once, which the prompt requires."
+    },
+    {
+      "task": "he-135",
+      "mutant": "solution.py:25:compare-boundary:0",
+      "operator": "compare-boundary",
+      "change": "arr[i] < arr[i-1] -> arr[i] <= arr[i-1]",
+      "counterexample": "can_arrange([1, 4, 2, 2, 6, 7, 8, 9, 10]) returns 2 for the gold and 3 for the mutant",
+      "bucket": "b",
+      "reason": "The prompt says the array will not contain duplicates, and the two comparisons differ on the repeated 2."
+    }
+  ],
+  "filter_hidden": [
+    {
+      "task": "he-019",
+      "mutant": "solution.py:33:constant-plus-one:0",
+      "operator": "constant-plus-one",
+      "change": "'six': 6 -> 7",
+      "reason": "HumanEval+ rejects it. The probe found no difference on 134 inputs, so a wrong rank for the word six was hidden."
+    },
+    {
+      "task": "he-020",
+      "mutant": "solution.py:88:binop-swap:0",
+      "operator": "binop-swap",
+      "change": "abs(elem - elem2) -> abs(elem + elem2) on the first pair",
+      "reason": "HumanEval+ rejects it. The probe found no difference on 300 inputs, so the wrong first-pair distance was hidden."
+    },
+    {
+      "task": "he-094",
+      "mutant": "solution.py:86:binop-swap:0",
+      "operator": "binop-swap",
+      "change": "n**0.5 -> n*0.5 in the prime test",
+      "reason": "HumanEval+ rejects it. The probe found no difference on 300 inputs, so a prime test that stops too early was hidden."
+    },
+    {
+      "task": "he-099",
+      "mutant": "solution.py:53:constant-plus-one:0",
+      "operator": "constant-plus-one",
+      "change": "num > 0 -> num > 1",
+      "reason": "HumanEval+ rejects it. The probe found no difference on 221 inputs, so rounding a fraction in (0, 1] the wrong way was hidden."
+    },
+    {
+      "task": "he-157",
+      "mutant": "solution.py:19:binop-swap:0",
+      "operator": "binop-swap",
+      "change": "a*a + c*c -> a*a - c*c in the right-angle check",
+      "reason": "HumanEval+ rejects it. The probe found no difference on 300 inputs, so a hypotenuse on the b side was hidden."
+    }
+  ]
+}
