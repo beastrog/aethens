@@ -32,11 +32,12 @@ from aethens.checks import (
     Check,
     CheckContext,
 )
-from aethens.errors import AethensError
+from aethens.errors import AethensError, DockerUnavailableError, MissingFileError, SchemaError
 from aethens.models import Budget, Report, Severity
 from aethens.report import render_json, render_markdown
 from aethens.runner import DockerRunner, LocalRunner, Runner
 from aethens.runner.docker import LEDGER
+from aethens.scaffold import write_example
 
 ALL_CHECKS: dict[str, type[Check]] = {
     "C001": C001GoldSanity,
@@ -56,36 +57,110 @@ UNSAFE_WARNING = (
     "isolation. It can read your files and use your network. Only use it on code you trust."
 )
 
+# Shown by `aethens` and `aethens audit --help`. Kept in one place so the two texts cannot drift.
+HELP_EPILOG = """\
+examples:
+  aethens init demo
+  aethens audit demo --budget smoke --check C001
+  aethens audit path/to/task --format markdown --fail-on warning
+
+exit codes:
+  0  no finding at or above --fail-on
+  1  findings at or above --fail-on
+  2  tool error (bad task, Docker unavailable, Ctrl-C, internal error)
+  3  a gold-solution run in C001 or C002 timed out
+
+A run with no error or warning findings means these checks found nothing at this
+budget and seed. It does not mean the verifier is sound.
+"""
+
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="aethens", description="Validate the verifiers of code tasks by running them."
+        prog="aethens",
+        description=(
+            "Audit the verifiers of code tasks by running them in a Docker sandbox. "
+            "Every finding includes what was run, what happened, and a one-line repro."
+        ),
+        epilog=HELP_EPILOG,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument("--version", action="version", version=f"aethens {__version__}")
     sub = parser.add_subparsers(dest="command")
-    audit = sub.add_parser("audit", help="audit one task directory or a directory of tasks")
-    audit.add_argument("path", help="a task directory (with task.yaml) or a directory of tasks")
+    audit = sub.add_parser(
+        "audit",
+        help="audit one task directory or a directory of tasks",
+        description=(
+            "Run the task verifiers in a Docker sandbox and write a report. "
+            "Each finding has evidence and a one-line repro command."
+        ),
+        epilog=HELP_EPILOG,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    audit.add_argument(
+        "path",
+        help="a task directory (contains task.yaml) or a directory of tasks",
+    )
     audit.add_argument(
         "--budget",
         choices=[b.value for b in Budget],
         default="standard",
-        help="smoke: 3 flaky runs, 5 mutants; standard: 5, 10; deep: 10, 30",
+        help=(
+            "how far the checks go (default: %(default)s). "
+            "smoke / standard / deep: C002 starts at 3 / 5 / 10 gold runs "
+            "(stops early once it can bound the flake rate); "
+            "C004 tries up to 5 / 10 / 30 mutants"
+        ),
     )
-    audit.add_argument("--fail-on", choices=["error", "warning"], default="error")
-    audit.add_argument("--format", choices=["json", "markdown"], default="json")
-    audit.add_argument("--seed", type=int, default=0)
+    audit.add_argument(
+        "--fail-on",
+        choices=["error", "warning"],
+        default="error",
+        help="minimum severity that exits 1 (default: %(default)s). warning also fails on warnings",
+    )
+    audit.add_argument(
+        "--format",
+        choices=["json", "markdown"],
+        default="json",
+        help="report on stdout, or in --output (default: %(default)s)",
+    )
+    audit.add_argument(
+        "--seed",
+        type=int,
+        default=0,
+        help="seed for shuffles, mutants and PYTHONHASHSEED (default: %(default)s)",
+    )
     audit.add_argument(
         "--check",
         action="append",
         choices=sorted(ALL_CHECKS),
         dest="checks",
-        help="run only this check (repeatable); default: all",
+        help="run only this check (repeatable). Default: C001 through C007",
     )
     audit.add_argument("--output", help="write the report to this file instead of stdout")
     audit.add_argument(
         "--unsafe-local",
         action="store_true",
-        help="run task code directly on this machine WITHOUT container isolation",
+        help=(
+            "run task code on this machine with no container isolation. "
+            "It can read your files and use your network. Only for code you trust"
+        ),
+    )
+    init = sub.add_parser(
+        "init",
+        help="write a minimal example task you can audit",
+        description=(
+            "Write a tiny aethens-task/v1 directory: an add function, a starter that "
+            "raises, a gold solution, and unittest tests. Refuses to overwrite. "
+            "The generated verifier is a plain unittest harness, so C001 can pass and "
+            "C007 reward-hacking probes usually get through."
+        ),
+    )
+    init.add_argument(
+        "path",
+        nargs="?",
+        default="aethens-task",
+        help="directory to create (default: %(default)s)",
     )
     return parser
 
@@ -144,9 +219,59 @@ def main(argv: list[str] | None = None) -> int:
         signal.signal(signal.SIGTERM, previous)
 
 
+def error_hint(exc: AethensError) -> str | None:
+    """A next step for the failures a first audit usually hits. None when we have nothing to add.
+
+    The exception text itself stays the loader's or the runner's. Exit codes do not change.
+    """
+    if isinstance(exc, DockerUnavailableError):
+        return (
+            "Install Docker and start the daemon (the default task image is python:3.12-slim), "
+            "or rerun with --unsafe-local on code you trust. That flag has no container isolation."
+        )
+    if isinstance(exc, MissingFileError):
+        return (
+            "Pass a task directory that contains task.yaml, or a directory of such tasks. "
+            "Create a minimal one with: aethens init demo"
+        )
+    if isinstance(exc, SchemaError):
+        return (
+            "task.yaml must use schema aethens-task/v1 with the required keys. "
+            "See docs/task-format.md in the repository."
+        )
+    return None
+
+
+def _print_tool_error(exc: AethensError) -> None:
+    print(f"aethens: error: {type(exc).__name__}: {exc}", file=sys.stderr)
+    hint = error_hint(exc)
+    if hint is not None:
+        print(f"aethens: hint: {hint}", file=sys.stderr)
+
+
+def _init(path: str) -> int:
+    try:
+        written = write_example(Path(path))
+    except AethensError as exc:
+        print(f"aethens: error: {type(exc).__name__}: {exc}", file=sys.stderr)
+        return EXIT_TOOL_ERROR
+    print(f"Wrote {path} ({len(written)} files, schema aethens-task/v1).")
+    print("Next:")
+    print("  docker pull python:3.12-slim")
+    print(f"  aethens audit {path} --budget smoke --check C001")
+    print(
+        "A full audit also runs C007. This example uses a plain unittest verifier, "
+        "which those probes usually get past, so expect exit 1 until the harness "
+        "judges the solution in a separate process."
+    )
+    return EXIT_OK
+
+
 def _main(argv: list[str] | None) -> int:
     parser = build_parser()
     args = parser.parse_args(sys.argv[1:] if argv is None else argv)
+    if args.command == "init":
+        return _init(args.path)
     if args.command != "audit":
         parser.print_help()
         return EXIT_OK
@@ -169,7 +294,7 @@ def _main(argv: list[str] | None) -> int:
         )
         report = run_audit(tasks, [ALL_CHECKS[i]() for i in ids], ctx)
     except AethensError as exc:
-        print(f"aethens: error: {type(exc).__name__}: {exc}", file=sys.stderr)
+        _print_tool_error(exc)
         return EXIT_TOOL_ERROR
     text = render_json(report) if args.format == "json" else render_markdown(report)
     if args.output:
